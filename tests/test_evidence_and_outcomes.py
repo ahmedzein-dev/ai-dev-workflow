@@ -3,9 +3,10 @@ from __future__ import annotations
 
 import json
 import unittest
+from unittest import mock
 
 from helpers import FILLED_AUDIT, FILLED_REPORT, PY, WorkflowTestCase, git
-from workflow import parse_analyzer
+from workflow import decode_command_output, parse_analyzer
 
 FINDINGS_HEADER = ("| ID | Severity | Dimension | Finding | Location | Disposition | Notes |\n"
                    "|----|----------|-----------|---------|----------|-------------|-------|\n")
@@ -14,6 +15,14 @@ FINDINGS_HEADER = ("| ID | Severity | Dimension | Finding | Location | Dispositi
 class EvidenceTest(WorkflowTestCase):
     def test_analyzer_accepts_windows_replacement_separators(self) -> None:
         issues, counts = parse_analyzer("   info ? Style hint ? lib/a.dart:3:3 ? style\n")
+        self.assertEqual(counts, {"error": 0, "warning": 0, "info": 1})
+        self.assertEqual(issues[0]["code"], "style")
+
+    def test_analyzer_decodes_windows_code_page_output(self) -> None:
+        output = "   info • Style hint • lib/a.dart:3:3 • style\n"
+        with mock.patch("workflow.locale.getpreferredencoding", return_value="cp1252"):
+            decoded = decode_command_output(output.encode("cp1252"))
+        issues, counts = parse_analyzer(decoded)
         self.assertEqual(counts, {"error": 0, "warning": 0, "info": 1})
         self.assertEqual(issues[0]["code"], "style")
 

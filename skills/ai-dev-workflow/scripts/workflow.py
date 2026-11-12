@@ -15,6 +15,7 @@ import argparse
 import datetime as _dt
 import hashlib
 import json
+import locale
 import os
 import re
 import shlex
@@ -1468,6 +1469,13 @@ def glob_match(path: str, pattern: str) -> bool:
     return bool(glob_to_regex(pattern).match(path))
 
 
+def decode_command_output(data: bytes) -> str:
+    try:
+        return data.decode("utf-8")
+    except UnicodeDecodeError:
+        return data.decode(locale.getpreferredencoding(False), errors="replace")
+
+
 def execute(repo: Path, command: str, extra: Sequence[str], timeout: int) -> Tuple[Optional[int], str, float, Optional[str]]:
     try:
         tokens = shlex.split(command, posix=(os.name != "nt")) + list(extra)
@@ -1483,13 +1491,13 @@ def execute(repo: Path, command: str, extra: Sequence[str], timeout: int) -> Tup
     tokens[0] = executable
     started = time.time()
     try:
-        proc = subprocess.run(tokens, cwd=str(repo), capture_output=True, text=True, encoding="utf-8",
-                              errors="replace", timeout=timeout)
+        proc = subprocess.run(tokens, cwd=str(repo), capture_output=True, timeout=timeout)
     except subprocess.TimeoutExpired:
         return None, "", float(timeout), f"it timed out after {timeout} seconds"
     except OSError as exc:
         return None, "", 0.0, f"it could not start: {exc}"
-    return proc.returncode, (proc.stdout or "") + (proc.stderr or ""), time.time() - started, None
+    return proc.returncode, decode_command_output(proc.stdout or b"") + \
+        decode_command_output(proc.stderr or b""), time.time() - started, None
 
 
 def last_line(output: str) -> str:
