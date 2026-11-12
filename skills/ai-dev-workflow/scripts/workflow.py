@@ -1424,7 +1424,7 @@ def transition(repo: Path, state: Dict[str, Any], cfg: Dict[str, Any], target: s
 # --------------------------------------------------------------------------- checks
 
 ANALYZER_RE = re.compile(
-    r"^\s*(error|warning|info)\s+[•\-]\s+(.+?)\s+[•\-]\s+(\S+?):(\d+):(\d+)\s+[•\-]\s+([\w.\-]+)\s*$", re.I)
+    r"^\s*(error|warning|info)\s+[•?\-]\s+(.+?)\s+[•?\-]\s+(\S+?):(\d+):(\d+)\s+[•?\-]\s+([\w.\-]+)\s*$", re.I)
 
 
 def parse_analyzer(output: str) -> Tuple[List[Dict[str, Any]], Dict[str, int]]:

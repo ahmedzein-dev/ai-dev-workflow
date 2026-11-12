@@ -5,12 +5,18 @@ import json
 import unittest
 
 from helpers import FILLED_AUDIT, FILLED_REPORT, PY, WorkflowTestCase, git
+from workflow import parse_analyzer
 
 FINDINGS_HEADER = ("| ID | Severity | Dimension | Finding | Location | Disposition | Notes |\n"
                    "|----|----------|-----------|---------|----------|-------------|-------|\n")
 
 
 class EvidenceTest(WorkflowTestCase):
+    def test_analyzer_accepts_windows_replacement_separators(self) -> None:
+        issues, counts = parse_analyzer("   info ? Style hint ? lib/a.dart:3:3 ? style\n")
+        self.assertEqual(counts, {"error": 0, "warning": 0, "info": 1})
+        self.assertEqual(issues[0]["code"], "style")
+
     def test_evidence_goes_stale_when_code_changes_but_not_when_it_is_committed(self) -> None:
         self.to_implementation()
         self.implement_and_test()

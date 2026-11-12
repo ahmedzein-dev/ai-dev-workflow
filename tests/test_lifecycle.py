@@ -139,7 +139,7 @@ class ImmutabilityTest(WorkflowTestCase):
 
     def test_line_endings_do_not_change_the_hash(self) -> None:
         path = self.task / "plan.md"
-        path.write_bytes(path.read_bytes().replace(b"\n", b"\r\n"))
+        path.write_bytes(path.read_bytes().replace(b"\r\n", b"\n").replace(b"\n", b"\r\n"))
         self.wf("preflight", "favorites")
 
 
