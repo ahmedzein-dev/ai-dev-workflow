@@ -19,16 +19,21 @@ own, the skill tells it to stop and ask you first.
 
 ## First run in a project
 
-The agent runs `workflow.py init --discover` and shows you:
+The agent inspects the project (`workflow.py init --discover`) and proposes a setup in one short message:
 
-- the instruction files it found (CLAUDE.md, AGENTS.md, GEMINI.md, …) — confirm which ones are the engineering
-  standards every agent must follow;
-- specification templates found in the repository and in your private library — choose one, or provide one;
-  the agent never invents a template;
-- suggested checks based on the project's tooling — confirm or adjust;
-- whether task records are committed: `all`, `config-only` or `none`.
+- **Instruction files** it found (CLAUDE.md, AGENTS.md, …) — the standards every agent follows.
+- **Specification template** — your default template, if you registered one (`install.py add-template … --default`).
+  Without a default it tells you so and lists what it found, or asks you for one; it never picks an example for you.
+- **Checks** — commands found from your project's own files (for example `flutter analyze` and `flutter test` from
+  pubspec.yaml and test/, scripts from package.json, pytest or ruff from their configuration), each with a one-line
+  explanation, plus the commands your CI already runs. You don't need to know them in advance.
+- **Saving task records in git** — what `all`, `config-only` and `none` actually do: what is committed, whether a
+  clone or another computer can resume a task, what is lost if your computer is, and who can read the records. It
+  recommends one, with the reason and the trade-off.
 
-Then it runs `workflow.py init`, which creates `.ai-dev-workflow/`. Nothing else in the repository changes.
+Accept everything, or change any item. Then it runs `workflow.py init`, which creates `.ai-dev-workflow/` and records
+both the recommendations and your choices. Nothing else in the repository changes, and later tasks reuse these
+settings without asking again. To change one later, ask the agent (`init --update`).
 
 ## What happens next
 

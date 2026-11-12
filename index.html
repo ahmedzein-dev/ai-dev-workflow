@@ -478,7 +478,7 @@ details.more{margin-top:12px}
     </li>
     <li>
       <h3>أكّد الإعداد ثم وافق</h3>
-      <p>في أول مهمة فقط، اختر قالب المواصفات وفحوص مشروعك وطريقة حفظ السجلات عندما يسألك AI. بعد ذلك يعرض المواصفات، ثم الخطة. اقرأ كل واحدة واكتب الموافقة المناسبة في وقتها إن كانت صحيحة:</p>
+      <p>في أول مهمة فقط، يقترح AI قالب المواصفات وفحوص مشروعك وطريقة حفظ السجلات، ويشرح كل اقتراح؛ وافق عليها كما هي أو غيّر ما تريد. بعد ذلك يعرض المواصفات، ثم الخطة. اقرأ كل واحدة واكتب الموافقة المناسبة في وقتها إن كانت صحيحة:</p>
       <div class="reply"><span class="reply-label">ردّان منفصلان:</span><span class="say">أوافق على المواصفات</span><span class="say">أوافق على الخطة</span></div>
       <p>بعد الموافقتين، ينفّذ AI التغيير ويشغّل الفحوص ويعطيك تقريرًا بالنتيجة.</p>
     </li>
@@ -545,14 +545,16 @@ details.more{margin-top:12px}
     <p class="note">إذا ظهرت المهارة مرتين داخل هذا المشروع، فهناك نسخة مثبّتة على جهازك وأخرى داخل المشروع. اختر طريقة واحدة لهذا المشروع؛ يفحص أمر <code>doctor</code> النسخ المكرّرة.</p>
   </details>
   <details class="more">
-    <summary>اختياري: استخدم نموذج مواصفات من إعدادك</summary>
-    <p><strong>ملف القالب</strong> مستند <code>.md</code> فيه عناوين المواصفات وحقول تملؤها لاحقًا لكل مهمة؛ لا تضع فيه تفاصيل مهمة محددة. افتح <code>examples/templates/example-spec-template.md</code> واحفظ نسخة منه في مجلد خاص خارج أي مستودع، مثل <code>../my-templates/spec.md</code>، ثم عدّل العناوين بما يناسبك.</p>
-    <p>من داخل مجلد <code>ai-dev-workflow</code>، أضف الملف إلى مكتبتك الخاصة بهذا الأمر. <code>my-template</code> اسم تختاره للقالب، و<code>../my-templates/spec.md</code> مكان الملف الذي أنشأته، بالنسبة إلى المجلد الذي تعمل منه:</p>
-    <div class="act term"><div class="act-head"><svg aria-hidden="true"><use href="#i-term"/></svg><span>سطر الأوامر</span></div><pre><code><span class="ln">python3 skills/ai-dev-workflow/scripts/install.py add-template my-template ../my-templates/spec.md</span></code></pre></div>
-    <p><strong>ملف القواعد اختياري.</strong> هو ملف <code>.json</code> يحدد ما الذي يفحصه المحرك في المواصفات، مثل الأقسام المطلوبة وصيغة معايير القبول. إذا أردت قواعد خاصة، احفظ نسخة من <code>examples/templates/example-spec-template.rules.json</code> في <code>../my-templates/spec.rules.json</code> وعدّلها لتطابق عناوين قالبك. عندها استخدم الأمر التالي <strong>بدلًا من</strong> الأمر السابق:</p>
-    <div class="act term"><div class="act-head"><svg aria-hidden="true"><use href="#i-term"/></svg><span>سطر الأوامر — مع ملف قواعد</span></div><pre><code><span class="ln">python3 skills/ai-dev-workflow/scripts/install.py add-template my-template ../my-templates/spec.md --rules ../my-templates/spec.rules.json</span></code></pre></div>
-    <p class="note">نفّذ واحدًا فقط من الأمرين. بدون ملف قواعد إضافي، يراجع المحرك بنية القالب والحقول غير المعبأة.</p>
-    <p>المثبّت يحتفظ بنسخة من القالب والقواعد في مكتبتك الخاصة خارج المشاريع. عند إعداد مشروع، تختار القالب بالاسم <code>user:my-template</code>. وإن لم تضف قالبًا، يستخدم مساعد AI قالبًا موجودًا في المشروع أو يطلبه منك؛ لا ينشئ قالبًا من عنده.</p>
+    <summary>اختياري: سجّل قالب المواصفات الخاص بك مرة واحدة</summary>
+    <p><strong>قالب المواصفات</strong> ملف <code>.md</code> فيه أقسام المواصفات فارغة، ويملؤه مساعد AI لكل مهمة. عندما تسجّله قالبًا افتراضيًا، يقترحه مساعد AI تلقائيًا في كل مشروع جديد، فلا تحدده كل مرة.</p>
+    <ol>
+      <li><strong>جهّز الملف:</strong> انسخ <code>examples/templates/example-spec-template.md</code> إلى مجلد خارج أي مستودع، مثل <code>../my-templates/spec.md</code>، وعدّل أقسامه كما تريد.</li>
+      <li><strong>سجّله قالبًا افتراضيًا</strong> من داخل مجلد <code>ai-dev-workflow</code>. <code>my-template</code> اسم تختاره له:
+        <div class="act term"><div class="act-head"><svg aria-hidden="true"><use href="#i-term"/></svg><span>سطر الأوامر</span></div><pre><code><span class="ln">python3 skills/ai-dev-workflow/scripts/install.py add-template my-template ../my-templates/spec.md --default</span></code></pre></div></li>
+      <li><strong>ملف القواعد (اختياري):</strong> ملف <code>.json</code> يحدد ما يفحصه المحرك في المواصفات، مثل الأقسام المطلوبة وصيغة معايير القبول. إن أردته، انسخ <code>examples/templates/example-spec-template.rules.json</code> إلى <code>../my-templates/spec.rules.json</code> وعدّله ليطابق أقسام قالبك، ثم استخدم هذا الأمر <strong>بدلًا من</strong> أمر الخطوة 2:
+        <div class="act term"><div class="act-head"><svg aria-hidden="true"><use href="#i-term"/></svg><span>سطر الأوامر — مع ملف قواعد</span></div><pre><code><span class="ln">python3 skills/ai-dev-workflow/scripts/install.py add-template my-template ../my-templates/spec.md --rules ../my-templates/spec.rules.json --default</span></code></pre></div></li>
+    </ol>
+    <p>يُحفظ القالب في مكتبتك الخاصة على جهازك، خارج كل المشاريع. لجعل قالب آخر هو الافتراضي لاحقًا، استخدم <code>install.py default-template</code> متبوعًا باسمه. وإن لم تسجّل قالبًا، يخبرك مساعد AI بذلك ويسألك عن القالب؛ لا ينشئ قالبًا من عنده.</p>
   </details>
 </section>
 
@@ -580,20 +582,20 @@ details.more{margin-top:12px}
     <li class="step">
       <div class="step-tags"><span class="where you"><svg aria-hidden="true"><use href="#i-you"/></svg>أنت</span><span class="where chat"><svg aria-hidden="true"><use href="#i-chat"/></svg>محادثة مساعد AI</span></div>
       <h3>أول مرة في المشروع فقط: أكّد الإعداد</h3>
-      <p>يعرض مساعد AI ما وجده في مشروعك، ويسألك عن:</p>
+      <p>يفحص مساعد AI مشروعك ويقترح إعدادًا جاهزًا، ويشرح كل اقتراح. وافق عليه كما هو، أو غيّر أي بند:</p>
       <ul>
-        <li>ملفات التعليمات التي يلتزم بها كل مساعد AI، مثل <code>CLAUDE.md</code> أو <code>AGENTS.md</code>.</li>
-        <li>قالب المواصفات الذي يُستخدم.</li>
-        <li>الفحوص التي تُشغَّل، مثل الاختبارات وأداة التحليل.</li>
-        <li>هل تُحفظ سجلات المهام في <bdi>git</bdi>؟
+        <li><strong>ملفات التعليمات</strong> التي وجدها، مثل <code>CLAUDE.md</code> أو <code>AGENTS.md</code>.</li>
+        <li><strong>قالب المواصفات:</strong> قالبك الافتراضي إن سجّلته في مكتبتك الخاصة، وإلا يخبرك بذلك ويسألك عن القالب.</li>
+        <li><strong>الفحوص:</strong> يستنتجها من ملفات مشروعك، مثل <code>flutter analyze</code> و <code>flutter test</code>، مع سطر يشرح كل أمر. لا تحتاج إلى معرفتها مسبقًا.</li>
+        <li><strong>حفظ سجلات المهام في <bdi>git</bdi>:</strong> يشرح الخيارات الثلاثة ويوصي بأنسبها لمشروعك:
           <ul class="sublist">
-            <li><code>all</code> — كل السجلات.</li>
-            <li><code>config-only</code> — الإعدادات فقط، وتبقى المهام على جهازك.</li>
-            <li><code>none</code> — لا شيء، وتبقى كل السجلات على جهازك.</li>
+            <li><code>all</code> — كل السجلات في <bdi>git</bdi>: يكمل المهمة أي مطوّر أو مساعد AI على جهاز آخر، لكن كل من يصل إلى المستودع يقرأ المواصفات والخطط.</li>
+            <li><code>config-only</code> — الإعدادات فقط في <bdi>git</bdi>: المهام على جهازك وحده، فلا تكتمل على جهاز آخر وتضيع إن ضاع الجهاز.</li>
+            <li><code>none</code> — لا شيء في <bdi>git</bdi>: كل شيء على جهازك وحده.</li>
           </ul>
         </li>
       </ul>
-      <p>تجيب مرة واحدة فقط لكل مشروع.</p>
+      <p>تجيب مرة واحدة فقط لكل مشروع، وتُستخدم الإعدادات نفسها في كل المهام التالية.</p>
     </li>
     <li class="step">
       <div class="step-tags"><span class="where auto"><svg aria-hidden="true"><use href="#i-auto"/></svg>تلقائي</span><span class="where you"><svg aria-hidden="true"><use href="#i-you"/></svg>أنت</span></div>
@@ -608,7 +610,15 @@ details.more{margin-top:12px}
     <li class="step gate">
       <div class="step-tags"><span class="where you"><svg aria-hidden="true"><use href="#i-you"/></svg>أنت</span><span class="where chat"><svg aria-hidden="true"><use href="#i-chat"/></svg>محادثة مساعد AI</span><span class="flag gate">بوابة موافقة</span></div>
       <h3>وافق على المواصفات</h3>
-      <p>اقرأ المواصفات التي يعرضها مساعد AI. إن كانت صحيحة، اكتب:</p>
+      <p><strong>المواصفات (<bdi>spec</bdi>)</strong> تصف ما سيُبنى قبل كتابة أي كود. أقسامها يحددها قالب مشروعك، وغالبًا تشمل:</p>
+      <ul>
+        <li><strong>الهدف:</strong> المشكلة التي تحلّها الميزة، والنتيجة المطلوبة.</li>
+        <li><strong>المتطلبات:</strong> ما يجب أن تفعله الميزة، وما ليس ضمنها.</li>
+        <li><strong>الحالات الخاصة:</strong> مثل انقطاع الإنترنت أو قائمة فارغة.</li>
+        <li><strong>القيود:</strong> ما يجب ألا يتغيّر.</li>
+        <li><strong>معايير القبول:</strong> كيف نعرف أن العمل اكتمل.</li>
+      </ul>
+      <p>اقرأها. إن كانت صحيحة، اكتب:</p>
       <div class="reply"><span class="reply-label">ردّك:</span><span class="say">أوافق على المواصفات</span></div>
       <p>وإن أردت تغيير شيء، اكتب ما تريد تغييره. الأسئلة أو عبارة «جيد، لكن…» لا تُعدّ موافقة.</p>
     </li>
@@ -891,7 +901,7 @@ details.more{margin-top:12px}
     </li>
     <li>
       <h3>Confirm setup, then approve</h3>
-      <p>On the first task in a project, choose the spec template, project checks and how to save records when the AI tool asks. It then shows the spec, followed by the plan. Read each and send the matching approval when it appears, if it is right:</p>
+      <p>On the first task in a project, the AI tool proposes the spec template, project checks and how to save records, and explains each; accept them as they are or change what you want. It then shows the spec, followed by the plan. Read each and send the matching approval when it appears, if it is right:</p>
       <div class="reply"><span class="reply-label">Two separate replies:</span><span class="say">approve the spec</span><span class="say">approve the plan</span></div>
       <p>After both approvals, the AI tool makes the change, runs the checks and reports the result.</p>
     </li>
@@ -958,14 +968,16 @@ details.more{margin-top:12px}
     <p class="note">If the skill appears twice in this project, there is a computer copy and a project copy. Use one method for this project; <code>doctor</code> checks for duplicates.</p>
   </details>
   <details class="more">
-    <summary>Optional: use your own specification template</summary>
-    <p><strong>The template file</strong> is a <code>.md</code> document with specification headings and fields to fill in for each task, rather than details of one task. Open <code>examples/templates/example-spec-template.md</code>, save a copy outside any repository, such as <code>../my-templates/spec.md</code>, and adapt it.</p>
-    <p>From the <code>ai-dev-workflow</code> folder, add that file to your private library. <code>my-template</code> is the name you choose; <code>../my-templates/spec.md</code> is the file's location relative to this folder:</p>
-    <div class="act term"><div class="act-head"><svg aria-hidden="true"><use href="#i-term"/></svg><span>Terminal / PowerShell</span></div><pre><code><span class="ln">python3 skills/ai-dev-workflow/scripts/install.py add-template my-template ../my-templates/spec.md</span></code></pre></div>
-    <p><strong>The rules file is optional.</strong> It is a <code>.json</code> file that tells the engine what to check in a specification, such as required sections and the format of acceptance criteria. To add rules, save a copy of <code>examples/templates/example-spec-template.rules.json</code> at <code>../my-templates/spec.rules.json</code> and edit it to match your template headings. Then run this command <strong>instead of</strong> the one above:</p>
-    <div class="act term"><div class="act-head"><svg aria-hidden="true"><use href="#i-term"/></svg><span>Terminal / PowerShell — with rules</span></div><pre><code><span class="ln">python3 skills/ai-dev-workflow/scripts/install.py add-template my-template ../my-templates/spec.md --rules ../my-templates/spec.rules.json</span></code></pre></div>
-    <p class="note">Run only one of the two commands. Without an extra rules file, the engine still checks the template structure and unfilled fields.</p>
-    <p>The installer keeps copies of the template and rules in your private library outside your projects. During project setup, choose it by the name <code>user:my-template</code>. Without a custom template, the AI tool uses one already in the project or asks you for one; it never invents one.</p>
+    <summary>Optional: register your own spec template once</summary>
+    <p><strong>A spec template</strong> is a <code>.md</code> file with the spec's sections left empty; the AI tool fills it in for each task. When you register it as your default, the AI tool proposes it automatically in every new project, so you don't choose it each time.</p>
+    <ol>
+      <li><strong>Prepare the file:</strong> copy <code>examples/templates/example-spec-template.md</code> to a folder outside any repository, such as <code>../my-templates/spec.md</code>, and adapt its sections.</li>
+      <li><strong>Register it as your default</strong> from the <code>ai-dev-workflow</code> folder. <code>my-template</code> is a name you choose:
+        <div class="act term"><div class="act-head"><svg aria-hidden="true"><use href="#i-term"/></svg><span>Terminal / PowerShell</span></div><pre><code><span class="ln">python3 skills/ai-dev-workflow/scripts/install.py add-template my-template ../my-templates/spec.md --default</span></code></pre></div></li>
+      <li><strong>Rules file (optional):</strong> a <code>.json</code> file that tells the engine what to check in a spec, such as required sections and the format of acceptance criteria. If you want one, copy <code>examples/templates/example-spec-template.rules.json</code> to <code>../my-templates/spec.rules.json</code>, edit it to match your sections, and run this command <strong>instead of</strong> the one in step 2:
+        <div class="act term"><div class="act-head"><svg aria-hidden="true"><use href="#i-term"/></svg><span>Terminal / PowerShell — with rules</span></div><pre><code><span class="ln">python3 skills/ai-dev-workflow/scripts/install.py add-template my-template ../my-templates/spec.md --rules ../my-templates/spec.rules.json --default</span></code></pre></div></li>
+    </ol>
+    <p>The template is kept in your private library on your computer, outside every project. To make another template the default later, use <code>install.py default-template</code> followed by its name. Without a registered template, the AI tool tells you so and asks you for one; it never invents one.</p>
   </details>
 </section>
 
@@ -993,20 +1005,20 @@ details.more{margin-top:12px}
     <li class="step">
       <div class="step-tags"><span class="where you"><svg aria-hidden="true"><use href="#i-you"/></svg>You</span><span class="where chat"><svg aria-hidden="true"><use href="#i-chat"/></svg>Agent chat</span></div>
       <h3>First time in a project only: confirm the setup</h3>
-      <p>The agent shows what it found in your project and asks about:</p>
+      <p>The agent inspects your project, proposes a ready setup and explains each item. Accept it as it is, or change any item:</p>
       <ul>
-        <li>the instruction files every agent must follow, such as <code>CLAUDE.md</code> or <code>AGENTS.md</code>;</li>
-        <li>the spec template to use;</li>
-        <li>the checks to run, such as tests and the analyzer;</li>
-        <li>whether task records are saved in git:
+        <li><strong>Instruction files</strong> it found, such as <code>CLAUDE.md</code> or <code>AGENTS.md</code>.</li>
+        <li><strong>Spec template:</strong> your default template if you registered one in your private library; otherwise it says so and asks you for one.</li>
+        <li><strong>Checks:</strong> found from your project's own files, such as <code>flutter analyze</code> and <code>flutter test</code>, each with a one-line explanation. You don't need to know them in advance.</li>
+        <li><strong>Saving task records in git:</strong> it explains the three options and recommends one for your project:
           <ul class="sublist">
-            <li><code>all</code> — every record.</li>
-            <li><code>config-only</code> — the settings only; tasks stay on your computer.</li>
-            <li><code>none</code> — nothing; all records stay on your computer.</li>
+            <li><code>all</code> — every record in git: any developer or AI agent on another computer can continue the task, but everyone with access to the repository can read the specs and plans.</li>
+            <li><code>config-only</code> — only the settings in git: tasks stay on your computer, so they can't continue elsewhere and are lost with the computer.</li>
+            <li><code>none</code> — nothing in git: everything stays on your computer.</li>
           </ul>
         </li>
       </ul>
-      <p>You answer once per project.</p>
+      <p>You answer once per project; every later task reuses these settings.</p>
     </li>
     <li class="step">
       <div class="step-tags"><span class="where auto"><svg aria-hidden="true"><use href="#i-auto"/></svg>Automatic</span><span class="where you"><svg aria-hidden="true"><use href="#i-you"/></svg>You</span></div>
@@ -1021,7 +1033,15 @@ details.more{margin-top:12px}
     <li class="step gate">
       <div class="step-tags"><span class="where you"><svg aria-hidden="true"><use href="#i-you"/></svg>You</span><span class="where chat"><svg aria-hidden="true"><use href="#i-chat"/></svg>Agent chat</span><span class="flag gate">Approval gate</span></div>
       <h3>Approve the spec</h3>
-      <p>Read the spec the agent shows. If it is right, type:</p>
+      <p><strong>The spec</strong> describes what will be built, before any code is written. Its sections come from your project's template and usually include:</p>
+      <ul>
+        <li><strong>Goal:</strong> the problem the feature solves and the result wanted.</li>
+        <li><strong>Requirements:</strong> what the feature must do, and what is out of scope.</li>
+        <li><strong>Edge cases:</strong> such as no internet connection or an empty list.</li>
+        <li><strong>Constraints:</strong> what must not change.</li>
+        <li><strong>Acceptance criteria:</strong> how we know the work is done.</li>
+      </ul>
+      <p>Read it. If it is right, type:</p>
       <div class="reply"><span class="reply-label">Your reply:</span><span class="say">approve the spec</span></div>
       <p>To change something, say what to change. Questions or "looks good, but…" do not count as approval.</p>
     </li>

@@ -1,5 +1,17 @@
 # Changelog
 
+## Unreleased
+
+- Guided first-time setup: `init --discover` now proposes a complete setup with plain-language explanations — your
+  default template (`install.py add-template … --default`, `install.py default-template`), checks found from the
+  project's own files (with what each does, why it was suggested, and whether its tool is installed), the commands
+  the CI already runs, and what each records option really does, with a recommendation and its trade-off.
+- An existing setup is reused without asking again; `init --discover` lists only its problems.
+- `config.json` → `setup` records what was recommended and what the user chose.
+- `init` and `init --update` accept `--without-check` and `--add-check`; `init --update --template` changes the
+  template when no task is open.
+- The `config-only` and `none` exclusions are re-applied in a new clone when a task starts.
+
 ## 1.0.0 — 2026-11-12
 
 First release.

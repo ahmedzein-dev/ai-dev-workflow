@@ -9,7 +9,7 @@ This report covers what was actually run. Anything not listed as passed was not 
 
 | Area | Result |
 |---|---|
-| Automated tests (`tests/`, 121 tests) | Pass |
+| Automated tests (`tests/`, 141 tests) | Pass |
 | Spec rules on a separate, unpublished template with four filled-in example specs | Pass: every example meets all mandatory rules; the blank template is rejected |
 | Installer in a temporary home folder | Pass |
 | HTML guide in a browser (English and Arabic) | Pass, after the fixes listed below |
@@ -22,7 +22,7 @@ This report covers what was actually run. Anything not listed as passed was not 
 
 ## Automated tests
 
-`cd tests && python3 -m unittest -v` — 121 tests, all passing. They cover:
+`cd tests && python3 -m unittest -v` — 141 tests, all passing. They cover:
 
 - the 11 stages, forward prerequisites, moving back, early final reports;
 - spec validation: structure from the template, placeholders, IDs, required formats, "None — reason", judgment

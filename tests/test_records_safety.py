@@ -93,7 +93,7 @@ class TemplateTest(WorkflowTestCase):
             install.main(["add-template", "mine", str(EXAMPLE_TEMPLATE), "--rules",
                           str(EXAMPLE_TEMPLATE.with_name("example-spec-template.rules.json"))])
         discover = json.loads(self.wf("init", "--discover", "--json"))
-        self.assertEqual(discover["user_templates"], [{"name": "user:mine", "has_rules": True}])
+        self.assertEqual(discover["user_templates"], [{"name": "user:mine", "has_rules": True, "default": False}])
         self.assertFalse((self.repo / ".ai-dev-workflow").exists())
         self.wf("init", "--template", "user:mine", "--commit", "all")
         config = (self.repo / ".ai-dev-workflow" / "config.json").read_text(encoding="utf-8")

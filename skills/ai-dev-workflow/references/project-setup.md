@@ -3,30 +3,45 @@
 The skill is project-agnostic. Each project gets a small setup in `.ai-dev-workflow/`, created only after the user
 explicitly invoked the skill and confirmed the choices.
 
-## First run
+## First run: guided setup
 
-1. `workflow.py init --discover` lists the instruction files found (CLAUDE.md, AGENTS.md, GEMINI.md, …), files that
-   look like specification templates, templates in the user's private library, and suggested checks based on the
-   project's tooling (pubspec.yaml, package.json, pyproject.toml, go.mod, Cargo.toml, …).
-2. Show the user what was found and ask them to confirm:
-   - **engineering standards** — the instruction files every agent must follow for this project;
-   - **specification template** — a template file in the repository, a template from their private library
-     (`user:<name>`), or one they provide now. Never choose for them and never invent one; if there is none, ask
-     for it and stop;
-   - **checks** — the commands that verify the project (adjust the suggestions with them);
-   - **commit mode** for task records: `all` (shared with teammates, other machines and cloud agents),
-     `config-only` (setup shared, task records local) or `none` (everything local).
-3. Run `init` with those choices, for example:
+The goal is a short setup the user can answer without knowing git or the project's toolchain: you propose, explain
+and ask once; they accept or change.
+
+1. Run `workflow.py init --discover` (add `--json` for structured output). It changes nothing. If it says the
+   project is **already set up**, reuse the settings and skip the questions; only fix the problems it lists, or
+   change what the user asks for with `init --update`.
+2. Otherwise present its proposal, in the user's language and in plain words, as one short message:
+   - **Engineering standards** — the instruction files found; every agent follows them.
+   - **Specification template** — if a default template is registered in the user's private library, it is the
+     recommendation (`user:<name>`); say which one and that it lives outside every repository. Otherwise say so
+     plainly and list what was found (repository files marked "example" are samples, not recommendations) or ask the
+     user to provide one. Never pick a template on their behalf.
+   - **Checks** — each recommended command with its one-line explanation and what it was found from (for example
+     pubspec.yaml, a package.json script, a pytest configuration, the CI workflow). Say they have not been run yet
+     and mention any tool "not found on this computer". If nothing was detected, inspect the README, scripts and CI
+     and propose commands yourself; never invent ones you have not seen evidence for.
+   - **Saving task records in git** — explain the three options with the output's own words (what is committed,
+     what a clone contains, whether another computer or agent can resume, what is lost with this computer, privacy),
+     then the recommended option, its reason and its trade-off.
+3. Ask: accept everything as recommended, or change any item. Wait for the answer. Silence or a question is not
+   acceptance.
+4. Run `init` with exactly what they confirmed:
 
 ```
-workflow.py init --template user:my-template --commit all --standards CLAUDE.md
-workflow.py init --template docs/spec-template.md --rules docs/spec-template.rules.json --commit config-only
+workflow.py init --template user:my-template --commit all --standards CLAUDE.md,AGENTS.md
+workflow.py init --template docs/spec-template.md --commit config-only --without-check codegen --add-check e2e="npm run e2e"
 workflow.py init --template <file> --commit all --config <checks-and-rules.json> --project-notes <PROJECT.md>
 ```
 
 `init` copies the chosen template (and its rules file) into `.ai-dev-workflow/templates/`, so every agent and machine
-uses the same version. With `config-only` or `none` it adds rules to the repository's local git exclude file; no
-tracked file changes. Change these later with `init --update --commit <mode>` or `--standards <files>`.
+uses the same version, and records in `config.json` → `setup` both what was recommended and what the user chose.
+With `config-only` or `none` it adds rules to the repository's local git exclude file (no tracked file changes); in a
+new clone they are re-applied when the next task starts. The settings are reused for every later task.
+
+Change settings only when the user asks: `init --update` with `--commit`, `--standards`, `--template` (refused while
+a task is still open, so its spec keeps its template), `--add-check` or `--without-check`. Never change the records
+mode of an existing project on your own.
 
 ## config.json
 
@@ -36,6 +51,7 @@ tracked file changes. Change these later with `init --update --commit <mode>` or
 | `spec_template`, `spec_rules` | the project's template and optional rules file (copied by `init`) |
 | `template_source` | where the template came from (`user:<name>` or `file:<name>`) |
 | `records.commit` | `all`, `config-only` or `none` |
+| `setup` | what `init` recommended and what the user chose (`recommended`, `chosen`), and later `changes` |
 | `checks` | verification commands: `id`, `name`, `command`, `required`, optional `when` (conditional), `accepts_args`, `timeout_s`, `parser` (`dart-analyzer`, with `fail_on`), or `builtin` (`json-key-parity` with `files`, `rule-scan`, `manifest-diff` with `files`) |
 | `rules` | patterns for `rule-scan`: `id`, `pattern` (regex), `paths`, `exclude`, `max_per_file`, `severity` (`error` or `warning`), `message` |
 
@@ -68,7 +84,8 @@ python3 <SKILL_DIR>/scripts/install.py add-template my-template /path/to/spec-te
 ```
 
 They are stored in `~/.ai-dev-workflow/templates/<name>/` (or `$AI_DEV_WORKFLOW_HOME`) and appear in
-`init --discover` as `user:<name>`. They are never applied to a project unless the user picks them.
+`init --discover` as `user:<name>`. Add `--default` (or run `install.py default-template <name>`) to make one the
+recommendation for every new project. Templates are never applied to a project unless the user confirms them.
 
 ## PROJECT.md
 

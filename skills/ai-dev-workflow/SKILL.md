@@ -88,11 +88,13 @@ python3 "<SKILL_DIR>/scripts/workflow.py" <command> <task> [options] --agent <yo
 
 The user's request after the invocation is in `$ARGUMENTS` or in their message.
 
-1. Run `status`. If the project has no `.ai-dev-workflow/` folder yet, set it up first (see
-   [references/project-setup.md](references/project-setup.md)): run `init --discover`, show the user the
-   instruction files, template candidates and suggested checks, ask which specification template to use and how task
-   records are committed (`all`, `config-only` or `none`), then run `init`. Never choose a template the user has not
-   confirmed, and never invent one.
+1. Run `status`. If the project has no `.ai-dev-workflow/` folder yet, set it up first with the guided setup in
+   [references/project-setup.md](references/project-setup.md): run `init --discover`, present its recommendations
+   (template, checks, how task records are saved in git) in plain language with their trade-offs, and let the user
+   accept them or change any item; then run `init` with what they confirmed. A recommendation is not a choice: never
+   run `init` before the user confirms, never pick a template on their behalf, and never invent one. If the project
+   is already set up, reuse its settings and ask nothing, unless `init --discover` reports a problem or the user asks
+   for a change (`init --update`).
 2. If the request names an existing task, or the user wants to continue one, run `resume <task>` and continue from its
    stage. If several tasks could match, ask which.
 3. Otherwise create a task: choose a short kebab-case name and a type (`feature`, `bugfix`, `enhancement`,

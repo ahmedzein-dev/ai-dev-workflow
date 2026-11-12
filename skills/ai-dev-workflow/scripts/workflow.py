@@ -1728,68 +1728,382 @@ def compute_outcome(repo: Path, state: Dict[str, Any], cfg: Dict[str, Any]) -> D
 
 # --------------------------------------------------------------------------- discovery for init
 
-def detect_checks(repo: Path) -> List[Dict[str, Any]]:
+PY_CMD = "python" if os.name == "nt" else "python3"
+DISCOVERY_ONLY_KEYS = ("evidence", "tool_found")
+OSS_LICENSE_RE = re.compile(
+    r"MIT License|Apache License|GNU (?:GENERAL|LESSER|AFFERO) PUBLIC|BSD [0-9]-Clause|Mozilla Public License|"
+    r"The Unlicense|ISC License|Redistribution and use in source and binary forms", re.I)
+TRANSLATION_DIRS = ("assets/translations", "assets/lang", "assets/langs", "assets/l10n", "assets/i18n", "assets/locales",
+                    "lib/l10n", "locales", "i18n", "src/locales", "src/i18n", "translations")
+
+# What each records.commit mode really does (see apply_commit_mode and ensure_commit_mode).
+RECORD_OPTIONS = (
+    {"mode": "all", "label": "Save everything in git",
+     "what": "Nothing is excluded: config.json, PROJECT.md, the template and every task folder (spec, plan, approved "
+             "versions, state.json with approvals, progress and check results, verification, audit and report) are "
+             "included whenever you commit. Only the local pointer ACTIVE is never committed.",
+     "after_clone": "Yes: a clone has the setup and the full history of every committed task.",
+     "other_machine": "Yes: another developer or AI agent on another computer can resume a task after pulling.",
+     "if_lost": "Nothing that was committed and pushed; uncommitted work is lost, as with any file.",
+     "privacy": "Specs, plans, the wording of approvals and audit findings are visible to everyone with access to "
+                "the repository, and stay in its history."},
+    {"mode": "config-only", "label": "Save only the setup in git",
+     "what": "config.json, PROJECT.md and the template are included when you commit. Task folders are excluded "
+             "through the local file .git/info/exclude, so they stay on the computer where they were created.",
+     "after_clone": "The setup, yes. Task records, no.",
+     "other_machine": "No for existing tasks: the same setup works for new tasks, but these tasks cannot be resumed "
+                      "elsewhere.",
+     "if_lost": "All task records on that computer: specs, plans, approval history, progress, audit and reports.",
+     "privacy": "Task details stay on your computer; only the setup is shared."},
+    {"mode": "none", "label": "Save nothing in git",
+     "what": "The whole .ai-dev-workflow folder is excluded through the local file .git/info/exclude; nothing from "
+             "AIDevWorkflow is committed.",
+     "after_clone": "No: a clone has no setup and no task records.",
+     "other_machine": "No: every computer needs its own setup, and tasks cannot move between computers.",
+     "if_lost": "The setup and all task records.",
+     "privacy": "Nothing from AIDevWorkflow leaves your computer."},
+)
+RECORD_NOTES = (
+    "AIDevWorkflow never commits by itself: 'saved in git' means the files are included when you commit.",
+    "The exclusion is a local git setting of each clone; it is re-applied automatically when a task starts in a "
+    "new clone.",
+    "Excluding files later does not remove what was already committed; it stays in the history.",
+)
+
+
+def _read(repo: Path, rel: str) -> str:
+    path = repo / rel
+    try:
+        return read_text(path) if path.is_file() else ""
+    except (OSError, UnicodeDecodeError):
+        return ""
+
+
+def _tool_found(repo: Path, command: str) -> bool:
+    first = command.split()[0]
+    if first.startswith(("./", ".\\")):
+        return (repo / first[2:]).is_file()
+    return shutil.which(first) is not None
+
+
+def _check(cid: str, name: str, command: str, explain: str, evidence: str, required: bool = True,
+           **extra: Any) -> Dict[str, Any]:
+    check = {"id": cid, "name": name, "command": command, "required": required, "explain": explain,
+             "evidence": evidence}
+    check.update(extra)
+    return check
+
+
+def _builtin(cid: str, name: str, kind: str, files: List[str], explain: str, evidence: str) -> Dict[str, Any]:
+    return {"id": cid, "name": name, "builtin": kind, "files": files, "required": True, "explain": explain,
+            "evidence": evidence}
+
+
+def project_files(repo: Path) -> List[str]:
+    return [f for f in run_git(repo, ["ls-files", "-co", "--exclude-standard", "-z"]).split("\0") if f]
+
+
+def _dart_checks(repo: Path, pubspec: str) -> List[Dict[str, Any]]:
+    tool = "flutter" if re.search(r"sdk:\s*flutter", pubspec) else "dart"
+    evidence = "pubspec.yaml" + (", analysis_options.yaml" if (repo / "analysis_options.yaml").exists() else "")
+    checks = [_check("analyze", f"{tool} analyze", f"{tool} analyze",
+                     "Reads the Dart code and reports errors and warnings, without running the app.", evidence,
+                     parser="dart-analyzer", fail_on=["error", "warning", "new"])]
+    tests = sorted((repo / "test").rglob("*_test.dart")) if (repo / "test").is_dir() else []
+    if tests:
+        checks.append(_check("test", f"{tool} test", f"{tool} test",
+                             f"Runs the project's automated tests ({len(tests)} test file(s) in test/).",
+                             "test/*_test.dart", accepts_args=True))
+    if re.search(r"^\s+build_runner\s*:", pubspec, re.M):
+        checks.append(_check("codegen", "build_runner", "dart run build_runner build --delete-conflicting-outputs",
+                             "Regenerates generated code (models, serializers); needed only when that code changes.",
+                             "build_runner in pubspec.yaml", required=False,
+                             when="Run when code-generated sources (models, serializers) change."))
+    checks.append(_builtin("dependencies", "New dependencies", "manifest-diff", ["pubspec.yaml"],
+                           "Lists packages added to pubspec.yaml, so every new dependency gets reviewed.",
+                           "pubspec.yaml"))
+    return checks
+
+
+def _node_checks(repo: Path, text: str) -> List[Dict[str, Any]]:
+    try:
+        pkg = json.loads(text)
+    except ValueError:
+        pkg = {}
+    scripts = pkg.get("scripts") or {}
+    if (repo / "pnpm-lock.yaml").exists():
+        runner = "pnpm"
+    elif (repo / "yarn.lock").exists():
+        runner = "yarn"
+    elif (repo / "bun.lockb").exists() or (repo / "bun.lock").exists():
+        runner = "bun run"
+    else:
+        runner = "npm run"
+    meaning = {"lint": "Checks code style and common mistakes", "typecheck": "Checks the types",
+               "type-check": "Checks the types", "check": "Runs the project's combined checks",
+               "test": "Runs the automated tests", "build": "Builds the project to make sure it compiles"}
     checks: List[Dict[str, Any]] = []
-    pubspec = repo / "pubspec.yaml"
-    if pubspec.exists():
-        text = read_text(pubspec)
-        tool = "flutter" if re.search(r"sdk:\s*flutter", text) else "dart"
-        checks.append({"id": "analyze", "name": f"{tool} analyze", "command": f"{tool} analyze",
-                       "parser": "dart-analyzer", "fail_on": ["error", "warning", "new"], "required": True})
-        if (repo / "test").is_dir():
-            checks.append({"id": "test", "name": f"{tool} test", "command": f"{tool} test", "required": True,
-                           "accepts_args": True})
-        if "build_runner" in text:
-            checks.append({"id": "codegen", "name": "build_runner", "required": False,
-                           "command": "dart run build_runner build --delete-conflicting-outputs",
-                           "when": "Run when code-generated sources (models, serializers) change."})
-        checks.append({"id": "dependencies", "name": "New dependencies", "builtin": "manifest-diff",
-                       "files": ["pubspec.yaml"], "required": True})
-    package = repo / "package.json"
-    if package.exists():
-        try:
-            scripts = (load_json(package).get("scripts") or {})
-        except ValueError:
-            scripts = {}
-        runner = "pnpm" if (repo / "pnpm-lock.yaml").exists() else "yarn" if (repo / "yarn.lock").exists() else "npm run"
-        for name in ("lint", "typecheck", "test", "build"):
-            if name in scripts:
-                checks.append({"id": name, "name": f"{runner} {name}", "command": f"{runner} {name}",
-                               "required": name != "build", "accepts_args": name == "test"})
-        checks.append({"id": "dependencies", "name": "New dependencies", "builtin": "manifest-diff",
-                       "files": ["package.json"], "required": True})
-    if (repo / "pyproject.toml").exists() or (repo / "requirements.txt").exists():
-        if (repo / "tests").is_dir() or (repo / "test").is_dir():
-            checks.append({"id": "test", "name": "pytest", "command": "python -m pytest", "required": True,
-                           "accepts_args": True})
+    for name in ("lint", "typecheck", "type-check", "check", "test", "build"):
+        body = scripts.get(name)
+        if not isinstance(body, str) or not body.strip():
+            continue
+        if name == "test" and "no test specified" in body:
+            continue
+        cid = "typecheck" if name == "type-check" else name
+        if any(c["id"] == cid for c in checks):
+            continue
+        checks.append(_check(cid, f"{runner} {name}", f"{runner} {name}",
+                             f"{meaning[name]} (package.json script: {body.strip()[:80]}).",
+                             f"package.json scripts.{name}", required=name != "build", accepts_args=name == "test"))
+    deps = {**(pkg.get("dependencies") or {}), **(pkg.get("devDependencies") or {})}
+    if not any(c["id"] == "typecheck" for c in checks) and (repo / "tsconfig.json").exists() and "typescript" in deps:
+        checks.append(_check("typecheck", "TypeScript types", "npx tsc --noEmit",
+                             "Checks the TypeScript types without building.", "tsconfig.json, typescript in package.json"))
+    checks.append(_builtin("dependencies", "New dependencies", "manifest-diff", ["package.json"],
+                           "Lists packages added to package.json, so every new dependency gets reviewed.",
+                           "package.json"))
+    return checks
+
+
+def _python_checks(repo: Path, files: List[str]) -> List[Dict[str, Any]]:
+    py_files = [f for f in files if f.endswith(".py")]
+    markers = [f for f in ("pyproject.toml", "setup.py", "setup.cfg", "requirements.txt", "tox.ini") if (repo / f).exists()]
+    if not py_files and not markers:
+        return []
+    pyproject, setup_cfg, tox = _read(repo, "pyproject.toml"), _read(repo, "setup.cfg"), _read(repo, "tox.ini")
+    requirements = " ".join(_read(repo, f) for f in files if re.match(r"requirements[^/]*\.txt$", f))
+    deps = (pyproject + "\n" + requirements + "\n" + setup_cfg).lower()
+    tests = [f for f in py_files if re.search(r"(?:^|/)(?:test_[^/]*|[^/]*_test)\.py$", f)]
+    checks: List[Dict[str, Any]] = []
+    uses_pytest = ((repo / "pytest.ini").exists() or "[tool.pytest" in pyproject or "[tool:pytest]" in setup_cfg
+                   or "[pytest]" in tox or any(f.endswith("conftest.py") for f in py_files)
+                   or re.search(r"\bpytest\b", deps) is not None)
+    if tests and uses_pytest:
+        checks.append(_check("test", "pytest", f"{PY_CMD} -m pytest", "Runs the automated tests with pytest.",
+                             f"{len(tests)} test file(s), pytest configured", accepts_args=True))
+    elif tests:
+        top = sorted({f.split("/")[0] for f in tests if "/" in f})
+        if not top:
+            command = f"{PY_CMD} -m unittest"
+        elif len(top) == 1 and not (repo / top[0] / "__init__.py").exists():
+            command = f"{PY_CMD} -m unittest discover -s {top[0]}"
+        else:
+            command = f"{PY_CMD} -m unittest discover"
+        checks.append(_check("test", "unittest", command,
+                             "Runs the automated tests with Python's built-in unittest.",
+                             f"{len(tests)} test file(s), no pytest configuration"))
+    if "[tool.ruff" in pyproject or (repo / "ruff.toml").exists() or (repo / ".ruff.toml").exists() \
+            or re.search(r"\bruff\b", deps):
+        checks.append(_check("lint", "ruff", "ruff check .", "Checks code style and common mistakes.",
+                             "ruff configuration"))
+    elif (repo / ".flake8").exists() or "[flake8]" in setup_cfg or "[flake8]" in tox:
+        checks.append(_check("lint", "flake8", "flake8", "Checks code style and common mistakes.",
+                             "flake8 configuration"))
+    if (repo / "mypy.ini").exists() or "[tool.mypy]" in pyproject or "[mypy]" in setup_cfg:
+        checks.append(_check("typecheck", "mypy", "mypy .", "Checks the type annotations.", "mypy configuration"))
+    return checks
+
+
+def _other_checks(repo: Path, files: List[str]) -> List[Dict[str, Any]]:
+    checks: List[Dict[str, Any]] = []
     if (repo / "go.mod").exists():
-        checks.append({"id": "vet", "name": "go vet", "command": "go vet ./...", "required": True})
-        checks.append({"id": "test", "name": "go test", "command": "go test ./...", "required": True})
+        checks.append(_check("vet", "go vet", "go vet ./...", "Reports suspicious Go code.", "go.mod"))
+        checks.append(_check("test", "go test", "go test ./...", "Runs the Go tests.", "go.mod"))
     if (repo / "Cargo.toml").exists():
-        checks.append({"id": "clippy", "name": "cargo clippy", "command": "cargo clippy", "required": True})
-        checks.append({"id": "test", "name": "cargo test", "command": "cargo test", "required": True})
+        if shutil.which("cargo-clippy"):
+            checks.append(_check("clippy", "cargo clippy", "cargo clippy", "Reports common Rust mistakes.",
+                                 "Cargo.toml, clippy installed"))
+        checks.append(_check("test", "cargo test", "cargo test", "Builds and runs the Rust tests.", "Cargo.toml"))
+    gradlew = "gradlew.bat" if os.name == "nt" else "./gradlew"
+    if (repo / "gradlew").exists() or (repo / "gradlew.bat").exists():
+        checks.append(_check("test", "Gradle tests", f"{gradlew} test", "Builds the project and runs its tests.",
+                             "gradlew"))
+        if any(re.search(r"com\.android\.application", _read(repo, f)) for f in files
+               if re.search(r"(?:^|/)build\.gradle(?:\.kts)?$", f)):
+            checks.append(_check("lint", "Android lint", f"{gradlew} lint", "Checks the Android code and resources.",
+                                 "Android Gradle plugin"))
+    elif (repo / "pom.xml").exists():
+        checks.append(_check("test", "Maven tests", "mvn -q test", "Builds the project and runs its tests.", "pom.xml"))
+    if any(re.match(r"[^/]+\.(?:sln|csproj)$", f) for f in files):
+        checks.append(_check("build", "dotnet build", "dotnet build", "Builds the project to make sure it compiles.",
+                             ".sln/.csproj"))
+        checks.append(_check("test", "dotnet test", "dotnet test", "Runs the .NET tests.", ".sln/.csproj"))
+    if (repo / "Gemfile").exists():
+        if (repo / "spec").is_dir():
+            checks.append(_check("test", "RSpec", "bundle exec rspec", "Runs the Ruby specs.", "Gemfile, spec/"))
+        if (repo / ".rubocop.yml").exists():
+            checks.append(_check("lint", "RuboCop", "bundle exec rubocop", "Checks Ruby code style.", ".rubocop.yml"))
+    if (repo / "Package.swift").exists():
+        checks.append(_check("build", "swift build", "swift build", "Builds the Swift package.", "Package.swift"))
+        if (repo / "Tests").is_dir():
+            checks.append(_check("test", "swift test", "swift test", "Runs the Swift tests.", "Package.swift, Tests/"))
+    return checks
+
+
+def _translation_check(repo: Path) -> Optional[Dict[str, Any]]:
+    for folder in TRANSLATION_DIRS:
+        path = repo / folder
+        if path.is_dir():
+            files = sorted(f"{folder}/{p.name}" for p in path.iterdir() if p.suffix in (".json", ".arb"))
+            if len(files) >= 2:
+                return _builtin("translations", "Translation keys match", "json-key-parity", files,
+                                "Checks that every translation file has the same keys, so no text is missing "
+                                "in one language.", folder)
+    return None
+
+
+def detect_checks(repo: Path, files: Optional[List[str]] = None) -> List[Dict[str, Any]]:
+    """Recommend checks from the project's own files; each says why it was suggested and whether its tool exists."""
+    files = project_files(repo) if files is None else files
+    checks: List[Dict[str, Any]] = []
+    pubspec = _read(repo, "pubspec.yaml")
+    if pubspec:
+        checks += _dart_checks(repo, pubspec)
+    package = _read(repo, "package.json")
+    if package:
+        checks += _node_checks(repo, package)
+    checks += _python_checks(repo, files)
+    checks += _other_checks(repo, files)
+    translations = _translation_check(repo)
+    if translations:
+        checks.append(translations)
+    makefile = _read(repo, "Makefile")
+    if not any(c["id"] == "test" for c in checks) and re.search(r"^test\s*:", makefile, re.M):
+        checks.append(_check("test", "make test", "make test", "Runs the project's test target.", "Makefile"))
     unique: Dict[str, Dict[str, Any]] = {}
     for check in checks:
         unique.setdefault(check["id"], check)
+    for check in unique.values():
+        if check.get("command"):
+            check["tool_found"] = _tool_found(repo, check["command"])
     return list(unique.values())
 
 
+def ci_commands(repo: Path, files: List[str]) -> List[str]:
+    """Single-line commands the project's CI already runs (GitHub Actions `run:` lines)."""
+    found: List[str] = []
+    for rel in files:
+        if not re.match(r"\.github/workflows/[^/]+\.ya?ml$", rel):
+            continue
+        for line in _read(repo, rel).splitlines():
+            match = re.match(r"\s*(?:-\s*)?run:\s*(.+?)\s*$", line)
+            if not match:
+                continue
+            command = match.group(1).strip().strip("'\"")
+            if command and command[0] not in "|>" and not command.startswith(("echo ", "git config")) \
+                    and command not in found:
+                found.append(command)
+    return found[:12]
+
+
+def library_settings() -> Dict[str, Any]:
+    path = library_dir() / "settings.json"
+    try:
+        return load_json(path) if path.is_file() else {}
+    except ValueError:
+        return {}
+
+
+def default_template_info() -> Optional[Dict[str, Any]]:
+    """The template the user registered as their default (install.py add-template --default), if any."""
+    name = library_settings().get("default_template")
+    if not name:
+        return None
+    entry = library_dir() / "templates" / name
+    info: Dict[str, Any] = {"name": f"user:{name}", "available": (entry / "template.md").is_file(),
+                            "has_rules": (entry / "rules.json").is_file()}
+    if not info["available"]:
+        info["problem"] = (f"Your default template '{name}' is registered, but its files are missing from your "
+                           f"private library. Register it again with `install.py add-template {name} <file> --default`.")
+    return info
+
+
+def template_proposal(default: Optional[Dict[str, Any]], candidates: List[str],
+                      library: List[Dict[str, Any]]) -> Dict[str, Any]:
+    if default and default["available"]:
+        rules = "with its rules file" if default["has_rules"] else "structure only, no rules file"
+        return {"recommended": default["name"],
+                "reason": f"Your registered default template ({rules}), kept in your private library outside "
+                          "every repository."}
+    note = default["problem"] if default else "No default template is registered in your private library."
+    others = [c for c in candidates] + [t["name"] for t in library]
+    return {"recommended": None,
+            "reason": note + (" Ask the user to choose one of the templates found or to provide one."
+                              if others else " No template was found; ask the user to provide one.")
+                      + " Never pick an example template on their behalf."}
+
+
+def recommend_commit(repo: Path) -> Dict[str, str]:
+    licence = next((f for f in ("LICENSE", "LICENSE.md", "LICENSE.txt", "COPYING") if (repo / f).is_file()), None)
+    if licence and OSS_LICENSE_RE.search(_read(repo, licence)):
+        return {"mode": "config-only",
+                "reason": f"{licence} looks like an open-source licence, so the repository is probably public. Keeping "
+                          "task records local avoids publishing specs, plans and audit findings; the trade-off is that "
+                          "tasks cannot be resumed on another computer."}
+    if run_git(repo, ["remote"]).split():
+        return {"mode": "all",
+                "reason": "The repository has a remote and no open-source licence, so it is probably shared with a "
+                          "team. Saving task records lets other developers, computers and AI agents resume tasks; the "
+                          "trade-off is that everyone with access can read the specs, plans and audit findings."}
+    return {"mode": "all",
+            "reason": "The repository has no remote yet. Saving task records keeps their history next to the code and "
+                      "ready to share; the trade-off is that once you push, everyone with access can read them."}
+
+
+def existing_setup(repo: Path) -> Optional[Dict[str, Any]]:
+    """The project's confirmed settings and anything missing or invalid in them."""
+    if not config_path(repo).exists():
+        return None
+    try:
+        cfg = load_config(repo)
+    except WorkflowError as exc:
+        return {"valid": False, "problems": [str(exc)], "notes": []}
+    problems: List[str] = []
+    notes: List[str] = []
+    try:
+        template_path(repo, cfg)
+        load_rules(repo, cfg)
+    except WorkflowError as exc:
+        problems.append(str(exc))
+    mode = (cfg.get("records") or {}).get("commit")
+    if mode not in COMMIT_MODES:
+        problems.append("How task records are saved in git is not set (records.commit).")
+    elif not commit_mode_applied(repo, mode):
+        notes.append(f"records.commit={mode} is not yet applied in this clone; it is applied when the next task starts.")
+    checks = cfg.get("checks") or []
+    if not checks:
+        problems.append("No checks are configured.")
+    for check in checks:
+        if check.get("command") and not _tool_found(repo, check["command"]):
+            notes.append(f"Check '{check['id']}': '{check['command'].split()[0]}' was not found on this computer.")
+    return {"valid": not problems, "template": cfg.get("template_source"), "commit": mode,
+            "standards": cfg.get("standards") or [], "checks": [c.get("id") for c in checks],
+            "confirmed": bool(cfg.get("setup")), "problems": problems, "notes": notes}
+
+
 def discover_project(repo: Path) -> Dict[str, Any]:
-    files = run_git(repo, ["ls-files", "-co", "--exclude-standard", "-z"]).split("\0")
+    files = project_files(repo)
     pattern = re.compile(r"(?i)(spec[^/]*template|template[^/]*spec)[^/]*\.md$")
-    candidates = sorted(f for f in files if f and not is_records_path(f) and pattern.search(f))
+    candidates = sorted(f for f in files if not is_records_path(f) and pattern.search(f))
+    default = default_template_info()
     library = []
     lib_root = library_dir() / "templates"
     if lib_root.is_dir():
         for entry in sorted(lib_root.iterdir()):
             if (entry / "template.md").exists():
-                library.append({"name": f"user:{entry.name}", "has_rules": (entry / "rules.json").exists()})
+                library.append({"name": f"user:{entry.name}", "has_rules": (entry / "rules.json").exists(),
+                                "default": bool(default and default["name"] == f"user:{entry.name}")})
     return {
         "repository": repo.name,
+        "existing": existing_setup(repo),
         "instruction_files": [p for p in INSTRUCTION_CANDIDATES if (repo / p).exists()],
         "template_candidates": candidates,
         "user_templates": library,
-        "suggested_checks": detect_checks(repo),
+        "default_template": default,
+        "template": template_proposal(default, candidates, library),
+        "suggested_checks": detect_checks(repo, files),
+        "ci_commands": ci_commands(repo, files),
+        "records": {"options": list(RECORD_OPTIONS), "notes": list(RECORD_NOTES), "recommended": recommend_commit(repo)},
     }
 
 
@@ -1825,6 +2139,22 @@ def apply_commit_mode(repo: Path, mode: str) -> Path:
         text += "\n"
     write_text(exclude, text.lstrip("\n") if text.strip() else "")
     return exclude
+
+
+def commit_mode_applied(repo: Path, mode: str) -> bool:
+    if mode == "all":
+        return True
+    exclude_rel = run_git(repo, ["rev-parse", "--git-path", "info/exclude"]).strip()
+    exclude = Path(exclude_rel) if Path(exclude_rel).is_absolute() else repo / exclude_rel
+    return exclude.exists() and f"records.commit={mode})" in read_text(exclude)
+
+
+def ensure_commit_mode(repo: Path, cfg: Dict[str, Any]) -> None:
+    """Apply the project's records.commit choice in this clone (the exclude file is local to each clone)."""
+    mode = (cfg.get("records") or {}).get("commit")
+    if mode in ("config-only", "none") and not commit_mode_applied(repo, mode):
+        apply_commit_mode(repo, mode)
+        print(f"Applied records.commit={mode} in this clone (local git exclude only).")
 
 
 # --------------------------------------------------------------------------- command helpers
@@ -1912,48 +2242,59 @@ def print_summary(info: Dict[str, Any]) -> None:
 
 # --------------------------------------------------------------------------- commands
 
-def cmd_init(args: argparse.Namespace) -> int:
-    repo = find_repo(args.repo)
-    if args.discover:
-        report = discover_project(repo)
-        if args.json:
-            print(json.dumps(report, indent=2))
-            return 0
-        print(f"Repository: {report['repository']}")
-        print("Instruction files: " + (", ".join(report["instruction_files"]) or "none found"))
-        print("Specification templates in the repository: " + (", ".join(report["template_candidates"]) or "none found"))
-        print("Templates in your private library: " + (", ".join(t["name"] for t in report["user_templates"]) or "none"))
-        print("Suggested checks:" + ("" if report["suggested_checks"] else " none detected; ask the user which commands verify this project."))
-        for check in report["suggested_checks"]:
-            print(f"  - {check['id']}: {check.get('command') or 'built-in ' + check['builtin']}"
-                  f"{'' if check.get('required') else ' (optional)'}")
-        print("Ask the user to confirm the instruction files, the template and the checks, and how task records are "
-              "committed (all, config-only or none). Then run `workflow.py init` with those choices.")
-        return 0
-    cfg_file = config_path(repo)
-    if cfg_file.exists() and not args.update:
-        raise WorkflowError("AIDevWorkflow is already set up here. Use --update with --commit or --standards to change those.")
-    if args.update:
-        cfg = load_config(repo)
-        if args.commit:
-            cfg.setdefault("records", {})["commit"] = args.commit
-            apply_commit_mode(repo, args.commit)
-        if args.standards:
-            cfg["standards"] = [s.strip() for s in args.standards.split(",") if s.strip()]
-        save_json(cfg_file, cfg)
-        print("Updated the AIDevWorkflow settings.")
-        return 0
-    if not args.commit:
-        raise WorkflowError("Choose how task records are committed with --commit all, config-only or none (ask the user).")
-    if not args.template:
-        raise WorkflowError("Choose the specification template with --template <path> or --template user:<name>. "
-                            "Ask the user; never invent one. `init --discover` lists candidates.")
-    base: Dict[str, Any] = {}
-    if args.config:
-        try:
-            base = load_json(Path(args.config).expanduser())
-        except (OSError, ValueError) as exc:
-            raise WorkflowError(f"Could not read --config {args.config}: {exc}") from exc
+def print_discovery(report: Dict[str, Any]) -> None:
+    existing = report["existing"]
+    if existing:
+        print(f"AIDevWorkflow is already set up in {report['repository']}. Reuse these settings; do not ask the setup "
+              "questions again unless something below is missing or invalid, or the user asks for a change "
+              "(`init --update`).")
+        print(f"  Template: {existing.get('template')}   Records in git: {existing.get('commit')}   "
+              f"Checks: {', '.join(existing.get('checks') or []) or 'none'}")
+        for problem in existing["problems"]:
+            print(f"  PROBLEM: {problem}")
+        for note in existing["notes"]:
+            print(f"  Note: {note}")
+        return
+    print(f"Setup proposal for {report['repository']}. These are recommendations; nothing is saved until the user "
+          "confirms them and you run `init`.")
+    print("\n1. Engineering standards (instruction files every agent follows): "
+          + (", ".join(report["instruction_files"]) or "none found"))
+    tpl = report["template"]
+    print("\n2. Specification template")
+    print(f"   Recommended: {tpl['recommended']}" if tpl["recommended"] else "   Recommended: none")
+    print(f"   Why: {tpl['reason']}")
+    others = [c + (" (example)" if "example" in c.lower() else "") for c in report["template_candidates"]]
+    others += [t["name"] for t in report["user_templates"] if t["name"] != tpl["recommended"]]
+    print("   Other choices: " + (", ".join(others) + ", or a file the user provides" if others
+                                  else "a file the user provides"))
+    print("\n3. Checks (recommended from the project's own files; not run yet)")
+    if not report["suggested_checks"]:
+        print("   None detected. Inspect the project (README, CI, scripts) and propose commands to the user.")
+    for check in report["suggested_checks"]:
+        what = check.get("command") or f"built-in {check['builtin']}"
+        flags = ("" if check.get("required") else " (optional)") + \
+            ("" if check.get("tool_found", True) else " [tool not found on this computer]")
+        print(f"   - {check['id']}: {what}{flags}\n     {check['explain']} Found from: {check['evidence']}.")
+    if report["ci_commands"]:
+        print("   Commands the project's CI already runs (for reference): " + "; ".join(report["ci_commands"]))
+    records = report["records"]
+    print("\n4. Saving task records in git")
+    for option in records["options"]:
+        print(f"   - {option['mode']} — {option['label']}: {option['what']}\n"
+              f"     After cloning: {option['after_clone']} Another computer or agent: {option['other_machine']}\n"
+              f"     If this computer is lost: {option['if_lost']} Privacy: {option['privacy']}")
+    for note in records["notes"]:
+        print(f"   Note: {note}")
+    print(f"   Recommended: {records['recommended']['mode']}. {records['recommended']['reason']}")
+    template_arg = tpl["recommended"] or "<template>"
+    print("\nExplain these in plain language, then ask the user to accept the recommendations or change any of them. "
+          "After they confirm, run for example:\n"
+          f"  workflow.py init --template {template_arg} --commit {records['recommended']['mode']}"
+          + (f" --standards {','.join(report['instruction_files'])}" if report["instruction_files"] else "")
+          + "\n  (add --without-check <id> or --add-check <id>=<command> for changes to the checks)")
+
+
+def resolve_template(args: argparse.Namespace) -> Tuple[Path, Optional[Path], str, str]:
     if args.template.startswith("user:"):
         name = args.template[5:]
         source_dir = library_dir() / "templates" / name
@@ -1972,27 +2313,100 @@ def cmd_init(args: argparse.Namespace) -> int:
             raise WorkflowError(f"Rules file not found: {args.rules}")
         rules_src = None
     name = re.sub(r"[^A-Za-z0-9._-]+", "-", name).strip("-") or "spec-template"
-    standards = [s.strip() for s in (args.standards or "").split(",") if s.strip()] or base.get("standards") or \
-        [p for p in ("CLAUDE.md", "AGENTS.md", "GEMINI.md") if (repo / p).exists()]
-    cfg = {
-        "schema": 1,
-        "project": args.project or base.get("project") or repo.name,
-        "standards": standards,
-        "spec_template": f"{RECORDS}/templates/{name}.md",
-        "spec_rules": f"{RECORDS}/templates/{name}.rules.json" if rules_src else None,
-        "template_source": source_label,
-        "records": {"commit": args.commit},
-        "checks": base["checks"] if "checks" in base else detect_checks(repo),
-        "rules": base.get("rules", []),
-    }
-    assert_no_secrets(json.dumps(cfg), "config.json")
-    templates = records_dir(repo) / "templates"
-    write_text(templates / f"{name}.md", read_text(template_src))
+    return template_src, rules_src, name, source_label
+
+
+def install_template(repo: Path, cfg: Dict[str, Any], template_src: Path, rules_src: Optional[Path], name: str,
+                     source_label: str) -> None:
+    rules = None
     if rules_src:
         rules = load_json(rules_src)
         if rules.get("schema") != 1:
             raise WorkflowError(f"{rules_src.name} has an unsupported schema; expected 1.")
+    templates = records_dir(repo) / "templates"
+    write_text(templates / f"{name}.md", read_text(template_src))
+    if rules_src:
         write_text(templates / f"{name}.rules.json", read_text(rules_src))
+    cfg["spec_template"] = f"{RECORDS}/templates/{name}.md"
+    cfg["spec_rules"] = f"{RECORDS}/templates/{name}.rules.json" if rules_src else None
+    cfg["template_source"] = source_label
+
+
+def change_checks(checks: List[Dict[str, Any]], without: Sequence[str], add: Sequence[str]) -> List[Dict[str, Any]]:
+    result = [dict(c) for c in checks]
+    for cid in without or []:
+        if not any(c.get("id") == cid for c in result):
+            raise WorkflowError(f"There is no check '{cid}' to remove. Checks: {', '.join(c['id'] for c in result)}.")
+        result = [c for c in result if c.get("id") != cid]
+    for spec in add or []:
+        cid, sep, command = spec.partition("=")
+        cid, command = cid.strip(), command.strip()
+        if not sep or not SLUG_RE.match(cid) or not command:
+            raise WorkflowError(f"--add-check needs <id>=<command>, for example unit='python3 -m unittest'; got {spec!r}.")
+        assert_no_secrets(command, "the check command")
+        result = [c for c in result if c.get("id") != cid]
+        result.append({"id": cid, "name": cid, "command": command, "required": True, "explain": "Added by the user."})
+    return result
+
+
+def open_tasks(repo: Path) -> List[str]:
+    return [slug for slug in list_tasks(repo) if load_state(repo, slug).get("status") != "closed"]
+
+
+def cmd_init(args: argparse.Namespace) -> int:
+    repo = find_repo(args.repo)
+    if args.discover:
+        report = discover_project(repo)
+        if args.json:
+            print(json.dumps(report, indent=2))
+        else:
+            print_discovery(report)
+        return 0
+    cfg_file = config_path(repo)
+    if cfg_file.exists() and not args.update:
+        raise WorkflowError("AIDevWorkflow is already set up here; reuse its settings. To change them, use --update "
+                            "with --commit, --standards, --template, --add-check or --without-check.")
+    if args.update:
+        return update_setup(repo, args)
+    if not args.commit:
+        raise WorkflowError("Choose how task records are saved in git with --commit all, config-only or none. Explain "
+                            "the options (`init --discover`) and ask the user.")
+    if not args.template:
+        raise WorkflowError("Choose the specification template with --template <path> or --template user:<name>. "
+                            "Ask the user; never invent one. `init --discover` lists the recommendation and candidates.")
+    base: Dict[str, Any] = {}
+    if args.config:
+        try:
+            base = load_json(Path(args.config).expanduser())
+        except (OSError, ValueError) as exc:
+            raise WorkflowError(f"Could not read --config {args.config}: {exc}") from exc
+    template_src, rules_src, name, source_label = resolve_template(args)
+    proposal = discover_project(repo)
+    recommended_checks = [{k: v for k, v in c.items() if k not in DISCOVERY_ONLY_KEYS}
+                          for c in proposal["suggested_checks"]]
+    checks = change_checks(base["checks"] if "checks" in base else recommended_checks,
+                           args.without_check, args.add_check)
+    standards = [s.strip() for s in (args.standards or "").split(",") if s.strip()] or base.get("standards") or \
+        [p for p in ("CLAUDE.md", "AGENTS.md", "GEMINI.md") if (repo / p).exists()]
+    cfg: Dict[str, Any] = {
+        "schema": 1,
+        "project": args.project or base.get("project") or repo.name,
+        "standards": standards,
+        "records": {"commit": args.commit},
+        "checks": checks,
+        "rules": base.get("rules", []),
+        "setup": {
+            "confirmed_at": now_iso(), "recorded_by": agent_name(args),
+            "recommended": {"template": proposal["template"]["recommended"],
+                            "commit": proposal["records"]["recommended"]["mode"],
+                            "checks": [c["id"] for c in recommended_checks]},
+            "chosen": {"template": source_label, "commit": args.commit, "checks": [c["id"] for c in checks]},
+        },
+    }
+    install_template(repo, cfg, template_src, rules_src, name, source_label)
+    cfg = {k: cfg[k] for k in ("schema", "project", "standards", "spec_template", "spec_rules", "template_source",
+                               "records", "checks", "rules", "setup")}
+    assert_no_secrets(json.dumps(cfg), "config.json")
     save_json(cfg_file, cfg)
     write_text(records_dir(repo) / "README.md", RECORDS_README)
     if args.project_notes:
@@ -2005,9 +2419,44 @@ def cmd_init(args: argparse.Namespace) -> int:
     write_text(records_dir(repo) / "PROJECT.md", notes)
     exclude = apply_commit_mode(repo, args.commit)
     print(f"AIDevWorkflow is set up in {RECORDS}/ (template: {source_label}, rules: {'yes' if rules_src else 'none'}, "
-          f"records.commit={args.commit}).")
+          f"records.commit={args.commit}, checks: {', '.join(c['id'] for c in checks) or 'none'}).")
     if args.commit != "all":
         print(f"Local git exclude rules were written to {exclude} (no tracked files changed).")
+    print("These settings are reused for every task in this project.")
+    return 0
+
+
+def update_setup(repo: Path, args: argparse.Namespace) -> int:
+    cfg = load_config(repo)
+    chosen = cfg.setdefault("setup", {}).setdefault("chosen", {})
+    changed: List[str] = []
+    if args.commit:
+        cfg.setdefault("records", {})["commit"] = args.commit
+        apply_commit_mode(repo, args.commit)
+        chosen["commit"] = args.commit
+        changed.append(f"records.commit={args.commit}")
+    if args.standards:
+        cfg["standards"] = [s.strip() for s in args.standards.split(",") if s.strip()]
+        changed.append("standards")
+    if args.template:
+        busy = open_tasks(repo)
+        if busy:
+            raise WorkflowError("Finish or close these tasks before changing the template, so their specs keep the "
+                                f"template they were written for: {', '.join(busy)}.")
+        template_src, rules_src, name, source_label = resolve_template(args)
+        install_template(repo, cfg, template_src, rules_src, name, source_label)
+        chosen["template"] = source_label
+        changed.append(f"template={source_label}")
+    if args.without_check or args.add_check:
+        cfg["checks"] = change_checks(cfg.get("checks") or [], args.without_check, args.add_check)
+        chosen["checks"] = [c["id"] for c in cfg["checks"]]
+        changed.append("checks")
+    if not changed:
+        raise WorkflowError("Nothing to change: pass --commit, --standards, --template, --add-check or --without-check.")
+    cfg["setup"].setdefault("changes", []).append({"at": now_iso(), "by": agent_name(args), "changed": changed})
+    assert_no_secrets(json.dumps(cfg), "config.json")
+    save_json(config_path(repo), cfg)
+    print("Updated the AIDevWorkflow settings: " + ", ".join(changed) + ".")
     return 0
 
 
@@ -2019,6 +2468,7 @@ def cmd_new(args: argparse.Namespace) -> int:
             "ask for AIDevWorkflow, stop and work normally.")
     repo = find_repo(args.repo)
     cfg = load_config(repo)
+    ensure_commit_mode(repo, cfg)
     agent = agent_name(args)
     if not SLUG_RE.match(args.task) or len(args.task) > 60:
         raise WorkflowError("Task names use lowercase letters, digits and single hyphens (e.g. saved-places), at most 60 characters.")
@@ -2858,7 +3308,8 @@ def build_parser() -> argparse.ArgumentParser:
     sub = parser.add_subparsers(dest="command", required=True)
 
     p = sub.add_parser("init", parents=[common], help="Set up AIDevWorkflow in a project (after asking the user).")
-    p.add_argument("--discover", action="store_true", help="Only list instruction files, templates and suggested checks.")
+    p.add_argument("--discover", action="store_true",
+                   help="Show the setup proposal (or the existing setup) without changing anything.")
     p.add_argument("--template", help="Template file path, or user:<name> from your private library.")
     p.add_argument("--rules", help="Template rules file (default: <template>.rules.json next to the template).")
     p.add_argument("--no-rules", action="store_true", help="Use structural checks only.")
@@ -2867,7 +3318,10 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--config", help="JSON file with checks and rules to start from.")
     p.add_argument("--project-notes", help="Markdown file to use as .ai-dev-workflow/PROJECT.md.")
     p.add_argument("--project", help="Project name.")
-    p.add_argument("--update", action="store_true", help="Change --commit or --standards of an existing setup.")
+    p.add_argument("--without-check", action="append", metavar="ID", help="Leave out a recommended check (repeatable).")
+    p.add_argument("--add-check", action="append", metavar="ID=COMMAND", help="Add a check (repeatable).")
+    p.add_argument("--update", action="store_true",
+                   help="Change an existing setup: --commit, --standards, --template, --add-check, --without-check.")
     p.set_defaults(func=cmd_init)
 
     p = sub.add_parser("new", parents=[common], help="Create a task (only after an explicit invocation).")

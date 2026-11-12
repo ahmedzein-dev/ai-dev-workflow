@@ -74,12 +74,14 @@ Keep personal templates outside any repository and offer them to projects:
 
 ```bash
 python3 skills/ai-dev-workflow/scripts/install.py add-template my-template /path/to/spec-template.md \
-    --rules /path/to/spec-template.rules.json
+    --rules /path/to/spec-template.rules.json --default
 python3 skills/ai-dev-workflow/scripts/install.py list-templates
+python3 skills/ai-dev-workflow/scripts/install.py default-template            # show; add a name to set, --clear to unset
 ```
 
-Templates are stored in `~/.ai-dev-workflow/templates/<name>/` (or `$AI_DEV_WORKFLOW_HOME`). A project uses one
-only when you choose it during setup (`user:my-template`).
+Templates are stored in `~/.ai-dev-workflow/templates/<name>/` (or `$AI_DEV_WORKFLOW_HOME`). The default template
+(`--default`) is recommended to every new project; a project uses a template only after you confirm it during setup
+(`user:my-template`).
 
 ## Updating
 

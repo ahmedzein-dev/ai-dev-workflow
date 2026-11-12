@@ -330,6 +330,48 @@ def cmd_add_template(args: argparse.Namespace) -> int:
             "has_rules": bool(rules)}
     (target / "meta.json").write_text(json.dumps(meta, indent=2) + "\n", encoding="utf-8")
     print(f"Template '{args.name}' saved in {target}. Projects can choose it with `workflow.py init --template user:{args.name}`.")
+    if args.default:
+        set_default_template(args.name)
+        print(f"'{args.name}' is now your default template: new projects are offered it first.")
+    return 0
+
+
+def settings_path() -> Path:
+    return library_dir() / "settings.json"
+
+
+def set_default_template(name: Optional[str]) -> None:
+    path = settings_path()
+    settings = json.loads(path.read_text(encoding="utf-8")) if path.is_file() else {}
+    if name:
+        settings["default_template"] = name
+    else:
+        settings.pop("default_template", None)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(settings, indent=2) + "\n", encoding="utf-8")
+
+
+def default_template() -> Optional[str]:
+    path = settings_path()
+    try:
+        return json.loads(path.read_text(encoding="utf-8")).get("default_template") if path.is_file() else None
+    except ValueError:
+        return None
+
+
+def cmd_default_template(args: argparse.Namespace) -> int:
+    if args.clear:
+        set_default_template(None)
+        print("No default template is set; new projects ask which template to use.")
+        return 0
+    if not args.name:
+        current = default_template()
+        print(f"Default template: user:{current}" if current else "No default template is set.")
+        return 0
+    if not (library_dir() / "templates" / args.name / "template.md").is_file():
+        raise SystemExit(f"There is no template '{args.name}' in your library. Add it first with add-template.")
+    set_default_template(args.name)
+    print(f"'{args.name}' is now your default template: new projects are offered it first.")
     return 0
 
 
@@ -339,8 +381,10 @@ def cmd_list_templates(_: argparse.Namespace) -> int:
     if not entries:
         print(f"No templates in {root}.")
         return 0
+    default = default_template()
     for entry in entries:
-        print(f"user:{entry.name}  ({'with rules' if (entry / 'rules.json').exists() else 'structure only'})")
+        print(f"user:{entry.name}  ({'with rules' if (entry / 'rules.json').exists() else 'structure only'})"
+              + ("  [default]" if entry.name == default else ""))
     return 0
 
 
@@ -373,7 +417,12 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("template")
     p.add_argument("--rules")
     p.add_argument("--force", action="store_true")
+    p.add_argument("--default", action="store_true", help="Offer this template first to every new project.")
     p.set_defaults(func=cmd_add_template)
+    p = sub.add_parser("default-template", help="Show, set or clear your default template.")
+    p.add_argument("name", nargs="?")
+    p.add_argument("--clear", action="store_true")
+    p.set_defaults(func=cmd_default_template)
     p = sub.add_parser("list-templates", help="List your private templates.")
     p.set_defaults(func=cmd_list_templates)
     return parser

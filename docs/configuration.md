@@ -23,10 +23,13 @@ choices. You can edit it by hand afterwards (it is not part of any approval).
 | `spec_template`, `spec_rules` | The project's template and optional rules file, copied by `init` — see [templates-and-rules.md](templates-and-rules.md) |
 | `template_source` | Where the template came from (`user:<name>` or `file:<name>`); no absolute paths are stored |
 | `records.commit` | `all`, `config-only` or `none` |
+| `setup` | What `init` recommended and what you chose (`recommended`, `chosen`), plus later `changes` |
 | `checks` | Verification commands (below) |
 | `rules` | Patterns for the `rule-scan` check (below) |
 
-Change the commit mode or standards with `workflow.py init --update --commit <mode>` / `--standards <files>`.
+Change settings with `workflow.py init --update` and `--commit <mode>`, `--standards <files>`, `--template <template>`
+(not while a task is open), `--add-check <id>=<command>` or `--without-check <id>`. A check may also carry `explain`,
+the one-line description shown during setup.
 
 ## Checks
 

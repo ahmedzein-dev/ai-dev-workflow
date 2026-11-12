@@ -16,7 +16,7 @@ LABELS = {
     "ar": {"tested": "مُختبَر", "checked": "مفحوص في النسخة المثبّتة", "docs": "حسب الوثائق الرسمية",
            "unverified": "غير متحقَّق منه"},
 }
-INSTALL_COMMANDS = {"install", "update", "doctor", "uninstall", "add-template", "list-templates"}
+INSTALL_COMMANDS = {"install", "update", "doctor", "uninstall", "add-template", "list-templates", "default-template"}
 
 
 def frontmatter(text: str) -> tuple:
