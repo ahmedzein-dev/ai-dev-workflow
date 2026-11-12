@@ -1,0 +1,23 @@
+{
+  "schema": 1,
+  "project": "shop-app",
+  "standards": [
+    "AGENTS.md"
+  ],
+  "spec_template": ".ai-dev-workflow/templates/example-spec-template.md",
+  "spec_rules": ".ai-dev-workflow/templates/example-spec-template.rules.json",
+  "template_source": "file:example-spec-template.md",
+  "records": {
+    "commit": "all"
+  },
+  "checks": [
+    {
+      "id": "unit",
+      "name": "unit tests",
+      "command": "python3 -m unittest discover -s tests -q",
+      "required": true,
+      "accepts_args": true
+    }
+  ],
+  "rules": []
+}

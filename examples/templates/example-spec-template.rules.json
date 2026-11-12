@@ -1,0 +1,108 @@
+{
+  "schema": 1,
+  "name": "example-spec-template",
+  "description": "Rules for the generic example template that ships with AIDevWorkflow. Copy and adapt for your own template.",
+  "id_prefixes": ["REQ", "EC", "AC"],
+  "patterns": [
+    {
+      "id": "M-ac-form",
+      "target": "ids:AC",
+      "regex": "^Given .+?, when .+?, then .+",
+      "message": "write acceptance criteria as: Given …, when …, then ….",
+      "source": "template"
+    }
+  ],
+  "tables": [
+    {
+      "id": "M-edge-cases",
+      "id_prefix": "EC",
+      "message": "every edge case needs a situation and a specific expected behavior.",
+      "source": "template"
+    }
+  ],
+  "content_required": [
+    {"target": "label:Problem"},
+    {"target": "label:Outcome"},
+    {"target": "ids:REQ"},
+    {"target": "label:Not included", "allow_none": true},
+    {"target": "section:Edge Cases", "allow_none": true},
+    {"target": "label:Structures", "allow_none": true},
+    {"target": "ids:AC"},
+    {"target": "label:Definition of done"}
+  ],
+  "verification": {"ids": ["AC", "EC"], "checklist_label": "Definition of done", "checklist_prefix": "DW"},
+  "judgment": [
+    {
+      "id": "J1",
+      "rule": "Every requirement is specific and testable",
+      "source": "template",
+      "detectors": [{"type": "vague-words", "target": "ids:REQ"}]
+    },
+    {
+      "id": "J2",
+      "rule": "Every edge case has a specific expected behavior",
+      "source": "template",
+      "detectors": [
+        {
+          "type": "vague-words",
+          "target": "table:EC:2",
+          "words": ["handle", "handles", "handled", "gracefully", "appropriately", "properly", "show an error", "as expected"]
+        }
+      ]
+    },
+    {
+      "id": "J3",
+      "rule": "Proposed structures are based on the inspected project and cite the existing code they follow",
+      "source": "AIDevWorkflow",
+      "requires_note": true,
+      "detectors": [{"type": "inspected-files"}]
+    },
+    {
+      "id": "J4",
+      "rule": "Every requirement can be verified by an acceptance criterion, edge case, done item or named test",
+      "source": "AIDevWorkflow",
+      "detectors": [{"type": "coverage-map", "of": "REQ"}]
+    }
+  ],
+  "advisory": [
+    {
+      "id": "A1",
+      "type": "questions",
+      "source": "common edge cases",
+      "questions": {
+        "double-submit": "The user submits twice",
+        "offline": "No network connection",
+        "server-error": "Server error or timeout",
+        "empty": "Empty result",
+        "interrupted": "The app or page closes mid-operation",
+        "concurrent": "Someone else changes the same data at the same time",
+        "stale": "Data changed since the user loaded it",
+        "lost-response": "The request succeeded but the response was lost"
+      }
+    },
+    {
+      "id": "A2",
+      "type": "none-entry",
+      "target": "label:Not included",
+      "message": "'Not included' says None; list what a reader might wrongly assume is part of this.",
+      "source": "template"
+    },
+    {
+      "id": "A3",
+      "type": "label-mentions",
+      "target": "label:Definition of done",
+      "words": ["test"],
+      "message": "Name the required tests in the Definition of done.",
+      "source": "template"
+    },
+    {
+      "id": "A4",
+      "type": "prompts",
+      "source": "AIDevWorkflow",
+      "prompts": [
+        "Who computes each value: the server or the client?",
+        "Which existing behavior must stay unchanged?"
+      ]
+    }
+  ]
+}

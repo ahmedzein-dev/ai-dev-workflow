@@ -1,0 +1,18 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+*.egg-info/
+build/
+dist/
+
+# Editors and OS
+.DS_Store
+.idea/
+*.swp
+
+# Local AIDevWorkflow state (if you try the skill inside this repository)
+.ai-dev-workflow/ACTIVE

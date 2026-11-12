@@ -1,0 +1,4 @@
+# Codex: never select this skill implicitly. Explicit invocation ($ai-dev-workflow, or picking it in /skills)
+# keeps working. Other agents ignore this file.
+policy:
+  allow_implicit_invocation: false

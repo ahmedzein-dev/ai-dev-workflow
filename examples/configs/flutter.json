@@ -1,0 +1,16 @@
+{
+  "description": "Starting checks for a Flutter project. Use with: workflow.py init --config examples/configs/flutter.json …",
+  "checks": [
+    {"id": "analyze", "name": "flutter analyze", "command": "flutter analyze", "parser": "dart-analyzer",
+     "fail_on": ["error", "warning", "new"], "required": true},
+    {"id": "test", "name": "flutter test", "command": "flutter test", "required": true, "accepts_args": true},
+    {"id": "codegen", "name": "build_runner", "command": "dart run build_runner build --delete-conflicting-outputs",
+     "required": false, "when": "Run when code-generated models or serializers change."},
+    {"id": "dependencies", "name": "New dependencies", "builtin": "manifest-diff", "files": ["pubspec.yaml"], "required": true},
+    {"id": "rules", "name": "Project rule scan", "builtin": "rule-scan", "required": true}
+  ],
+  "rules": [
+    {"id": "no-print", "pattern": "(?<![\\w.])print\\(", "paths": ["lib/**/*.dart"], "severity": "error",
+     "message": "Remove debug print() calls from production code."}
+  ]
+}

@@ -1,0 +1,1160 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="description" content="AIDevWorkflow: a skill for AI coding agents that takes a task from requirements to a tested, reviewed result, with your approval at every gate.">
+<title>AIDevWorkflow</title>
+<script>
+(function () {
+  var root = document.documentElement;
+  root.classList.add("js");
+  function read(key) { try { return window.localStorage.getItem(key); } catch (e) { return null; } }
+  var hash = window.location.hash;
+  var lang = (hash === "#ar" || hash.indexOf("#ar-") === 0) ? "ar"
+    : (hash === "#en" || hash.indexOf("#en-") === 0) ? "en"
+    : read("aidw-lang") || ((navigator.language || "").toLowerCase().indexOf("ar") === 0 ? "ar" : "en");
+  if (lang !== "ar") { lang = "en"; }
+  root.setAttribute("data-lang", lang);
+  root.setAttribute("lang", lang);
+  root.setAttribute("dir", lang === "ar" ? "rtl" : "ltr");
+  var theme = read("aidw-theme");
+  if (theme === "light" || theme === "dark") { root.setAttribute("data-theme", theme); }
+})();
+</script>
+<style>
+:root{
+  --bg:#f6f7f9;--surface:#ffffff;--surface-2:#eef1f4;--text:#1a1e24;--muted:#56606c;--border:#dde1e7;--border-strong:#c2c8d0;
+  --accent:#3550c8;--accent-soft:#e9edfb;--focus:#3550c8;
+  --term-bg:#15181d;--term-head:#23282f;--term-text:#e7eaef;--term-muted:#8d96a3;
+  --chat:#1b5ccc;--chat-soft:#e9f1fd;
+  --you:#a35400;--you-soft:#fcf1e2;
+  --auto:#16713b;--auto-soft:#e4f4e9;
+  --gate:#a35400;--gate-soft:#fdf5e8;
+  --code-edit:#16713b;--code-bg:#eceff3;
+  --shadow:0 1px 2px rgba(16,24,40,.06),0 1px 3px rgba(16,24,40,.04);
+  --font-en:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --font-ar:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Naskh Arabic","Noto Sans Arabic","Geeza Pro",Tahoma,Arial,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0f1216;--surface:#171b21;--surface-2:#1f242c;--text:#e8ebf0;--muted:#a6aeb9;--border:#2b313a;--border-strong:#3d4550;
+    --accent:#8ea2ff;--accent-soft:#222a46;--focus:#8ea2ff;
+    --term-bg:#0a0c0f;--term-head:#1a1e24;--term-text:#e7eaef;--term-muted:#7d8692;
+    --chat:#84b3ff;--chat-soft:#18243a;
+    --you:#f2b56b;--you-soft:#2d2316;
+    --auto:#6fd39a;--auto-soft:#15281d;
+    --gate:#f2b56b;--gate-soft:#271f14;
+    --code-edit:#6fd39a;--code-bg:#242a32;
+    --shadow:0 1px 2px rgba(0,0,0,.4);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0f1216;--surface:#171b21;--surface-2:#1f242c;--text:#e8ebf0;--muted:#a6aeb9;--border:#2b313a;--border-strong:#3d4550;
+  --accent:#8ea2ff;--accent-soft:#222a46;--focus:#8ea2ff;
+  --term-bg:#0a0c0f;--term-head:#1a1e24;--term-text:#e7eaef;--term-muted:#7d8692;
+  --chat:#84b3ff;--chat-soft:#18243a;
+  --you:#f2b56b;--you-soft:#2d2316;
+  --auto:#6fd39a;--auto-soft:#15281d;
+  --gate:#f2b56b;--gate-soft:#271f14;
+  --code-edit:#6fd39a;--code-bg:#242a32;
+  --shadow:0 1px 2px rgba(0,0,0,.4);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%;scroll-padding-top:80px}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font-en);font-size:1rem;line-height:1.7}
+[lang="ar"]{font-family:var(--font-ar)}
+.lang{font-size:1.0625rem;line-height:1.72}
+.lang[lang="ar"]{font-size:1.1875rem;line-height:1.9}
+a{color:var(--accent)}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+code,kbd,pre,.ltr{direction:ltr;unicode-bidi:isolate}
+bdi{unicode-bidi:isolate;white-space:nowrap}
+.en-term bdi,.page-foot bdi{white-space:normal}
+code{font-family:var(--mono);font-size:.86em;background:var(--code-bg);padding:.1em .38em;border-radius:5px;white-space:nowrap}
+@media (max-width:420px){code{white-space:normal;overflow-wrap:anywhere}}
+.lang[lang="ar"] code{font-size:.8em}
+kbd{font-family:var(--mono);font-size:.82em;border:1px solid var(--border-strong);border-bottom-width:2px;border-radius:5px;padding:0 .35em;background:var(--surface)}
+h1,h2,h3{line-height:1.3;margin:0}
+.lang[lang="ar"] h1,.lang[lang="ar"] h2,.lang[lang="ar"] h3{line-height:1.55}
+p{margin:.5em 0}
+ul,ol{padding-inline-start:1.3em;margin:.4em 0}
+li{margin:.25em 0}
+
+/* top bar */
+.topbar{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--border)}
+@supports ((backdrop-filter:blur(8px)) or (-webkit-backdrop-filter:blur(8px))){
+  .topbar{background:color-mix(in srgb,var(--bg) 86%,transparent);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+}
+.topbar-in{max-width:48rem;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:8px}
+.brand{display:flex;align-items:center;gap:9px;font-weight:700;font-size:1.05rem;text-decoration:none;color:var(--text);margin-inline-end:auto;min-width:0}
+.brand svg{width:28px;height:28px;flex:none}
+.tbtn{font:inherit;font-size:.9rem;line-height:1.2;display:inline-flex;align-items:center;gap:7px;min-height:40px;padding:6px 14px;border-radius:999px;border:1px solid var(--border-strong);background:var(--surface);color:var(--text);cursor:pointer;text-decoration:none;white-space:nowrap}
+.tbtn:hover{border-color:var(--accent)}
+.tbtn svg{width:17px;height:17px;flex:none}
+.tbtn.needs-js{display:none}
+html.js .tbtn.needs-js{display:inline-flex}
+html.js .nojs{display:none}
+@media (max-width:430px){#theme-toggle .label{display:none}#theme-toggle{padding:6px 11px}}
+
+/* language containers: Arabic is hidden unless chosen */
+.lang[lang="ar"]{display:none}
+html:not(.js) #ar:target{display:block}
+html:not(.js) #ar:target ~ #en{display:none}
+html:not(.js) #ar:has(:target){display:block}
+html:not(.js) #ar:has(:target) ~ #en{display:none}
+html[data-lang="ar"] #ar{display:block}
+html[data-lang="ar"] #en{display:none}
+
+main{max-width:46rem;margin:0 auto;padding:0 16px 8px}
+section{padding-top:48px}
+section > h2{font-size:1.45em;margin-bottom:4px}
+.sub{color:var(--muted);margin:0 0 16px}
+
+/* hero */
+.hero{padding-top:40px}
+.kicker{font-size:.78em;font-weight:700;color:var(--accent);margin:0 0 10px}
+.lang[lang="en"] .kicker{text-transform:uppercase;letter-spacing:.08em}
+.hero h1{font-size:2.35em}
+.tagline{font-size:1.1em;font-weight:600;margin:6px 0 14px}
+.points{list-style:none;padding:0;display:grid;grid-template-columns:minmax(0,1fr);gap:10px;margin:18px 0 22px}
+.points li{margin:0;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 16px;box-shadow:var(--shadow)}
+.cta{display:flex;flex-wrap:wrap;gap:10px;margin:0}
+.btn{display:inline-flex;align-items:center;min-height:44px;padding:8px 18px;border-radius:10px;border:1px solid var(--border-strong);background:var(--surface);color:var(--text);font-weight:600;text-decoration:none}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+:root[data-theme="dark"] .btn.primary{color:#0f1216}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .btn.primary{color:#0f1216}}
+
+/* contents */
+.toc{margin-top:32px;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px 18px}
+.toc h2{font-size:1em;margin-bottom:6px}
+.toc ul{margin:0;padding-inline-start:1.2em;columns:2;column-gap:32px}
+.toc li{break-inside:avoid;margin:.2em 0}
+@media (max-width:600px){.toc ul{columns:1}}
+
+/* where each step happens */
+.where{display:inline-flex;align-items:center;gap:6px;font-size:.78em;font-weight:700;line-height:1.5;padding:3px 10px;border-radius:999px;border:1px solid transparent;white-space:nowrap;vertical-align:middle}
+.where svg{width:1.15em;height:1.15em;flex:none}
+.where.term{background:var(--term-bg);color:var(--term-text)}
+.where.chat{background:var(--chat-soft);color:var(--chat);border-color:var(--chat)}
+.where.you{background:var(--you-soft);color:var(--you);border-color:var(--you)}
+.where.auto{background:var(--auto-soft);color:var(--auto);border-color:var(--auto)}
+.legend{display:grid;grid-template-columns:minmax(0,1fr);gap:10px}
+.legend-item{display:grid;grid-template-columns:10.5em minmax(0,1fr);gap:14px;align-items:start;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 16px}
+.legend-item p{margin:0}
+@media (max-width:560px){.legend-item{grid-template-columns:minmax(0,1fr);gap:6px}}
+
+/* numbered steps */
+.steps{list-style:none;padding:0;margin:0;counter-reset:step}
+.step{position:relative;counter-increment:step;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px 18px;padding-inline-start:64px;margin:0 0 12px;box-shadow:var(--shadow)}
+.step::before{content:counter(step);position:absolute;inset-inline-start:16px;top:16px;width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:15px;line-height:1;background:var(--surface-2);border:1px solid var(--border-strong);color:var(--text)}
+.step.gate{border:2px dashed var(--gate);background:var(--gate-soft)}
+.step.gate::before{border-color:var(--gate);color:var(--gate)}
+.step-tags{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-bottom:6px}
+.step h3{font-size:1.08em;margin-bottom:4px}
+.step > :last-child{margin-bottom:0}
+@media (max-width:480px){.step{padding:14px 16px}.step::before{top:14px}.step-tags{padding-inline-start:44px;min-height:32px}}
+.note{font-size:.92em;color:var(--muted)}
+.tip{background:var(--accent-soft);border:1px solid var(--accent);border-radius:12px;padding:12px 16px;margin-top:14px}
+
+/* blocks to type */
+.act{margin:10px 0;border-radius:12px;overflow:hidden;border:1px solid var(--border)}
+.act-head{display:flex;align-items:center;gap:8px;min-height:38px;padding:5px 8px;padding-inline-start:12px;font-size:.8em;font-weight:700}
+.act-head svg{width:1.25em;height:1.25em;flex:none}
+.act-head .copy{margin-inline-start:auto}
+.act pre{margin:0;padding:12px 14px;overflow-x:auto;font-family:var(--mono);font-size:.875rem;line-height:1.65;text-align:left}
+.act pre code{background:none;padding:0;border-radius:0;font-size:inherit;overflow-wrap:normal;white-space:pre}
+.act.term{background:var(--term-bg);border-color:var(--term-bg)}
+.act.term .act-head{background:var(--term-head);color:var(--term-text)}
+.act.term pre{color:var(--term-text)}
+.act.term .ln::before{content:"$ ";color:var(--term-muted);-webkit-user-select:none;user-select:none}
+.act.chat{background:var(--chat-soft);border-color:var(--chat)}
+.act.chat .act-head{color:var(--chat);border-bottom:1px solid var(--border)}
+.act.chat pre{color:var(--text)}
+.act.chat pre code{white-space:pre-wrap}
+.act.mixed pre,.act.mixed pre code{direction:rtl;text-align:right}
+.act.mixed pre{font-family:var(--font-ar);font-size:1.0625rem}
+.act.mixed pre code{font-family:inherit}
+.act.mixed pre bdi{font-family:var(--mono);font-size:.84em}
+.copy{font:inherit;font-size:.95em;font-weight:600;min-height:28px;padding:2px 10px;border-radius:7px;border:1px solid currentColor;background:transparent;color:inherit;cursor:pointer}
+.reply{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:8px 0}
+.reply-label{font-size:.85em;font-weight:700;color:var(--you)}
+.say{display:inline-block;background:var(--surface);border:1px solid var(--you);color:var(--text);padding:1px 12px;border-radius:999px;font-weight:600}
+.sublist{list-style:none;padding:0;padding-inline-start:.4em;margin:.3em 0 .2em}
+.sublist li{margin:.2em 0}
+
+/* stages */
+.flow{list-style:none;padding:0;margin:0;position:relative}
+.flow::before{content:"";position:absolute;inset-inline-start:19px;top:12px;bottom:12px;width:2px;background:var(--border-strong)}
+.node{position:relative;display:grid;grid-template-columns:40px minmax(0,1fr);gap:12px;margin:0 0 10px}
+.node .n{position:relative;z-index:1;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:15px;background:var(--surface);border:2px solid var(--border-strong)}
+.node .card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:10px 14px}
+.node h3{font-size:1.02em}
+.node .id{font-family:var(--mono);font-size:.72rem;font-weight:600;color:var(--muted);margin:0 .6em}
+.node p{margin:.2em 0}
+.node .who{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.node.gate .n{border-color:var(--gate);color:var(--gate)}
+.node.gate .card{border:2px dashed var(--gate);background:var(--gate-soft)}
+.node.code .n{border-color:var(--code-edit);color:var(--code-edit)}
+.node.code .card{border-inline-start:5px solid var(--code-edit)}
+.flag{display:inline-block;font-size:.72em;font-weight:700;line-height:1.6;padding:0 8px;border-radius:999px;margin-inline-start:8px;vertical-align:middle}
+.flag.gate{background:var(--gate);color:var(--surface)}
+.flag.code{background:var(--code-edit);color:var(--surface)}
+.step-tags .flag{margin:0}
+
+/* lists, tables, messages */
+.rules{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:minmax(0,1fr);gap:10px}
+.rules li{margin:0;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 16px}
+.rules strong{display:block;margin-bottom:2px}
+.classes{display:grid;grid-template-columns:auto minmax(0,1fr);gap:8px 18px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin:10px 0}
+.classes dt{font-weight:700}
+.classes dd{margin:0}
+@media (max-width:480px){.classes{grid-template-columns:minmax(0,1fr);gap:2px}.classes dd{margin-bottom:8px}}
+.status-line{direction:ltr;unicode-bidi:isolate;text-align:left;font-family:var(--mono);font-size:.875rem;background:var(--you-soft);border:1px solid var(--you);border-radius:10px;padding:10px 14px;margin:8px 0;overflow-x:auto;white-space:pre}
+.message{background:var(--surface);border:1px solid var(--border);border-inline-start:4px solid var(--you);border-radius:12px;padding:12px 16px;margin:8px 0;white-space:pre-line}
+table{width:100%;border-collapse:collapse;background:var(--surface);border:1px solid var(--border);margin:10px 0}
+th,td{text-align:start;vertical-align:top;padding:10px 14px;border-bottom:1px solid var(--border)}
+tr:last-child td{border-bottom:none}
+th{background:var(--surface-2);font-size:.92em}
+.en-term{display:block;font-size:.8em;font-weight:600;color:var(--muted)}
+.howto{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:minmax(0,1fr);gap:10px}
+.howto > li{margin:0;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 16px}
+.howto h3{font-size:1.02em;margin-bottom:4px}
+h3.with-tag{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+
+/* agents */
+.agents{display:grid;grid-template-columns:minmax(0,1fr);gap:12px}
+.agent{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px 16px;box-shadow:var(--shadow)}
+.agent h3{font-size:1.08em;margin-bottom:8px}
+.agent dl{margin:0;display:grid;grid-template-columns:10.5em minmax(0,1fr);gap:8px 14px}
+.agent dt{font-weight:600;color:var(--muted);font-size:.92em}
+.agent dd{margin:0}
+@media (max-width:560px){.agent dl{grid-template-columns:minmax(0,1fr);gap:2px}.agent dd{margin-bottom:8px}}
+.ev{display:inline-block;font-size:.72em;font-weight:700;line-height:1.6;padding:0 8px;border-radius:999px;border:1px solid;margin-inline-start:4px;white-space:nowrap;vertical-align:middle}
+.ev[data-evidence="tested"]{color:var(--auto);background:var(--auto-soft)}
+.ev[data-evidence="checked"]{color:var(--chat);background:var(--chat-soft)}
+.ev[data-evidence="docs"]{color:var(--you);background:var(--you-soft)}
+.ev[data-evidence="unverified"]{color:var(--muted);background:var(--surface-2)}
+.evlegend{list-style:none;padding:0;margin:6px 0 14px;display:grid;grid-template-columns:minmax(0,1fr);gap:4px;font-size:.92em;color:var(--muted)}
+.evlegend .ev{margin-inline-start:0;margin-inline-end:6px}
+
+/* task files */
+.files{margin:10px 0;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:4px 16px}
+.files div{display:grid;grid-template-columns:minmax(10em,max-content) minmax(0,1fr);gap:4px 16px;padding:8px 0;border-bottom:1px solid var(--border)}
+.files div:last-child{border-bottom:none}
+.files dt,.files dd{margin:0}
+.files .indent dt{padding-inline-start:18px}
+@media (max-width:480px){.files div{grid-template-columns:minmax(0,1fr)}}
+
+/* questions */
+details{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:10px 16px;margin:0 0 10px}
+summary{cursor:pointer;font-weight:600}
+details[open] summary{margin-bottom:6px}
+details.more{margin-top:12px}
+.page-foot{border-top:1px solid var(--border);margin-top:48px;padding:18px 0 40px;text-align:center;color:var(--muted);font-size:.9em}
+@media print{
+  .topbar,.copy,.cta,.toc{display:none}
+  body{background:#fff;color:#000}
+  section{padding-top:18px}
+  .act.term,.act.term .act-head,.act.term pre{background:#f3f3f3;color:#000;border-color:#ccc}
+}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <symbol id="i-term" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M7.5 9.5l3 2.5-3 2.5M12.5 15h4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-chat" viewBox="0 0 24 24"><path d="M4 5.5h16v10.5H10l-5 4v-4H4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
+  <symbol id="i-you" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.8" fill="none" stroke="currentColor" stroke-width="2"/><path d="M4.5 20.5c1.4-3.7 4.3-5.6 7.5-5.6s6.1 1.9 7.5 5.6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+  <symbol id="i-auto" viewBox="0 0 24 24"><path d="M13 2.5L5 13.5h6l-1 8 8-11h-6z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 019.5 4a8 8 0 1010.5 10.5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
+  <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+  <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M3 12h18M12 3c2.6 2.6 3.8 5.6 3.8 9s-1.2 6.4-3.8 9M12 3c-2.6 2.6-3.8 5.6-3.8 9s1.2 6.4 3.8 9" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
+</svg>
+
+<header class="topbar">
+  <div class="topbar-in">
+    <a class="brand" href="#top" aria-label="AIDevWorkflow">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#3550c8"/><path d="M9 11h9M9 16h14M9 21h7" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/><path d="M19 21l2.4 2.4L26 18.8" stroke="#9cf0bf" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span>AIDevWorkflow</span>
+    </a>
+    <a class="tbtn nojs" href="#en" lang="en">English</a>
+    <a class="tbtn nojs" href="#ar" lang="ar">العربية</a>
+    <button id="lang-toggle" class="tbtn needs-js" type="button" lang="ar"><svg aria-hidden="true"><use href="#i-globe"/></svg><span class="label">العربية</span></button>
+    <button id="theme-toggle" class="tbtn needs-js" type="button"><svg aria-hidden="true"><use href="#i-moon"/></svg><span class="label">Dark</span></button>
+  </div>
+</header>
+<script>
+(function () {
+  var root = document.documentElement;
+  var TEXT = {
+    en: {copy: "Copy", copied: "Copied", failed: "Select and copy", dark: "Dark", light: "Light",
+         toDark: "Switch to the dark theme", toLight: "Switch to the light theme",
+         lang: "العربية", toLang: "اعرض الصفحة بالعربية"},
+    ar: {copy: "نسخ", copied: "تم النسخ", failed: "حدّد النص وانسخه", dark: "داكن", light: "فاتح",
+         toDark: "التبديل إلى المظهر الداكن", toLight: "التبديل إلى المظهر الفاتح",
+         lang: "English", toLang: "Show this page in English"}
+  };
+  var langBtn = document.getElementById("lang-toggle");
+  var themeBtn = document.getElementById("theme-toggle");
+  function save(key, value) { try { window.localStorage.setItem(key, value); } catch (e) { /* storage unavailable */ } }
+  function lang() { return root.getAttribute("data-lang") === "ar" ? "ar" : "en"; }
+  function theme() {
+    var chosen = root.getAttribute("data-theme");
+    if (chosen === "light" || chosen === "dark") { return chosen; }
+    return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  }
+  function labelTheme() {
+    var t = TEXT[lang()], next = theme() === "dark" ? "light" : "dark";
+    var text = next === "dark" ? t.toDark : t.toLight;
+    themeBtn.querySelector(".label").textContent = next === "dark" ? t.dark : t.light;
+    themeBtn.querySelector("use").setAttribute("href", next === "dark" ? "#i-moon" : "#i-sun");
+    themeBtn.setAttribute("aria-label", text);
+    themeBtn.setAttribute("title", text);
+  }
+  function setLang(value, remember) {
+    root.setAttribute("data-lang", value);
+    root.setAttribute("lang", value);
+    root.setAttribute("dir", value === "ar" ? "rtl" : "ltr");
+    var t = TEXT[value];
+    langBtn.querySelector(".label").textContent = t.lang;
+    langBtn.setAttribute("lang", value === "ar" ? "en" : "ar");
+    langBtn.setAttribute("aria-label", t.toLang);
+    langBtn.setAttribute("title", t.toLang);
+    if (remember) { save("aidw-lang", value); }
+    labelTheme();
+  }
+  function sectionInView(container) {
+    var found = null, list = container.querySelectorAll("section[id]");
+    for (var i = 0; i < list.length; i++) {
+      if (list[i].getBoundingClientRect().top < 140) { found = list[i]; }
+    }
+    return found;
+  }
+  setLang(lang(), false);
+  langBtn.addEventListener("click", function () {
+    var from = lang(), to = from === "ar" ? "en" : "ar";
+    var current = window.pageYOffset > 200 ? sectionInView(document.getElementById(from)) : null;
+    setLang(to, true);
+    var target = current ? document.getElementById(to + current.id.slice(2)) : null;
+    if (window.history && window.history.replaceState) {
+      window.history.replaceState(null, "", window.location.pathname + window.location.search + (target ? "#" + target.id : ""));
+    }
+    if (target) { target.scrollIntoView(); } else { window.scrollTo(0, 0); }
+  });
+  window.addEventListener("hashchange", function () {
+    var hash = window.location.hash;
+    var wanted = (hash === "#ar" || hash.indexOf("#ar-") === 0) ? "ar" : (hash === "#en" || hash.indexOf("#en-") === 0) ? "en" : null;
+    if (wanted && wanted !== lang()) {
+      setLang(wanted, false);
+      var el = document.getElementById(hash.slice(1));
+      if (el) { el.scrollIntoView(); }
+    }
+  });
+  themeBtn.addEventListener("click", function () {
+    var next = theme() === "dark" ? "light" : "dark";
+    root.setAttribute("data-theme", next);
+    save("aidw-theme", next);
+    labelTheme();
+  });
+  if (window.matchMedia) {
+    var scheme = window.matchMedia("(prefers-color-scheme: dark)");
+    if (scheme.addEventListener) { scheme.addEventListener("change", labelTheme); }
+    else if (scheme.addListener) { scheme.addListener(labelTheme); }
+  }
+  document.addEventListener("DOMContentLoaded", function () {
+    Array.prototype.forEach.call(document.querySelectorAll(".act"), function (block) {
+      var head = block.querySelector(".act-head"), code = block.querySelector("code");
+      if (!head || !code) { return; }
+      var holder = block.closest("[lang]");
+      var t = TEXT[holder && holder.getAttribute("lang") === "ar" ? "ar" : "en"];
+      var btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "copy";
+      btn.textContent = t.copy;
+      btn.addEventListener("click", function () {
+        var lines = code.querySelectorAll(".ln");
+        var text = lines.length
+          ? Array.prototype.map.call(lines, function (l) { return l.textContent; }).join("\n")
+          : code.textContent;
+        function done(ok) {
+          btn.textContent = ok ? t.copied : t.failed;
+          setTimeout(function () { btn.textContent = t.copy; }, 1600);
+        }
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(function () { done(true); }, function () { done(false); });
+        } else { done(false); }
+      });
+      head.appendChild(btn);
+    });
+  });
+})();
+</script>
+
+<main id="top">
+
+<!-- ============================== العربية ============================== -->
+<div id="ar" class="lang" lang="ar" dir="rtl">
+
+<section class="hero">
+  <p class="kicker">مهارة لوكلاء البرمجة · <bdi>ai-dev-workflow</bdi> · رخصة <bdi>MIT</bdi></p>
+  <h1><bdi>AIDevWorkflow</bdi></h1>
+  <p class="tagline">تطوير منظّم بمساعدة الذكاء الاصطناعي — من المتطلبات حتى الإصدار.</p>
+  <p>مهارة (<bdi>Skill</bdi>) تضيفها إلى وكيل البرمجة الذي تستخدمه. تنقل الميزة الجديدة أو إصلاح الخطأ أو إعادة الهيكلة من طلبك إلى نتيجة مختبَرة ومراجَعة. لا يُكتب أي كود قبل موافقتك على المواصفات وعلى الخطة، وتُحفظ كل خطوة في ملفات داخل مشروعك، فتستطيع أنت — أو وكيل آخر — المتابعة في أي وقت.</p>
+  <ul class="points">
+    <li><strong>تعمل فقط عندما تستدعيها.</strong> طلباتك العادية للوكيل تعمل كما كانت.</li>
+    <li><strong>مهارة واحدة لعدة وكلاء.</strong> يستخدم <bdi>Claude Code</bdi> و <bdi>Codex</bdi> و <bdi>Gemini CLI</bdi> و <bdi>Antigravity</bdi> الملفات نفسها.</li>
+    <li><strong>لا شيء يضيع مع المحادثة.</strong> المواصفات والموافقات ونتائج الاختبارات والتقارير ملفات محفوظة في مشروعك.</li>
+  </ul>
+  <p class="cta"><a class="btn primary" href="#ar-setup">ابدأ التثبيت</a><a class="btn" href="#ar-use">تشغيل مهمة</a><a class="btn" href="https://github.com/ahmedzein-dev/ai-dev-workflow"><bdi>GitHub</bdi></a></p>
+</section>
+
+<nav class="toc" aria-label="محتويات الصفحة">
+  <h2>في هذه الصفحة</h2>
+  <ul>
+    <li><a href="#ar-legend">كيف تقرأ هذه الصفحة</a></li>
+    <li><a href="#ar-setup">التثبيت (مرة واحدة)</a></li>
+    <li><a href="#ar-use">تشغيل مهمة</a></li>
+    <li><a href="#ar-continue">الإيقاف والمتابعة وتبديل الوكيل</a></li>
+    <li><a href="#ar-stages">المراحل الإحدى عشرة</a></li>
+    <li><a href="#ar-approvals">موافقتك وقواعد الأمان</a></li>
+    <li><a href="#ar-dependencies">عندما تنقص معلومة</a></li>
+    <li><a href="#ar-quality">الاختبار والمراجعة والحالة النهائية</a></li>
+    <li><a href="#ar-agents">الوكلاء المدعومون</a></li>
+    <li><a href="#ar-files">ملفات المهمة</a></li>
+    <li><a href="#ar-faq">أسئلة شائعة والتحديث وإلغاء التثبيت</a></li>
+  </ul>
+</nav>
+
+<section id="ar-legend">
+  <h2>كيف تقرأ هذه الصفحة</h2>
+  <p class="sub">على كل خطوة علامة تبيّن أين تنفّذها:</p>
+  <div class="legend">
+    <div class="legend-item"><span><span class="where term"><svg aria-hidden="true"><use href="#i-term"/></svg>الطرفية</span></span><p>أمر تكتبه في الطرفية: تطبيق <bdi>Terminal</bdi> على <bdi>macOS</bdi> و <bdi>Linux</bdi>، أو <bdi>PowerShell</bdi> على <bdi>Windows</bdi>. انسخه بزر «نسخ» والصقه، ثم اضغط <kbd>Enter</kbd>. لا تكتب علامة <code>$</code> في أول السطر؛ زر «نسخ» لا ينسخها.</p></div>
+    <div class="legend-item"><span><span class="where chat"><svg aria-hidden="true"><use href="#i-chat"/></svg>محادثة الوكيل</span></span><p>نص تكتبه في خانة الرسائل داخل الوكيل: <bdi>Claude Code</bdi> أو <bdi>Codex</bdi> أو <bdi>Gemini CLI</bdi> أو <bdi>Antigravity</bdi>.</p></div>
+    <div class="legend-item"><span><span class="where you"><svg aria-hidden="true"><use href="#i-you"/></svg>أنت</span></span><p>قرار أو عمل منك: تقرأ ثم توافق أو تطلب تعديلًا، أو ترسل رسالة إلى زميل.</p></div>
+    <div class="legend-item"><span><span class="where auto"><svg aria-hidden="true"><use href="#i-auto"/></svg>تلقائي</span></span><p>يقوم به الوكيل وحده. أنت تنتظر فقط.</p></div>
+  </div>
+</section>
+
+<section id="ar-setup">
+  <h2>التثبيت (مرة واحدة)</h2>
+  <p class="sub">مرة واحدة على كل جهاز، وتستغرق دقيقتين تقريبًا.</p>
+  <ol class="steps">
+    <li class="step">
+      <div class="step-tags"><span class="where term"><svg aria-hidden="true"><use href="#i-term"/></svg>الطرفية</span></div>
+      <h3>افتح الطرفية وتأكّد من وجود <bdi>git</bdi> و <bdi>Python</bdi></h3>
+      <p>تحتاج إلى <bdi>git</bdi>، وإلى <bdi>Python 3.9</bdi> أو أحدث. اكتب:</p>
+      <div class="act term"><div class="act-head"><svg aria-hidden="true"><use href="#i-term"/></svg><span>الطرفية</span></div><pre><code><span class="ln">git --version</span>
+<span class="ln">python3 --version</span></code></pre></div>
+      <p>يجب أن يظهر رقم إصدار لكل منهما، مثل <code>Python 3.12.4</code>.</p>
+      <p class="note">على <bdi>Windows</bdi>: اكتب <code>python</code> بدلًا من <code>python3</code> في كل أوامر هذه الصفحة.</p>
+    </li>
+    <li class="step">
+      <div class="step-tags"><span class="where term"><svg aria-hidden="true"><use href="#i-term"/></svg>الطرفية</span></div>
+      <h3>نزّل <bdi>AIDevWorkflow</bdi></h3>
+      <p>نفّذ هذا في أي مجلد خارج مشاريعك، مثل مجلد المستخدم:</p>
+      <div class="act term"><div class="act-head"><svg aria-hidden="true"><use href="#i-term"/></svg><span>الطرفية</span></div><pre><code><span class="ln">git clone https://github.com/ahmedzein-dev/ai-dev-workflow.git</span>
+<span class="ln">cd ai-dev-workflow</span></code></pre></div>
+      <p class="note">احتفظ بهذا المجلد؛ ستحتاجه للتحديث ولإلغاء التثبيت.</p>
+    </li>
+    <li class="step">
+      <div class="step-tags"><span class="where term"><svg aria-hidden="true"><use href="#i-term"/></svg>الطرفية</span></div>
+      <h3>ثبّت المهارة</h3>
+      <div class="act term"><div class="act-head"><svg aria-hidden="true"><use href="#i-term"/></svg><span>الطرفية</span></div><pre><code><span class="ln">python3 skills/ai-dev-workflow/scripts/install.py</span></code></pre></div>
+      <p>يضع المثبّت نسخة واحدة في <code>~/.agents/skills</code> يقرؤها <bdi>Codex</bdi> و <bdi>Gemini CLI</bdi> مباشرة، ويربط بها <bdi>Claude Code</bdi>، و <bdi>Antigravity</bdi> إن كان مثبّتًا.</p>
+    </li>
+    <li class="step">
+      <div class="step-tags"><span class="where term"><svg aria-hidden="true"><use href="#i-term"/></svg>الطرفية</span></div>
+      <h3>تحقّق من التثبيت</h3>
+      <div class="act term"><div class="act-head"><svg aria-hidden="true"><use href="#i-term"/></svg><span>الطرفية</span></div><pre><code><span class="ln">python3 skills/ai-dev-workflow/scripts/install.py doctor</span></code></pre></div>
+      <p>آخر سطر في النتيجة الصحيحة: <code>No problems found.</code></p>
+    </li>
+    <li class="step">
+      <div class="step-tags"><span class="where you"><svg aria-hidden="true"><use href="#i-you"/></svg>أنت</span></div>
+      <h3>أعد تشغيل الوكيل</h3>
+      <p>أغلق الوكيل ثم افتحه من جديد حتى يتعرّف على المهارة.</p>
+    </li>
+  </ol>
+  <details class="more">
+    <summary>اختياري: قالب مواصفات خاص بك لكل مشاريعك</summary>
+    <div class="act term"><div class="act-head"><svg aria-hidden="true"><use href="#i-term"/></svg><span>الطرفية</span></div><pre><code><span class="ln">python3 skills/ai-dev-workflow/scripts/install.py add-template my-template path/to/spec-template.md --rules path/to/spec-template.rules.json</span></code></pre></div>
+    <p>ضع مسار ملف القالب ومسار ملف قواعده مكان المسارين في المثال. ملف القواعد اختياري؛ احذف <code>--rules …</code> إن لم يكن لديك ملف قواعد.</p>
+    <p>سيُعرض عليك القالب عند إعداد أي مشروع. وإن لم تضف قالبًا، يستخدم الوكيل القالب الموجود في مشروعك أو يطلبه منك، ولا يخترع قالبًا أبدًا.</p>
+  </details>
+  <details class="more">
+    <summary>اختياري: التثبيت داخل مشروع واحد (للزملاء ولوكلاء السحابة)</summary>
+    <div class="act term"><div class="act-head"><svg aria-hidden="true"><use href="#i-term"/></svg><span>الطرفية</span></div><pre><code><span class="ln">python3 skills/ai-dev-workflow/scripts/install.py install --project /path/to/your/project</span></code></pre></div>
+    <p>يضع نسخًا كاملة في المجلدين <code>.agents/skills</code> و <code>.claude/skills</code> داخل المشروع. احفظ المجلدين في <bdi>git</bdi>. ولا تجمع في المشروع نفسه بين هذا التثبيت والتثبيت العام، وإلا ظهرت المهارة مرتين.</p>
+  </details>
+</section>
+
+<section id="ar-use">
+  <h2>تشغيل مهمة</h2>
+  <p class="sub">من طلبك حتى نتيجة مراجَعة. دورك في الخطوات التي عليها علامة «أنت».</p>
+  <ol class="steps">
+    <li class="step">
+      <div class="step-tags"><span class="where term"><svg aria-hidden="true"><use href="#i-term"/></svg>الطرفية</span></div>
+      <h3>افتح الوكيل داخل مشروعك</h3>
+      <p>انتقل إلى مجلد مشروعك، ثم شغّل الوكيل:</p>
+      <div class="act term"><div class="act-head"><svg aria-hidden="true"><use href="#i-term"/></svg><span>الطرفية</span></div><pre><code><span class="ln">cd path/to/your/project</span>
+<span class="ln">claude</span></code></pre></div>
+      <p>اكتب <code>codex</code> أو <code>gemini</code> بدلًا من <code>claude</code> حسب الوكيل الذي تستخدمه. وإن كنت تستخدم تطبيقًا على سطح المكتب (مثل <bdi>Claude</bdi> أو <bdi>Codex</bdi> أو <bdi>Antigravity</bdi>)، فافتح مجلد المشروع في التطبيق بدلًا من ذلك.</p>
+      <p class="note">يجب أن يكون المشروع مستودع <bdi>git</bdi>.</p>
+    </li>
+    <li class="step">
+      <div class="step-tags"><span class="where chat"><svg aria-hidden="true"><use href="#i-chat"/></svg>محادثة الوكيل</span></div>
+      <h3>ابدأ المهمة</h3>
+      <p>اكتب اسم المهارة ثم طلبك. ضع طلبك أنت مكان المثال، بالعربية أو بالإنجليزية:</p>
+      <div class="act chat mixed"><div class="act-head"><svg aria-hidden="true"><use href="#i-chat"/></svg><span><bdi>Claude Code</bdi>، <bdi>Gemini CLI</bdi>، <bdi>Antigravity</bdi></span></div><pre><code><span class="ln"><bdi dir="ltr">/ai-dev-workflow</bdi> أضف المفضلة إلى قائمة المنتجات</span></code></pre></div>
+      <div class="act chat mixed"><div class="act-head"><svg aria-hidden="true"><use href="#i-chat"/></svg><span><bdi>Codex</bdi></span></div><pre><code><span class="ln"><bdi dir="ltr">$ai-dev-workflow</bdi> أضف المفضلة إلى قائمة المنتجات</span></code></pre></div>
+      <p class="note">الطلب العادي من دون اسم المهارة لا يبدأ سير العمل.</p>
+    </li>
+    <li class="step">
+      <div class="step-tags"><span class="where you"><svg aria-hidden="true"><use href="#i-you"/></svg>أنت</span><span class="where chat"><svg aria-hidden="true"><use href="#i-chat"/></svg>محادثة الوكيل</span></div>
+      <h3>أول مرة في المشروع فقط: أكّد الإعداد</h3>
+      <p>يعرض الوكيل ما وجده في مشروعك، ويسألك عن:</p>
+      <ul>
+        <li>ملفات التعليمات التي يلتزم بها كل وكيل، مثل <code>CLAUDE.md</code> أو <code>AGENTS.md</code>.</li>
+        <li>قالب المواصفات الذي يُستخدم.</li>
+        <li>الفحوص التي تُشغَّل، مثل الاختبارات وأداة التحليل.</li>
+        <li>هل تُحفظ سجلات المهام في <bdi>git</bdi>؟
+          <ul class="sublist">
+            <li><code>all</code> — كل السجلات.</li>
+            <li><code>config-only</code> — الإعدادات فقط، وتبقى المهام على جهازك.</li>
+            <li><code>none</code> — لا شيء، وتبقى كل السجلات على جهازك.</li>
+          </ul>
+        </li>
+      </ul>
+      <p>تجيب مرة واحدة فقط لكل مشروع.</p>
+    </li>
+    <li class="step">
+      <div class="step-tags"><span class="where auto"><svg aria-hidden="true"><use href="#i-auto"/></svg>تلقائي</span><span class="where you"><svg aria-hidden="true"><use href="#i-you"/></svg>أنت</span></div>
+      <h3>الاستكشاف: أجب عن أسئلة الوكيل</h3>
+      <p>يقرأ الوكيل الكود أولًا، ثم يسأل فقط عمّا لا يجيب عنه الكود. أجب باختصار في المحادثة.</p>
+    </li>
+    <li class="step">
+      <div class="step-tags"><span class="where you"><svg aria-hidden="true"><use href="#i-you"/></svg>أنت</span><span class="where chat"><svg aria-hidden="true"><use href="#i-chat"/></svg>محادثة الوكيل</span></div>
+      <h3>إن نقصت تفاصيل من الواجهة البرمجية: أرسل الرسالة</h3>
+      <p>يكتب الوكيل رسالة جاهزة لمطوّر الواجهة الخلفية (<bdi>Backend</bdi>) ويتوقف. أرسلها له بالطريقة المعتادة (بريد، <bdi>Slack</bdi>…)، ثم الصق رده في المحادثة.</p>
+    </li>
+    <li class="step gate">
+      <div class="step-tags"><span class="where you"><svg aria-hidden="true"><use href="#i-you"/></svg>أنت</span><span class="where chat"><svg aria-hidden="true"><use href="#i-chat"/></svg>محادثة الوكيل</span><span class="flag gate">بوابة موافقة</span></div>
+      <h3>وافق على المواصفات</h3>
+      <p>اقرأ المواصفات التي يعرضها الوكيل. إن كانت صحيحة، اكتب:</p>
+      <div class="reply"><span class="reply-label">ردّك:</span><span class="say">أوافق على المواصفات</span></div>
+      <p>وإن أردت تغيير شيء، اكتب ما تريد تغييره. الأسئلة أو عبارة «جيد، لكن…» لا تُعدّ موافقة.</p>
+    </li>
+    <li class="step gate">
+      <div class="step-tags"><span class="where you"><svg aria-hidden="true"><use href="#i-you"/></svg>أنت</span><span class="where chat"><svg aria-hidden="true"><use href="#i-chat"/></svg>محادثة الوكيل</span><span class="flag gate">بوابة موافقة</span></div>
+      <h3>وافق على الخطة</h3>
+      <p>اقرأ خطة التنفيذ. إن كانت صحيحة، اكتب:</p>
+      <div class="reply"><span class="reply-label">ردّك:</span><span class="say">أوافق على الخطة</span></div>
+    </li>
+    <li class="step">
+      <div class="step-tags"><span class="where auto"><svg aria-hidden="true"><use href="#i-auto"/></svg>تلقائي</span></div>
+      <h3>التنفيذ والاختبار والإصلاح والمراجعة</h3>
+      <p>يعدّل الوكيل الكود خطوة بخطوة حسب الخطة، ويشغّل فحوص المشروع، ويصلح ما يفشل، ثم يراجع النتيجة. أنت تنتظر فقط.</p>
+      <p class="note">قد يطلب الوكيل إذنك لتشغيل أمر أو تعديل ملف؛ هذا من إعدادات الوكيل نفسه.</p>
+    </li>
+    <li class="step">
+      <div class="step-tags"><span class="where you"><svg aria-hidden="true"><use href="#i-you"/></svg>أنت</span></div>
+      <h3>اقرأ التقرير النهائي</h3>
+      <p>ملخص قصير: ما الذي نُفّذ، وما الذي اختُبر، وما الذي بقي مفتوحًا. والحالة فيه لا تتجاوز أبدًا ما تثبته الأدلة.</p>
+    </li>
+  </ol>
+  <div class="tip"><strong>تغيير صغير؟</strong> اكتب في المحادثة <span class="say">استخدم المسار السريع</span>. يعرض الوكيل المواصفات والخطة معًا، فتوافق عليهما في رسالة واحدة: <span class="say">أوافق على المواصفات والخطة</span></div>
+</section>
+
+<section id="ar-continue">
+  <h2>الإيقاف والمتابعة وتبديل الوكيل</h2>
+  <p class="sub">كل ما في هذا القسم يُكتب في محادثة الوكيل.</p>
+  <ul class="howto">
+    <li>
+      <h3 class="with-tag">متابعة مهمة لاحقًا <span class="where chat"><svg aria-hidden="true"><use href="#i-chat"/></svg>محادثة الوكيل</span></h3>
+      <p>اكتب اسم المهارة ثم اسم المهمة (هنا الاسم المثال <bdi>saved-favorites</bdi>). يخبرك الوكيل باسم المهمة عند إنشائها.</p>
+      <div class="act chat"><div class="act-head"><svg aria-hidden="true"><use href="#i-chat"/></svg><span><bdi>Claude Code</bdi>، <bdi>Gemini CLI</bdi>، <bdi>Antigravity</bdi></span></div><pre><code><span class="ln">/ai-dev-workflow saved-favorites</span></code></pre></div>
+      <div class="act chat"><div class="act-head"><svg aria-hidden="true"><use href="#i-chat"/></svg><span><bdi>Codex</bdi></span></div><pre><code><span class="ln">$ai-dev-workflow saved-favorites</span></code></pre></div>
+    </li>
+    <li>
+      <h3 class="with-tag">المتابعة في وكيل آخر <span class="where chat"><svg aria-hidden="true"><use href="#i-chat"/></svg>محادثة الوكيل</span></h3>
+      <p>افتح الوكيل الآخر في المشروع نفسه، واكتب أمر المتابعة نفسه بالعلامة التي يستخدمها: <code>/</code> أو <code>$</code>. يعيد التحقق من كل موافقة قبل أن يلمس الكود.</p>
+    </li>
+    <li>
+      <h3 class="with-tag">مراجعة مستقلة بوكيل آخر <span class="where chat"><svg aria-hidden="true"><use href="#i-chat"/></svg>محادثة الوكيل</span></h3>
+      <p>بعد التنفيذ في وكيل، اطلب المراجعة من وكيل آخر:</p>
+      <div class="act chat"><div class="act-head"><svg aria-hidden="true"><use href="#i-chat"/></svg><span><bdi>Claude Code</bdi>، <bdi>Gemini CLI</bdi>، <bdi>Antigravity</bdi></span></div><pre><code><span class="ln">/ai-dev-workflow audit saved-favorites</span></code></pre></div>
+      <div class="act chat"><div class="act-head"><svg aria-hidden="true"><use href="#i-chat"/></svg><span><bdi>Codex</bdi></span></div><pre><code><span class="ln">$ai-dev-workflow audit saved-favorites</span></code></pre></div>
+    </li>
+    <li>
+      <h3 class="with-tag">إيقاف المهمة مؤقتًا <span class="where chat"><svg aria-hidden="true"><use href="#i-chat"/></svg>محادثة الوكيل</span></h3>
+      <p>لتطلب شيئًا لا علاقة له بالمهمة، اكتب أولًا:</p>
+      <div class="reply"><span class="reply-label">ردّك:</span><span class="say">أوقف المهمة مؤقتًا</span></div>
+      <p>المهمة الموقوفة لا تقيّد الوكيل في أي شيء، وتتابعها لاحقًا باسمها.</p>
+    </li>
+    <li>
+      <h3 class="with-tag">عرض كل المهام ومرحلة كل منها <span class="where chat"><svg aria-hidden="true"><use href="#i-chat"/></svg>محادثة الوكيل</span></h3>
+      <div class="act chat"><div class="act-head"><svg aria-hidden="true"><use href="#i-chat"/></svg><span><bdi>Claude Code</bdi>، <bdi>Gemini CLI</bdi>، <bdi>Antigravity</bdi></span></div><pre><code><span class="ln">/ai-dev-workflow status</span></code></pre></div>
+      <div class="act chat"><div class="act-head"><svg aria-hidden="true"><use href="#i-chat"/></svg><span><bdi>Codex</bdi></span></div><pre><code><span class="ln">$ai-dev-workflow status</span></code></pre></div>
+    </li>
+  </ul>
+</section>
+
+<section id="ar-stages">
+  <h2>المراحل الإحدى عشرة</h2>
+  <p class="sub">كل مهمة تمر بالمراحل نفسها بالترتيب. البوابتان المحاطتان بخط متقطّع تنتظران موافقتك، والكود لا يُعدَّل إلا في المرحلتين ذواتي الشريط الأخضر.</p>
+  <ol class="flow">
+    <li class="node"><span class="n">1</span><div class="card"><h3>الاستكشاف<bdi class="id">DISCOVERY</bdi></h3><p>يقرأ الكود وملفات التعليمات، ولا يسأل إلا عمّا ينقص.</p><p class="who"><span class="where auto"><svg aria-hidden="true"><use href="#i-auto"/></svg>تلقائي</span><span class="where you"><svg aria-hidden="true"><use href="#i-you"/></svg>أنت</span></p></div></li>
+    <li class="node"><span class="n">2</span><div class="card"><h3>المتطلبات الخارجية<bdi class="id">DEPENDENCIES</bdi></h3><p>يحدد ما يحتاجه من خارج الكود: تصميمات، وتفاصيل الواجهة البرمجية، وقرارات.</p><p class="who"><span class="where auto"><svg aria-hidden="true"><use href="#i-auto"/></svg>تلقائي</span><span class="where you"><svg aria-hidden="true"><use href="#i-you"/></svg>أنت</span></p></div></li>
+    <li class="node"><span class="n">3</span><div class="card"><h3>كتابة المواصفات<bdi class="id">SPECIFICATION</bdi></h3><p>يملأ قالب المواصفات، ويتحقق منه وفق قواعد القالب.</p><p class="who"><span class="where auto"><svg aria-hidden="true"><use href="#i-auto"/></svg>تلقائي</span></p></div></li>
+    <li class="node gate"><span class="n">4</span><div class="card"><h3>الموافقة على المواصفات<bdi class="id">SPEC_APPROVAL</bdi><span class="flag gate">بوابة</span></h3><p>ينتظر ردك: «أوافق على المواصفات».</p><p class="who"><span class="where you"><svg aria-hidden="true"><use href="#i-you"/></svg>أنت</span></p></div></li>
+    <li class="node"><span class="n">5</span><div class="card"><h3>التخطيط<bdi class="id">PLANNING</bdi></h3><p>يكتب الخطة من الكود الفعلي: الخطوات، والمخاطر، والاختبارات.</p><p class="who"><span class="where auto"><svg aria-hidden="true"><use href="#i-auto"/></svg>تلقائي</span></p></div></li>
+    <li class="node gate"><span class="n">6</span><div class="card"><h3>الموافقة على الخطة<bdi class="id">PLAN_APPROVAL</bdi><span class="flag gate">بوابة</span></h3><p>ينتظر ردك: «أوافق على الخطة».</p><p class="who"><span class="where you"><svg aria-hidden="true"><use href="#i-you"/></svg>أنت</span></p></div></li>
+    <li class="node code"><span class="n">7</span><div class="card"><h3>التنفيذ<bdi class="id">IMPLEMENTATION</bdi><span class="flag code">يُعدَّل الكود هنا</span></h3><p>هنا فقط يبدأ تعديل الكود، بعد فحص مسبق للموافقات (<bdi>preflight</bdi>).</p><p class="who"><span class="where auto"><svg aria-hidden="true"><use href="#i-auto"/></svg>تلقائي</span></p></div></li>
+    <li class="node"><span class="n">8</span><div class="card"><h3>الاختبار<bdi class="id">TESTING</bdi></h3><p>يشغّل الفحوص ويسجّل نتائجها.</p><p class="who"><span class="where auto"><svg aria-hidden="true"><use href="#i-auto"/></svg>تلقائي</span></p></div></li>
+    <li class="node code"><span class="n">9</span><div class="card"><h3>الإصلاح<bdi class="id">FIXING</bdi><span class="flag code">يُعدَّل الكود هنا</span></h3><p>إن فشل شيء، يصلحه ثم يعود إلى الاختبار.</p><p class="who"><span class="where auto"><svg aria-hidden="true"><use href="#i-auto"/></svg>تلقائي</span></p></div></li>
+    <li class="node"><span class="n">10</span><div class="card"><h3>المراجعة<bdi class="id">AUDIT</bdi></h3><p>يراجع التغييرات الفعلية مقابل المواصفات والخطة ومعايير مشروعك. وإن وجد مشكلة تحتاج تعديل الكود، يعود إلى الإصلاح.</p><p class="who"><span class="where auto"><svg aria-hidden="true"><use href="#i-auto"/></svg>تلقائي</span></p></div></li>
+    <li class="node"><span class="n">11</span><div class="card"><h3>التقرير النهائي<bdi class="id">FINAL_REPORT</bdi></h3><p>يذكر النتيجة دون أن يتجاوز ما تثبته الأدلة.</p><p class="who"><span class="where you"><svg aria-hidden="true"><use href="#i-you"/></svg>أنت تقرؤه</span></p></div></li>
+  </ol>
+  <p class="note">الرجوع إلى مرحلة سابقة مسموح دائمًا: تغيير النطاق يعيد المهمة إلى المواصفات أو الخطة، ويحتاج موافقتك من جديد.</p>
+</section>
+
+<section id="ar-approvals">
+  <h2>موافقتك وقواعد الأمان</h2>
+  <ul class="rules">
+    <li><strong>كلماتك وحدها هي الموافقة.</strong>يسجّل الوكيل ردك كما كتبته، مثل «أوافق على المواصفات»، ولا يوافق نيابة عنك أبدًا.</li>
+    <li><strong>ما توافق عليه يُجمَّد.</strong>تُحفظ كل نسخة وافقت عليها للقراءة فقط مع بصمة رقمية. وإن تغيّر المستند بعد ذلك، يحتاج موافقتك من جديد.</li>
+    <li><strong>لا كود قبل الموافقة على الخطة.</strong>في <bdi>Claude Code</bdi> يمنع خطّاف (<bdi>hook</bdi>) أي تعديل مبكر للكود. أما الوكلاء الآخرون فيلتزمون بالقاعدة، والمحرك يكشف أي ملف تغيّر قبل الأوان.</li>
+    <li><strong>فحص قبل كل جلسة تعديل.</strong>عند بدء جلسة جديدة، أو تبديل الوكيل، أو استئناف مهمة، يعيد الوكيل التحقق من الموافقات قبل أن يعدّل الكود.</li>
+    <li><strong>إن طلبت تخطي بوابة.</strong>يُفترض أن يعرض عليك الوكيل «المسار السريع» أو الإيقاف المؤقت بدلًا من ذلك. في الاختبار، كتب <bdi>Codex</bdi> الكود رغم ذلك عندما طُلب منه التخطي صراحةً، ثم كشف المحرك الملفات التي تغيّرت.</li>
+    <li><strong>لا أسرار في السجلات.</strong>كلمات المرور والرموز والمفاتيح لا تُحفظ أبدًا في ملفات المهمة.</li>
+  </ul>
+</section>
+
+<section id="ar-dependencies">
+  <h2>عندما تنقص معلومة</h2>
+  <p class="sub">يحدد الوكيل ما تحتاجه هذه المهمة فقط، ويصنّف كل عنصر:</p>
+  <dl class="classes">
+    <dt>مانع <bdi>(Blocking)</bdi></dt><dd>مطلوب قبل أن تكتمل مرحلة: المواصفات أو الخطة أو التنفيذ أو الإنهاء.</dd>
+    <dt>غير مانع <bdi>(Non-blocking)</bdi></dt><dd>مفيد، لكنه ليس ضروريًا.</dd>
+    <dt>مؤكَّد <bdi>(Verified)</bdi></dt><dd>تم التحقق منه بدليل موثوق.</dd>
+    <dt>غير منطبق <bdi>(Not applicable)</bdi></dt><dd>لا علاقة له بهذه المهمة.</dd>
+  </dl>
+  <p>عندما يتوقف العمل بسبب عنصر مانع، تبدأ رسالة الحالة بسطر مثل هذا (معناه: متوقف بانتظار عقد الواجهة البرمجية):</p>
+  <p class="status-line">BLOCKED — Awaiting backend API contract</p>
+  <p>وعندما تنقص تفاصيل الواجهة البرمجية، يكتب الوكيل رسالة ترسلها كما هي، مثل:</p>
+  <div class="message">مرحبًا! نضيف ميزة المفضلة إلى التطبيق: يضغط المستخدم المسجَّل على رمز القلب ليحفظ منتجًا، ويرى المنتجات المحفوظة في شاشة المفضلة.
+لإكمال المواصفات نحتاج إلى:
+1. ما الواجهات (<bdi>endpoints</bdi>) الخاصة بالحفظ والحذف وعرض القائمة؟
+2. هل القائمة مقسّمة إلى صفحات، وكيف تُرتَّب؟
+3. ماذا تُرجع الواجهة إذا لم يعد المنتج موجودًا؟
+هل يمكنك مشاركة مثال لطلب واستجابة؟ شكرًا!</div>
+</section>
+
+<section id="ar-quality">
+  <h2>الاختبار والمراجعة والحالة النهائية</h2>
+  <ul class="rules">
+    <li><strong>أدلة حقيقية.</strong>يشغّل المحرك كل فحص ويسجّل نتيجته مع بصمة للكود. وإن تغيّر الكود بعد ذلك، تصبح النتيجة قديمة ويجب تشغيل الفحص من جديد.</li>
+    <li><strong>المشكلات القديمة منفصلة.</strong>المشكلات الموجودة قبل المهمة تُعرض منفصلة عن المشكلات الجديدة.</li>
+    <li><strong>الفحص الذي لم يعمل لا يُعدّ ناجحًا أبدًا.</strong>يُسجَّل «متوقفًا» مع ذكر السبب.</li>
+    <li><strong>مراجعة مستقلة.</strong>يراجع العمل وكيلٌ آخر أو جلسة منفصلة كلما أمكن، وإلا يذكر التقرير أنها مراجعة ثانية من الوكيل نفسه.</li>
+  </ul>
+  <h3 style="margin-top:20px">الحالة النهائية</h3>
+  <table>
+    <thead><tr><th>الحالة</th><th>معناها</th></tr></thead>
+    <tbody>
+      <tr><td>مكتمل<small class="en-term"><bdi>Completed</bdi></small></td><td>نجح كل شيء بأدلة، ولا توجد ملاحظة حرجة أو مهمة دون حل.</td></tr>
+      <tr><td>مكتمل مع قيود<small class="en-term"><bdi>Completed with Limitations</bdi></small></td><td>لم يفشل شيء، لكن تعذّر التحقق من بعض العناصر، أو قبلتَ ملاحظة مهمة.</td></tr>
+      <tr><td>مكتمل جزئيًا<small class="en-term"><bdi>Partially Completed</bdi></small></td><td>فشل شيء، أو بقيت خطوات، أو بقيت ملاحظة حرجة حتى لو قبلتها.</td></tr>
+      <tr><td>متوقف<small class="en-term"><bdi>Blocked</bdi></small></td><td>لا يمكن المتابعة حتى يوفّر أحدٌ ما ينقص.</td></tr>
+    </tbody>
+  </table>
+  <p class="note">الملاحظات نوعان أساسيان: حرجة <bdi>(Critical)</bdi> ومهمة <bdi>(Important)</bdi>. وقبولك لملاحظة حرجة أو مهمة معروفة لا يعطي أبدًا حالة «مكتمل».</p>
+</section>
+
+<section id="ar-agents">
+  <h2>الوكلاء المدعومون</h2>
+  <p class="sub">أين يجد كل وكيل المهارة، وكيف تبدؤها فيه، وإلى أي حد تحققنا من ذلك.</p>
+  <ul class="evlegend">
+    <li><span class="ev" data-evidence="tested">مُختبَر</span>شغّلناه بأنفسنا.</li>
+    <li><span class="ev" data-evidence="checked">مفحوص في النسخة المثبّتة</span>وجدناه في كود الوكيل المثبّت، ولم نشغّله كاملًا.</li>
+    <li><span class="ev" data-evidence="docs">حسب الوثائق الرسمية</span>موثَّق، ولم نشغّله.</li>
+    <li><span class="ev" data-evidence="unverified">غير متحقَّق منه</span>لا هذا ولا ذاك.</li>
+  </ul>
+  <div class="agents">
+    <article class="agent">
+      <h3><bdi>Claude Code</bdi></h3>
+      <dl>
+        <dt>مكان المهارة</dt><dd><code>~/.claude/skills</code> (رابط إلى <code>~/.agents/skills</code>) <span class="ev" data-evidence="checked" data-evidence-key="claude-discovery">مفحوص في النسخة المثبّتة</span></dd>
+        <dt>طريقة البدء</dt><dd><code>/ai-dev-workflow …</code> <span class="ev" data-evidence="checked" data-evidence-key="claude-invoke">مفحوص في النسخة المثبّتة</span></dd>
+        <dt>هل تبدأ وحدها؟</dt><dd>لا — <code>disable-model-invocation: true</code> <span class="ev" data-evidence="checked" data-evidence-key="claude-manual-only">مفحوص في النسخة المثبّتة</span></dd>
+        <dt>التعديل المبكر للكود</dt><dd>يمنعه خطّاف المهارة، وللمهمة التي بدأت في الجلسة نفسها فقط <span class="ev" data-evidence="checked" data-evidence-key="claude-hooks">مفحوص في النسخة المثبّتة</span></dd>
+        <dt>ملاحظة</dt><dd>لم يُشغَّل اختبار حي في <bdi>Claude Code</bdi> بعد. خطوات الفحص اليدوي في <a href="docs/compatibility.md"><code>docs/compatibility.md</code></a>.</dd>
+      </dl>
+    </article>
+    <article class="agent">
+      <h3><bdi>Codex</bdi></h3>
+      <dl>
+        <dt>مكان المهارة</dt><dd><code>~/.agents/skills</code> <span class="ev" data-evidence="tested" data-evidence-key="codex-discovery">مُختبَر</span></dd>
+        <dt>طريقة البدء</dt><dd><code>$ai-dev-workflow …</code> <span class="ev" data-evidence="tested" data-evidence-key="codex-invoke-dollar">مُختبَر</span>، أو اخترها من قائمة <code>/skills</code> <span class="ev" data-evidence="checked" data-evidence-key="codex-invoke-picker">مفحوص في النسخة المثبّتة</span></dd>
+        <dt>من الطرفية مباشرة</dt><dd><code>codex exec '$ai-dev-workflow …'</code> — أبقِ علامتي الاقتباس المفردتين <span class="ev" data-evidence="tested" data-evidence-key="codex-exec">مُختبَر</span></dd>
+        <dt>هل تبدأ وحدها؟</dt><dd>لا — <code>allow_implicit_invocation: false</code> <span class="ev" data-evidence="tested" data-evidence-key="codex-manual-only">مُختبَر</span></dd>
+        <dt>ملاحظة</dt><dd>نجحت مهمة كاملة من البداية إلى النهاية. أما طلب «تخطَّ البوابات» الصريح فلا يُمنع، بل يكشفه المحرك بعد ذلك.</dd>
+      </dl>
+    </article>
+    <article class="agent">
+      <h3><bdi>Gemini CLI</bdi></h3>
+      <dl>
+        <dt>مكان المهارة</dt><dd><code>~/.agents/skills</code> <span class="ev" data-evidence="tested" data-evidence-key="gemini-discovery">مُختبَر</span></dd>
+        <dt>طريقة البدء</dt><dd><code>/ai-dev-workflow …</code> <span class="ev" data-evidence="tested" data-evidence-key="gemini-slash">مُختبَر</span>، أو اكتب: <code>Use the ai-dev-workflow skill to …</code> <span class="ev" data-evidence="tested" data-evidence-key="gemini-by-name">مُختبَر</span></dd>
+        <dt>طريقة بديلة</dt><dd>اطلب منه قراءة ملف <code>SKILL.md</code> الخاص بالمهارة واتّباعه <span class="ev" data-evidence="unverified" data-evidence-key="gemini-read-fallback">غير متحقَّق منه</span></dd>
+        <dt>هل تبدأ وحدها؟</dt><dd>لا يوجد إعداد يمنع ذلك، لكن <bdi>Gemini</bdi> يطلب موافقتك قبل تفعيل أي مهارة.</dd>
+        <dt>ملاحظة</dt><dd>يحتاج مفتاح <bdi>Gemini API</bdi> مدفوعًا أو ترخيص <bdi>Code Assist</bdi>. ومهارات المشروع تعمل في المجلدات الموثوقة فقط.</dd>
+      </dl>
+    </article>
+    <article class="agent">
+      <h3><bdi>Antigravity</bdi></h3>
+      <dl>
+        <dt>مكان المهارة</dt><dd><code>~/.gemini/config/skills</code> <span class="ev" data-evidence="docs" data-evidence-key="antigravity-app-discovery">حسب الوثائق الرسمية</span></dd>
+        <dt>طريقة البدء (التطبيق)</dt><dd><code>/ai-dev-workflow …</code> <span class="ev" data-evidence="docs" data-evidence-key="antigravity-app-invoke">حسب الوثائق الرسمية</span></dd>
+        <dt>هل تبدأ وحدها؟</dt><dd>غير موثَّق <span class="ev" data-evidence="unverified" data-evidence-key="antigravity-manual-only">غير متحقَّق منه</span></dd>
+        <dt>نسخة سطر الأوامر</dt><dd>لم تُختبر <span class="ev" data-evidence="docs" data-evidence-key="antigravity-cli">حسب الوثائق الرسمية</span></dd>
+      </dl>
+    </article>
+    <article class="agent">
+      <h3>وكلاء آخرون</h3>
+      <p><bdi>Cursor</bdi> و <bdi>GitHub Copilot</bdi> و <bdi>OpenCode</bdi> وغيرها: انسخ مجلد المهارة إلى مجلد المهارات الخاص بالوكيل. والمهارة تطلب من الوكيل أن يسألك قبل أن يبدأ. <span class="ev" data-evidence="unverified" data-evidence-key="other-agents">غير متحقَّق منه</span></p>
+    </article>
+  </div>
+</section>
+
+<section id="ar-files">
+  <h2>ملفات المهمة</h2>
+  <p class="sub">كل شيء داخل المجلد <code>.ai-dev-workflow</code> في مشروعك:</p>
+  <dl class="files">
+    <div><dt><code>config.json</code></dt><dd>إعداد المشروع: ملفات التعليمات، والقالب، والفحوص.</dd></div>
+    <div><dt><code>templates/</code></dt><dd>قالب المواصفات الخاص بالمشروع.</dd></div>
+    <div><dt><code>tasks/saved-favorites/</code></dt><dd>مجلد لكل مهمة، وفيه:</dd></div>
+    <div class="indent"><dt><code>spec.md</code></dt><dd>المواصفات.</dd></div>
+    <div class="indent"><dt><code>dependencies.md</code></dt><dd>ما احتاجته المهمة من الخارج، مع الرسائل والردود.</dd></div>
+    <div class="indent"><dt><code>plan.md</code></dt><dd>خطة التنفيذ، وتُجمَّد بعد الموافقة.</dd></div>
+    <div class="indent"><dt><code>approved/</code></dt><dd>نسخ للقراءة فقط من كل نسخة وافقت عليها.</dd></div>
+    <div class="indent"><dt><code>state.json</code></dt><dd>المرحلة والموافقات والتقدم، ولا يكتبه إلا المحرك.</dd></div>
+    <div class="indent"><dt><code>verification.md</code></dt><dd>الفحوص ونتائجها.</dd></div>
+    <div class="indent"><dt><code>audit.md</code></dt><dd>ملاحظات المراجعة.</dd></div>
+    <div class="indent"><dt><code>report.md</code></dt><dd>التقرير النهائي.</dd></div>
+  </dl>
+  <p>حفظ هذه الملفات في <bdi>git</bdi> اختيارك لكل مشروع: <code>all</code> أو <code>config-only</code> أو <code>none</code>.</p>
+</section>
+
+<section id="ar-faq">
+  <h2>أسئلة شائعة والتحديث وإلغاء التثبيت</h2>
+  <details><summary>لماذا لا تبدأ المهارة وحدها؟</summary><p>كي تبقى طلباتك العادية عادية. أنت تقرر متى تمر المهمة بسير العمل.</p></details>
+  <details><summary>هل أستطيع استخدام قالب المواصفات الخاص بي؟</summary><p>نعم. لكل مشروع القالب الذي تختاره عند الإعداد. القواعد التي تحددها إلزامية تمنع الموافقة حتى تُستوفى، والتوصيات تعطي تنبيهًا فقط. ولا يوجد حد لعدد المتطلبات في المواصفات.</p></details>
+  <details><summary>هل تحتاج إلى اتصال بالإنترنت؟</summary><p>المهارة نفسها تعمل دون اتصال، أما الوكيل فيحتاج اتصاله المعتاد.</p></details>
+  <details><summary>هل تغيّر شيئًا في مشروعي غير المجلد <code>.ai-dev-workflow</code>؟</summary><p>لا، سوى تعديلات الكود في الخطط التي وافقت عليها. ملفات التعليمات مثل <code>CLAUDE.md</code> لا تُعدَّل أبدًا. وحسب اختيارك لحفظ السجلات، قد يُضاف سطر إلى <code>.git/info/exclude</code>.</p></details>
+  <details><summary>التحديث إلى إصدار أحدث</summary>
+    <p>في المجلد الذي نزّلته عند التثبيت:</p>
+    <div class="act term"><div class="act-head"><svg aria-hidden="true"><use href="#i-term"/></svg><span>الطرفية</span></div><pre><code><span class="ln">cd path/to/ai-dev-workflow</span>
+<span class="ln">git pull</span>
+<span class="ln">python3 skills/ai-dev-workflow/scripts/install.py update</span></code></pre></div>
+  </details>
+  <details><summary>إلغاء التثبيت</summary>
+    <p>في المجلد الذي نزّلته عند التثبيت، اعرض أولًا ما سيُحذف:</p>
+    <div class="act term"><div class="act-head"><svg aria-hidden="true"><use href="#i-term"/></svg><span>الطرفية</span></div><pre><code><span class="ln">cd path/to/ai-dev-workflow</span>
+<span class="ln">python3 skills/ai-dev-workflow/scripts/install.py uninstall</span></code></pre></div>
+    <p>ثم احذفه:</p>
+    <div class="act term"><div class="act-head"><svg aria-hidden="true"><use href="#i-term"/></svg><span>الطرفية</span></div><pre><code><span class="ln">python3 skills/ai-dev-workflow/scripts/install.py uninstall --yes</span></code></pre></div>
+    <p>ملفات المهام داخل مشاريعك لا تُمسّ أبدًا.</p>
+  </details>
+</section>
+
+<footer class="page-foot">رخصة <bdi>MIT</bdi> · الإصدار <bdi>1.0.0</bdi> · <a href="https://github.com/ahmedzein-dev/ai-dev-workflow"><bdi>github.com/ahmedzein-dev/ai-dev-workflow</bdi></a></footer>
+</div>
+
+<!-- ============================== English ============================== -->
+<div id="en" class="lang" lang="en" dir="ltr">
+
+<section class="hero">
+  <p class="kicker">Agent skill · ai-dev-workflow · MIT</p>
+  <h1>AIDevWorkflow</h1>
+  <p class="tagline">Structured AI-Assisted Development — From Requirements to Release.</p>
+  <p>A skill you add to your AI coding agent. It takes a feature, bug fix or refactor from your request to a tested, reviewed result. No code is written before you approve the spec and the plan, and every step is saved as files in your project, so you — or another agent — can continue at any time.</p>
+  <ul class="points">
+    <li><strong>Runs only when you call it.</strong> Ordinary requests to your agent work as before.</li>
+    <li><strong>One skill for several agents.</strong> Claude Code, Codex, Gemini CLI and Antigravity use the same files.</li>
+    <li><strong>Nothing is lost with the chat.</strong> Specs, approvals, test results and reports are saved as files in your project.</li>
+  </ul>
+  <p class="cta"><a class="btn primary" href="#en-setup">Start installing</a><a class="btn" href="#en-use">Run a task</a><a class="btn" href="https://github.com/ahmedzein-dev/ai-dev-workflow">GitHub</a></p>
+</section>
+
+<nav class="toc" aria-label="Page contents">
+  <h2>On this page</h2>
+  <ul>
+    <li><a href="#en-legend">How to read this page</a></li>
+    <li><a href="#en-setup">Set up once</a></li>
+    <li><a href="#en-use">Run a task</a></li>
+    <li><a href="#en-continue">Pause, continue, switch agents</a></li>
+    <li><a href="#en-stages">The 11 stages</a></li>
+    <li><a href="#en-approvals">Your approval and the safety rules</a></li>
+    <li><a href="#en-dependencies">When information is missing</a></li>
+    <li><a href="#en-quality">Testing, audit and the final status</a></li>
+    <li><a href="#en-agents">Supported agents</a></li>
+    <li><a href="#en-files">The task files</a></li>
+    <li><a href="#en-faq">Questions, updating and uninstalling</a></li>
+  </ul>
+</nav>
+
+<section id="en-legend">
+  <h2>How to read this page</h2>
+  <p class="sub">Every step carries a label that says where you do it:</p>
+  <div class="legend">
+    <div class="legend-item"><span><span class="where term"><svg aria-hidden="true"><use href="#i-term"/></svg>Terminal</span></span><p>A command for Terminal (macOS, Linux) or PowerShell (Windows). Copy it with the Copy button, paste it, and press <kbd>Enter</kbd>. Do not type the <code>$</code> at the start of the line; Copy leaves it out.</p></div>
+    <div class="legend-item"><span><span class="where chat"><svg aria-hidden="true"><use href="#i-chat"/></svg>Agent chat</span></span><p>Text you type into your agent's message box: Claude Code, Codex, Gemini CLI or Antigravity.</p></div>
+    <div class="legend-item"><span><span class="where you"><svg aria-hidden="true"><use href="#i-you"/></svg>You</span></span><p>Your decision or action: read, then approve or ask for changes, or send a message to a colleague.</p></div>
+    <div class="legend-item"><span><span class="where auto"><svg aria-hidden="true"><use href="#i-auto"/></svg>Automatic</span></span><p>The agent does it on its own. You just wait.</p></div>
+  </div>
+</section>
+
+<section id="en-setup">
+  <h2>Set up once</h2>
+  <p class="sub">Once per computer. It takes about two minutes.</p>
+  <ol class="steps">
+    <li class="step">
+      <div class="step-tags"><span class="where term"><svg aria-hidden="true"><use href="#i-term"/></svg>Terminal</span></div>
+      <h3>Open Terminal and check git and Python</h3>
+      <p>You need git and Python 3.9 or newer. Type:</p>
+      <div class="act term"><div class="act-head"><svg aria-hidden="true"><use href="#i-term"/></svg><span>Terminal</span></div><pre><code><span class="ln">git --version</span>
+<span class="ln">python3 --version</span></code></pre></div>
+      <p>Each should print a version number, such as <code>Python 3.12.4</code>.</p>
+      <p class="note">On Windows, type <code>python</code> instead of <code>python3</code> in every command on this page.</p>
+    </li>
+    <li class="step">
+      <div class="step-tags"><span class="where term"><svg aria-hidden="true"><use href="#i-term"/></svg>Terminal</span></div>
+      <h3>Download AIDevWorkflow</h3>
+      <p>Run this in any folder outside your projects, such as your home folder:</p>
+      <div class="act term"><div class="act-head"><svg aria-hidden="true"><use href="#i-term"/></svg><span>Terminal</span></div><pre><code><span class="ln">git clone https://github.com/ahmedzein-dev/ai-dev-workflow.git</span>
+<span class="ln">cd ai-dev-workflow</span></code></pre></div>
+      <p class="note">Keep this folder: you will use it to update and to uninstall.</p>
+    </li>
+    <li class="step">
+      <div class="step-tags"><span class="where term"><svg aria-hidden="true"><use href="#i-term"/></svg>Terminal</span></div>
+      <h3>Install the skill</h3>
+      <div class="act term"><div class="act-head"><svg aria-hidden="true"><use href="#i-term"/></svg><span>Terminal</span></div><pre><code><span class="ln">python3 skills/ai-dev-workflow/scripts/install.py</span></code></pre></div>
+      <p>The installer puts one copy in <code>~/.agents/skills</code>, which Codex and Gemini CLI read directly, and links Claude Code to it — and Antigravity, if it is installed.</p>
+    </li>
+    <li class="step">
+      <div class="step-tags"><span class="where term"><svg aria-hidden="true"><use href="#i-term"/></svg>Terminal</span></div>
+      <h3>Check the installation</h3>
+      <div class="act term"><div class="act-head"><svg aria-hidden="true"><use href="#i-term"/></svg><span>Terminal</span></div><pre><code><span class="ln">python3 skills/ai-dev-workflow/scripts/install.py doctor</span></code></pre></div>
+      <p>The last line should be: <code>No problems found.</code></p>
+    </li>
+    <li class="step">
+      <div class="step-tags"><span class="where you"><svg aria-hidden="true"><use href="#i-you"/></svg>You</span></div>
+      <h3>Restart your agent</h3>
+      <p>Close your agent and open it again, so it finds the skill.</p>
+    </li>
+  </ol>
+  <details class="more">
+    <summary>Optional: your own spec template for all your projects</summary>
+    <div class="act term"><div class="act-head"><svg aria-hidden="true"><use href="#i-term"/></svg><span>Terminal</span></div><pre><code><span class="ln">python3 skills/ai-dev-workflow/scripts/install.py add-template my-template path/to/spec-template.md --rules path/to/spec-template.rules.json</span></code></pre></div>
+    <p>Replace the two example paths with your template file and its rules file. The rules file is optional; leave out <code>--rules …</code> if you do not have one.</p>
+    <p>The template is offered whenever you set up a project. Without it, the agent uses the template in your project, or asks you for one. It never invents a template.</p>
+  </details>
+  <details class="more">
+    <summary>Optional: install inside one project (for teammates and cloud agents)</summary>
+    <div class="act term"><div class="act-head"><svg aria-hidden="true"><use href="#i-term"/></svg><span>Terminal</span></div><pre><code><span class="ln">python3 skills/ai-dev-workflow/scripts/install.py install --project /path/to/your/project</span></code></pre></div>
+    <p>This puts full copies in the project's <code>.agents/skills</code> and <code>.claude/skills</code> folders. Commit both. Do not combine it with the user-level install in the same project, or the skill appears twice.</p>
+  </details>
+</section>
+
+<section id="en-use">
+  <h2>Run a task</h2>
+  <p class="sub">From your request to a reviewed result. Your part is in the steps marked You.</p>
+  <ol class="steps">
+    <li class="step">
+      <div class="step-tags"><span class="where term"><svg aria-hidden="true"><use href="#i-term"/></svg>Terminal</span></div>
+      <h3>Open your agent in your project</h3>
+      <p>Go to your project's folder, then start your agent:</p>
+      <div class="act term"><div class="act-head"><svg aria-hidden="true"><use href="#i-term"/></svg><span>Terminal</span></div><pre><code><span class="ln">cd path/to/your/project</span>
+<span class="ln">claude</span></code></pre></div>
+      <p>Type <code>codex</code> or <code>gemini</code> instead of <code>claude</code>, depending on your agent. Using a desktop app (such as Claude, Codex or Antigravity)? Open the project folder in the app instead.</p>
+      <p class="note">The project must be a git repository.</p>
+    </li>
+    <li class="step">
+      <div class="step-tags"><span class="where chat"><svg aria-hidden="true"><use href="#i-chat"/></svg>Agent chat</span></div>
+      <h3>Start the task</h3>
+      <p>Type the skill's name, then your request. Put your own request in place of the example:</p>
+      <div class="act chat"><div class="act-head"><svg aria-hidden="true"><use href="#i-chat"/></svg><span>Claude Code, Gemini CLI, Antigravity</span></div><pre><code><span class="ln">/ai-dev-workflow Add saved favorites to the item list</span></code></pre></div>
+      <div class="act chat"><div class="act-head"><svg aria-hidden="true"><use href="#i-chat"/></svg><span>Codex</span></div><pre><code><span class="ln">$ai-dev-workflow Add saved favorites to the item list</span></code></pre></div>
+      <p class="note">A request without the skill's name does not start the workflow.</p>
+    </li>
+    <li class="step">
+      <div class="step-tags"><span class="where you"><svg aria-hidden="true"><use href="#i-you"/></svg>You</span><span class="where chat"><svg aria-hidden="true"><use href="#i-chat"/></svg>Agent chat</span></div>
+      <h3>First time in a project only: confirm the setup</h3>
+      <p>The agent shows what it found in your project and asks about:</p>
+      <ul>
+        <li>the instruction files every agent must follow, such as <code>CLAUDE.md</code> or <code>AGENTS.md</code>;</li>
+        <li>the spec template to use;</li>
+        <li>the checks to run, such as tests and the analyzer;</li>
+        <li>whether task records are saved in git:
+          <ul class="sublist">
+            <li><code>all</code> — every record.</li>
+            <li><code>config-only</code> — the settings only; tasks stay on your computer.</li>
+            <li><code>none</code> — nothing; all records stay on your computer.</li>
+          </ul>
+        </li>
+      </ul>
+      <p>You answer once per project.</p>
+    </li>
+    <li class="step">
+      <div class="step-tags"><span class="where auto"><svg aria-hidden="true"><use href="#i-auto"/></svg>Automatic</span><span class="where you"><svg aria-hidden="true"><use href="#i-you"/></svg>You</span></div>
+      <h3>Discovery: answer the agent's questions</h3>
+      <p>The agent reads your code first, then asks only what the code cannot answer. Answer briefly in the chat.</p>
+    </li>
+    <li class="step">
+      <div class="step-tags"><span class="where you"><svg aria-hidden="true"><use href="#i-you"/></svg>You</span><span class="where chat"><svg aria-hidden="true"><use href="#i-chat"/></svg>Agent chat</span></div>
+      <h3>If an API detail is missing: send the message</h3>
+      <p>The agent writes a ready message for your backend developer and stops. Send it the usual way (email, Slack…), then paste their reply into the chat.</p>
+    </li>
+    <li class="step gate">
+      <div class="step-tags"><span class="where you"><svg aria-hidden="true"><use href="#i-you"/></svg>You</span><span class="where chat"><svg aria-hidden="true"><use href="#i-chat"/></svg>Agent chat</span><span class="flag gate">Approval gate</span></div>
+      <h3>Approve the spec</h3>
+      <p>Read the spec the agent shows. If it is right, type:</p>
+      <div class="reply"><span class="reply-label">Your reply:</span><span class="say">approve the spec</span></div>
+      <p>To change something, say what to change. Questions or "looks good, but…" do not count as approval.</p>
+    </li>
+    <li class="step gate">
+      <div class="step-tags"><span class="where you"><svg aria-hidden="true"><use href="#i-you"/></svg>You</span><span class="where chat"><svg aria-hidden="true"><use href="#i-chat"/></svg>Agent chat</span><span class="flag gate">Approval gate</span></div>
+      <h3>Approve the plan</h3>
+      <p>Read the implementation plan. If it is right, type:</p>
+      <div class="reply"><span class="reply-label">Your reply:</span><span class="say">approve the plan</span></div>
+    </li>
+    <li class="step">
+      <div class="step-tags"><span class="where auto"><svg aria-hidden="true"><use href="#i-auto"/></svg>Automatic</span></div>
+      <h3>Implementation, tests, fixes and audit</h3>
+      <p>The agent changes the code step by step as planned, runs the project's checks, fixes what fails and reviews the result. You just wait.</p>
+      <p class="note">Your agent may still ask your permission to run a command or edit a file; that comes from the agent's own settings.</p>
+    </li>
+    <li class="step">
+      <div class="step-tags"><span class="where you"><svg aria-hidden="true"><use href="#i-you"/></svg>You</span></div>
+      <h3>Read the final report</h3>
+      <p>A short summary: what was done, what was tested, what is still open. Its status is never higher than the evidence allows.</p>
+    </li>
+  </ol>
+  <div class="tip"><strong>Small change?</strong> Type <span class="say">use the fast path</span> in the chat. The agent shows the spec and the plan together, and you approve both in one message: <span class="say">approve the spec and the plan</span></div>
+</section>
+
+<section id="en-continue">
+  <h2>Pause, continue, switch agents</h2>
+  <p class="sub">Everything in this section is typed in the agent chat.</p>
+  <ul class="howto">
+    <li>
+      <h3 class="with-tag">Continue a task later <span class="where chat"><svg aria-hidden="true"><use href="#i-chat"/></svg>Agent chat</span></h3>
+      <p>Type the skill's name, then the task's name (here, the example name saved-favorites). The agent tells you the name when it creates the task.</p>
+      <div class="act chat"><div class="act-head"><svg aria-hidden="true"><use href="#i-chat"/></svg><span>Claude Code, Gemini CLI, Antigravity</span></div><pre><code><span class="ln">/ai-dev-workflow saved-favorites</span></code></pre></div>
+      <div class="act chat"><div class="act-head"><svg aria-hidden="true"><use href="#i-chat"/></svg><span>Codex</span></div><pre><code><span class="ln">$ai-dev-workflow saved-favorites</span></code></pre></div>
+    </li>
+    <li>
+      <h3 class="with-tag">Continue in another agent <span class="where chat"><svg aria-hidden="true"><use href="#i-chat"/></svg>Agent chat</span></h3>
+      <p>Open the other agent in the same project and type the same command, with the sign that agent uses: <code>/</code> or <code>$</code>. It re-checks every approval before it touches code.</p>
+    </li>
+    <li>
+      <h3 class="with-tag">Independent review by another agent <span class="where chat"><svg aria-hidden="true"><use href="#i-chat"/></svg>Agent chat</span></h3>
+      <p>After implementing in one agent, ask another agent to review:</p>
+      <div class="act chat"><div class="act-head"><svg aria-hidden="true"><use href="#i-chat"/></svg><span>Claude Code, Gemini CLI, Antigravity</span></div><pre><code><span class="ln">/ai-dev-workflow audit saved-favorites</span></code></pre></div>
+      <div class="act chat"><div class="act-head"><svg aria-hidden="true"><use href="#i-chat"/></svg><span>Codex</span></div><pre><code><span class="ln">$ai-dev-workflow audit saved-favorites</span></code></pre></div>
+    </li>
+    <li>
+      <h3 class="with-tag">Pause the task <span class="where chat"><svg aria-hidden="true"><use href="#i-chat"/></svg>Agent chat</span></h3>
+      <p>To ask for something unrelated, first type:</p>
+      <div class="reply"><span class="reply-label">Your reply:</span><span class="say">pause the task</span></div>
+      <p>A paused task never limits the agent. Continue it later by its name.</p>
+    </li>
+    <li>
+      <h3 class="with-tag">See all tasks and their stage <span class="where chat"><svg aria-hidden="true"><use href="#i-chat"/></svg>Agent chat</span></h3>
+      <div class="act chat"><div class="act-head"><svg aria-hidden="true"><use href="#i-chat"/></svg><span>Claude Code, Gemini CLI, Antigravity</span></div><pre><code><span class="ln">/ai-dev-workflow status</span></code></pre></div>
+      <div class="act chat"><div class="act-head"><svg aria-hidden="true"><use href="#i-chat"/></svg><span>Codex</span></div><pre><code><span class="ln">$ai-dev-workflow status</span></code></pre></div>
+    </li>
+  </ul>
+</section>
+
+<section id="en-stages">
+  <h2>The 11 stages</h2>
+  <p class="sub">Every task goes through the same stages, in order. The two dashed gates wait for your approval; code changes only in the two stages with a green bar.</p>
+  <ol class="flow">
+    <li class="node"><span class="n">1</span><div class="card"><h3>Discovery<span class="id">DISCOVERY</span></h3><p>Reads your code and instruction files; asks only what is missing.</p><p class="who"><span class="where auto"><svg aria-hidden="true"><use href="#i-auto"/></svg>Automatic</span><span class="where you"><svg aria-hidden="true"><use href="#i-you"/></svg>You</span></p></div></li>
+    <li class="node"><span class="n">2</span><div class="card"><h3>Dependencies<span class="id">DEPENDENCIES</span></h3><p>Lists what it needs from outside the code: designs, API details, decisions.</p><p class="who"><span class="where auto"><svg aria-hidden="true"><use href="#i-auto"/></svg>Automatic</span><span class="where you"><svg aria-hidden="true"><use href="#i-you"/></svg>You</span></p></div></li>
+    <li class="node"><span class="n">3</span><div class="card"><h3>Specification<span class="id">SPECIFICATION</span></h3><p>Fills your spec template and checks it against the template's rules.</p><p class="who"><span class="where auto"><svg aria-hidden="true"><use href="#i-auto"/></svg>Automatic</span></p></div></li>
+    <li class="node gate"><span class="n">4</span><div class="card"><h3>Spec approval<span class="id">SPEC_APPROVAL</span><span class="flag gate">Gate</span></h3><p>Waits for your reply: "approve the spec".</p><p class="who"><span class="where you"><svg aria-hidden="true"><use href="#i-you"/></svg>You</span></p></div></li>
+    <li class="node"><span class="n">5</span><div class="card"><h3>Planning<span class="id">PLANNING</span></h3><p>Writes the plan from your real code: steps, risks, tests.</p><p class="who"><span class="where auto"><svg aria-hidden="true"><use href="#i-auto"/></svg>Automatic</span></p></div></li>
+    <li class="node gate"><span class="n">6</span><div class="card"><h3>Plan approval<span class="id">PLAN_APPROVAL</span><span class="flag gate">Gate</span></h3><p>Waits for your reply: "approve the plan".</p><p class="who"><span class="where you"><svg aria-hidden="true"><use href="#i-you"/></svg>You</span></p></div></li>
+    <li class="node code"><span class="n">7</span><div class="card"><h3>Implementation<span class="id">IMPLEMENTATION</span><span class="flag code">Code changes here</span></h3><p>Code changes start only here, after a check of the approvals (preflight).</p><p class="who"><span class="where auto"><svg aria-hidden="true"><use href="#i-auto"/></svg>Automatic</span></p></div></li>
+    <li class="node"><span class="n">8</span><div class="card"><h3>Testing<span class="id">TESTING</span></h3><p>Runs the checks and records their results.</p><p class="who"><span class="where auto"><svg aria-hidden="true"><use href="#i-auto"/></svg>Automatic</span></p></div></li>
+    <li class="node code"><span class="n">9</span><div class="card"><h3>Fixing<span class="id">FIXING</span><span class="flag code">Code changes here</span></h3><p>If something fails, fixes it and goes back to testing.</p><p class="who"><span class="where auto"><svg aria-hidden="true"><use href="#i-auto"/></svg>Automatic</span></p></div></li>
+    <li class="node"><span class="n">10</span><div class="card"><h3>Audit<span class="id">AUDIT</span></h3><p>Reviews the real changes against the spec, the plan and your project's standards. A problem that needs code goes back to fixing.</p><p class="who"><span class="where auto"><svg aria-hidden="true"><use href="#i-auto"/></svg>Automatic</span></p></div></li>
+    <li class="node"><span class="n">11</span><div class="card"><h3>Final report<span class="id">FINAL_REPORT</span></h3><p>States the result, never higher than the evidence.</p><p class="who"><span class="where you"><svg aria-hidden="true"><use href="#i-you"/></svg>You read it</span></p></div></li>
+  </ol>
+  <p class="note">Going back is always allowed: a change of scope returns the task to the spec or the plan, and needs your approval again.</p>
+</section>
+
+<section id="en-approvals">
+  <h2>Your approval and the safety rules</h2>
+  <ul class="rules">
+    <li><strong>Only your words approve.</strong>The agent records your reply as you wrote it, such as "approve the spec". It never approves on your behalf.</li>
+    <li><strong>What you approve is frozen.</strong>Each version you approve is saved read-only with a fingerprint. If the document changes later, it needs your approval again.</li>
+    <li><strong>No code before an approved plan.</strong>In Claude Code, a hook blocks early code edits. Other agents follow the rule, and the engine reports any file changed too early.</li>
+    <li><strong>A check before every editing session.</strong>When a new session starts, the agent changes or a task resumes, the agent re-checks the approvals before it edits code.</li>
+    <li><strong>If you ask to skip a gate.</strong>The agent should offer the fast path or a pause instead. In testing, Codex still wrote code when told explicitly to skip; the engine then reported the changed files.</li>
+    <li><strong>No secrets in records.</strong>Passwords, tokens and keys are never saved in task files.</li>
+  </ul>
+</section>
+
+<section id="en-dependencies">
+  <h2>When information is missing</h2>
+  <p class="sub">The agent lists only what this task needs, and gives each item a class:</p>
+  <dl class="classes">
+    <dt>Blocking</dt><dd>Needed before a stage can finish: the spec, the plan, the implementation or completion.</dd>
+    <dt>Non-blocking</dt><dd>Helpful, not essential.</dd>
+    <dt>Verified</dt><dd>Confirmed with reliable evidence.</dd>
+    <dt>Not applicable</dt><dd>Not relevant to this task.</dd>
+  </dl>
+  <p>While a blocking item stops the work, the status message starts with a line like this:</p>
+  <p class="status-line">BLOCKED — Awaiting backend API contract</p>
+  <p>For a missing API detail, the agent writes a message you can send as it is, for example:</p>
+  <div class="message">Hi! We're adding saved favorites to the app: a signed-in user taps a heart to save an item and sees saved items on a favorites screen.
+To finish the spec we need:
+1. Which endpoints save, remove and list favorites?
+2. Is the list paginated, and how is it sorted?
+3. What does the API return when the item no longer exists?
+Could you share an example request and response? Thanks!</div>
+</section>
+
+<section id="en-quality">
+  <h2>Testing, audit and the final status</h2>
+  <ul class="rules">
+    <li><strong>Real evidence.</strong>The engine runs each check and records its result with a fingerprint of the code. If the code changes later, the result is out of date and the check must run again.</li>
+    <li><strong>Old problems stay separate.</strong>Problems that existed before the task are reported separately from new ones.</li>
+    <li><strong>A check that did not run is never "passed".</strong>It is recorded as blocked, with the reason.</li>
+    <li><strong>Independent review.</strong>Another agent or a separate session reviews the work when possible; otherwise the report says it was a second pass by the same agent.</li>
+  </ul>
+  <h3 style="margin-top:20px">The final status</h3>
+  <table>
+    <thead><tr><th>Status</th><th>Meaning</th></tr></thead>
+    <tbody>
+      <tr><td>Completed</td><td>Everything passed with evidence; no unresolved Critical or Important finding.</td></tr>
+      <tr><td>Completed with Limitations</td><td>Nothing failed, but some items could not be verified, or you accepted an Important finding.</td></tr>
+      <tr><td>Partially Completed</td><td>Something failed, steps remain, or a Critical finding remains, even if you accepted it.</td></tr>
+      <tr><td>Blocked</td><td>Work cannot continue until someone provides what is missing.</td></tr>
+    </tbody>
+  </table>
+  <p class="note">Accepting a known Critical or Important finding never gives "Completed".</p>
+</section>
+
+<section id="en-agents">
+  <h2>Supported agents</h2>
+  <p class="sub">Where each agent finds the skill, how to start it there, and how far we verified it.</p>
+  <ul class="evlegend">
+    <li><span class="ev" data-evidence="tested">Tested</span>We ran it ourselves.</li>
+    <li><span class="ev" data-evidence="checked">Checked in installed version</span>Found in the installed agent's code, not run end to end.</li>
+    <li><span class="ev" data-evidence="docs">Vendor docs</span>Documented, not run by us.</li>
+    <li><span class="ev" data-evidence="unverified">Unverified</span>Neither.</li>
+  </ul>
+  <div class="agents">
+    <article class="agent">
+      <h3>Claude Code</h3>
+      <dl>
+        <dt>Where the skill lives</dt><dd><code>~/.claude/skills</code> (a link to <code>~/.agents/skills</code>) <span class="ev" data-evidence="checked" data-evidence-key="claude-discovery">Checked in installed version</span></dd>
+        <dt>How to start it</dt><dd><code>/ai-dev-workflow …</code> <span class="ev" data-evidence="checked" data-evidence-key="claude-invoke">Checked in installed version</span></dd>
+        <dt>Starts on its own?</dt><dd>No — <code>disable-model-invocation: true</code> <span class="ev" data-evidence="checked" data-evidence-key="claude-manual-only">Checked in installed version</span></dd>
+        <dt>Early code edits</dt><dd>Blocked by the skill's hook, only for the task started in that session <span class="ev" data-evidence="checked" data-evidence-key="claude-hooks">Checked in installed version</span></dd>
+        <dt>Note</dt><dd>Not yet run live in Claude Code. The manual check is in <a href="docs/compatibility.md"><code>docs/compatibility.md</code></a>.</dd>
+      </dl>
+    </article>
+    <article class="agent">
+      <h3>Codex</h3>
+      <dl>
+        <dt>Where the skill lives</dt><dd><code>~/.agents/skills</code> <span class="ev" data-evidence="tested" data-evidence-key="codex-discovery">Tested</span></dd>
+        <dt>How to start it</dt><dd><code>$ai-dev-workflow …</code> <span class="ev" data-evidence="tested" data-evidence-key="codex-invoke-dollar">Tested</span>, or pick it in the <code>/skills</code> list <span class="ev" data-evidence="checked" data-evidence-key="codex-invoke-picker">Checked in installed version</span></dd>
+        <dt>Straight from Terminal</dt><dd><code>codex exec '$ai-dev-workflow …'</code> — keep the single quotes <span class="ev" data-evidence="tested" data-evidence-key="codex-exec">Tested</span></dd>
+        <dt>Starts on its own?</dt><dd>No — <code>allow_implicit_invocation: false</code> <span class="ev" data-evidence="tested" data-evidence-key="codex-manual-only">Tested</span></dd>
+        <dt>Note</dt><dd>A full task passed end to end. An explicit "skip the gates" request is not blocked; the engine reports it afterwards.</dd>
+      </dl>
+    </article>
+    <article class="agent">
+      <h3>Gemini CLI</h3>
+      <dl>
+        <dt>Where the skill lives</dt><dd><code>~/.agents/skills</code> <span class="ev" data-evidence="tested" data-evidence-key="gemini-discovery">Tested</span></dd>
+        <dt>How to start it</dt><dd><code>/ai-dev-workflow …</code> <span class="ev" data-evidence="tested" data-evidence-key="gemini-slash">Tested</span>, or type <code>Use the ai-dev-workflow skill to …</code> <span class="ev" data-evidence="tested" data-evidence-key="gemini-by-name">Tested</span></dd>
+        <dt>Fallback</dt><dd>Ask it to read the skill's <code>SKILL.md</code> and follow it <span class="ev" data-evidence="unverified" data-evidence-key="gemini-read-fallback">Unverified</span></dd>
+        <dt>Starts on its own?</dt><dd>No setting prevents it, but Gemini asks for your consent before it activates any skill.</dd>
+        <dt>Note</dt><dd>Needs a paid Gemini API key or a Code Assist licence. Project skills load only in trusted folders.</dd>
+      </dl>
+    </article>
+    <article class="agent">
+      <h3>Antigravity</h3>
+      <dl>
+        <dt>Where the skill lives</dt><dd><code>~/.gemini/config/skills</code> <span class="ev" data-evidence="docs" data-evidence-key="antigravity-app-discovery">Vendor docs</span></dd>
+        <dt>How to start it (app)</dt><dd><code>/ai-dev-workflow …</code> <span class="ev" data-evidence="docs" data-evidence-key="antigravity-app-invoke">Vendor docs</span></dd>
+        <dt>Starts on its own?</dt><dd>Not documented <span class="ev" data-evidence="unverified" data-evidence-key="antigravity-manual-only">Unverified</span></dd>
+        <dt>Command-line version</dt><dd>Not tested <span class="ev" data-evidence="docs" data-evidence-key="antigravity-cli">Vendor docs</span></dd>
+      </dl>
+    </article>
+    <article class="agent">
+      <h3>Other agents</h3>
+      <p>Cursor, GitHub Copilot, OpenCode and others: copy the skill's folder into the agent's skills folder. The skill tells the agent to ask you before it starts. <span class="ev" data-evidence="unverified" data-evidence-key="other-agents">Unverified</span></p>
+    </article>
+  </div>
+</section>
+
+<section id="en-files">
+  <h2>The task files</h2>
+  <p class="sub">Everything is inside the <code>.ai-dev-workflow</code> folder in your project:</p>
+  <dl class="files">
+    <div><dt><code>config.json</code></dt><dd>Project setup: instruction files, template, checks.</dd></div>
+    <div><dt><code>templates/</code></dt><dd>The project's spec template.</dd></div>
+    <div><dt><code>tasks/saved-favorites/</code></dt><dd>One folder per task, containing:</dd></div>
+    <div class="indent"><dt><code>spec.md</code></dt><dd>The spec.</dd></div>
+    <div class="indent"><dt><code>dependencies.md</code></dt><dd>What the task needed from outside, with messages and replies.</dd></div>
+    <div class="indent"><dt><code>plan.md</code></dt><dd>The implementation plan, frozen once approved.</dd></div>
+    <div class="indent"><dt><code>approved/</code></dt><dd>Read-only copies of every version you approved.</dd></div>
+    <div class="indent"><dt><code>state.json</code></dt><dd>Stage, approvals and progress; only the engine writes it.</dd></div>
+    <div class="indent"><dt><code>verification.md</code></dt><dd>The checks and their results.</dd></div>
+    <div class="indent"><dt><code>audit.md</code></dt><dd>Review findings.</dd></div>
+    <div class="indent"><dt><code>report.md</code></dt><dd>The final report.</dd></div>
+  </dl>
+  <p>Whether these files go into git is your choice per project: <code>all</code>, <code>config-only</code> or <code>none</code>.</p>
+</section>
+
+<section id="en-faq">
+  <h2>Questions, updating and uninstalling</h2>
+  <details><summary>Why doesn't the skill start by itself?</summary><p>So that your normal requests stay normal. You decide when a task goes through the workflow.</p></details>
+  <details><summary>Can I use my own spec template?</summary><p>Yes. Each project uses the template you choose during setup. Rules you mark as mandatory block approval until they are met; recommendations only warn. There is no limit on how many requirements a spec has.</p></details>
+  <details><summary>Does it need an internet connection?</summary><p>The skill itself works offline. Your agent needs its usual connection.</p></details>
+  <details><summary>Does it change anything in my project besides <code>.ai-dev-workflow</code>?</summary><p>Only the code changes in plans you approved. Instruction files such as <code>CLAUDE.md</code> are never edited. Depending on how you chose to save records, a line may be added to <code>.git/info/exclude</code>.</p></details>
+  <details><summary>Update to a newer version</summary>
+    <p>In the folder you downloaded during setup:</p>
+    <div class="act term"><div class="act-head"><svg aria-hidden="true"><use href="#i-term"/></svg><span>Terminal</span></div><pre><code><span class="ln">cd path/to/ai-dev-workflow</span>
+<span class="ln">git pull</span>
+<span class="ln">python3 skills/ai-dev-workflow/scripts/install.py update</span></code></pre></div>
+  </details>
+  <details><summary>Uninstall</summary>
+    <p>In the folder you downloaded during setup, first see what would be removed:</p>
+    <div class="act term"><div class="act-head"><svg aria-hidden="true"><use href="#i-term"/></svg><span>Terminal</span></div><pre><code><span class="ln">cd path/to/ai-dev-workflow</span>
+<span class="ln">python3 skills/ai-dev-workflow/scripts/install.py uninstall</span></code></pre></div>
+    <p>Then remove it:</p>
+    <div class="act term"><div class="act-head"><svg aria-hidden="true"><use href="#i-term"/></svg><span>Terminal</span></div><pre><code><span class="ln">python3 skills/ai-dev-workflow/scripts/install.py uninstall --yes</span></code></pre></div>
+    <p>Task files in your projects are never touched.</p>
+  </details>
+</section>
+
+<footer class="page-foot">MIT License · Version 1.0.0 · <a href="https://github.com/ahmedzein-dev/ai-dev-workflow">github.com/ahmedzein-dev/ai-dev-workflow</a></footer>
+</div>
+</main>
+</body>
+</html>

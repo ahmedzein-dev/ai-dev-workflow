@@ -1,0 +1,14 @@
+{
+  "description": "Starting checks for a Node or TypeScript project. Use with: workflow.py init --config examples/configs/node.json …",
+  "checks": [
+    {"id": "lint", "name": "npm run lint", "command": "npm run lint", "required": true},
+    {"id": "typecheck", "name": "npm run typecheck", "command": "npm run typecheck", "required": true},
+    {"id": "test", "name": "npm test", "command": "npm test --", "required": true, "accepts_args": true},
+    {"id": "dependencies", "name": "New dependencies", "builtin": "manifest-diff", "files": ["package.json"], "required": true},
+    {"id": "rules", "name": "Project rule scan", "builtin": "rule-scan", "required": true}
+  ],
+  "rules": [
+    {"id": "no-console-log", "pattern": "console\\.log\\(", "paths": ["src/**/*.ts", "src/**/*.tsx"],
+     "exclude": ["**/*.test.ts", "**/*.test.tsx"], "severity": "warning", "message": "Avoid console.log in source files."}
+  ]
+}

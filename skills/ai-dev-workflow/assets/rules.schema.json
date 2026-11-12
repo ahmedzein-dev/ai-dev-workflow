@@ -1,0 +1,100 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AIDevWorkflow template rules file",
+  "description": "Classifies a specification template's requirements into mandatory checks, judgment rules and advisory warnings. Never encode limits on how many requirements, edge cases, exclusions or acceptance criteria a spec has.",
+  "type": "object",
+  "required": ["schema"],
+  "properties": {
+    "schema": {"const": 1},
+    "name": {"type": "string"},
+    "description": {"type": "string"},
+    "id_prefixes": {
+      "description": "ID families checked for uniqueness and order, e.g. FR, EC, AC.",
+      "type": "array", "items": {"type": "string", "pattern": "^[A-Z]{1,8}$"}
+    },
+    "patterns": {
+      "description": "Mandatory formats. A target that does not match blocks approval.",
+      "type": "array",
+      "items": {
+        "type": "object", "required": ["id", "target", "regex", "message"],
+        "properties": {
+          "id": {"type": "string"}, "target": {"$ref": "#/$defs/target"}, "regex": {"type": "string"},
+          "message": {"type": "string"}, "source": {"type": "string"}
+        }
+      }
+    },
+    "tables": {
+      "description": "Table rows (by ID prefix) whose cells must all be filled.",
+      "type": "array",
+      "items": {
+        "type": "object", "required": ["id", "id_prefix", "message"],
+        "properties": {"id": {"type": "string"}, "id_prefix": {"type": "string"}, "message": {"type": "string"}, "source": {"type": "string"}}
+      }
+    },
+    "content_required": {
+      "description": "Fields or sections that need real content. allow_none permits an explicit 'None — <reason>'.",
+      "type": "array",
+      "items": {
+        "type": "object", "required": ["target"],
+        "properties": {"target": {"$ref": "#/$defs/target"}, "allow_none": {"type": "boolean"}}
+      }
+    },
+    "verification": {
+      "description": "What the acceptance matrix must cover.",
+      "type": "object",
+      "properties": {
+        "ids": {"type": "array", "items": {"type": "string"}},
+        "checklist_label": {"type": ["string", "null"]},
+        "checklist_prefix": {"type": "string"}
+      }
+    },
+    "vague_words": {"type": "array", "items": {"type": "string"}},
+    "judgment": {
+      "description": "Rules that need judgment. They block approval until the agent records a review for the current spec version.",
+      "type": "array",
+      "items": {
+        "type": "object", "required": ["id", "rule"],
+        "properties": {
+          "id": {"type": "string"}, "rule": {"type": "string"}, "source": {"type": "string"},
+          "requires_note": {"type": "boolean"},
+          "detectors": {
+            "type": "array",
+            "items": {
+              "type": "object", "required": ["type"],
+              "properties": {
+                "type": {"enum": ["vague-words", "inspected-files", "coverage-map"]},
+                "target": {"$ref": "#/$defs/target"},
+                "words": {"type": "array", "items": {"type": "string"}},
+                "of": {"type": "string"}
+              }
+            }
+          }
+        }
+      }
+    },
+    "advisory": {
+      "description": "Recommendations. They produce warnings and never block approval.",
+      "type": "array",
+      "items": {
+        "type": "object", "required": ["id", "type"],
+        "properties": {
+          "id": {"type": "string"},
+          "type": {"enum": ["questions", "label-mentions", "none-entry", "prompts"]},
+          "target": {"$ref": "#/$defs/target"},
+          "questions": {"type": "object", "additionalProperties": {"type": "string"}},
+          "words": {"type": "array", "items": {"type": "string"}},
+          "prompts": {"type": "array", "items": {"type": "string"}},
+          "message": {"type": "string"},
+          "source": {"type": "string"}
+        }
+      }
+    }
+  },
+  "$defs": {
+    "target": {
+      "description": "label:<field name> | section:<heading start> | ids:<PREFIX> | table:<PREFIX>:<column index>",
+      "type": "string",
+      "pattern": "^(label|section|ids|table):.+$"
+    }
+  }
+}

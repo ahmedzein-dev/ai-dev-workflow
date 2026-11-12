@@ -1,0 +1,21 @@
+{
+  "schema": 1,
+  "project": "example-app",
+  "standards": ["AGENTS.md"],
+  "spec_template": ".ai-dev-workflow/templates/example-spec-template.md",
+  "spec_rules": ".ai-dev-workflow/templates/example-spec-template.rules.json",
+  "template_source": "file:example-spec-template.md",
+  "records": {"commit": "all"},
+  "checks": [
+    {"id": "lint", "name": "Lint", "command": "npm run lint", "required": true},
+    {"id": "test", "name": "Unit tests", "command": "npm test --", "required": true, "accepts_args": true},
+    {"id": "e2e", "name": "End-to-end tests", "command": "npm run e2e", "required": false,
+     "when": "Run when user-facing flows change."},
+    {"id": "dependencies", "name": "New dependencies", "builtin": "manifest-diff", "files": ["package.json"], "required": true},
+    {"id": "rules", "name": "Project rule scan", "builtin": "rule-scan", "required": true}
+  ],
+  "rules": [
+    {"id": "no-console-log", "pattern": "console\\.log\\(", "paths": ["src/**/*.ts"], "exclude": ["src/**/*.test.ts"],
+     "severity": "warning", "message": "Avoid console.log in source files."}
+  ]
+}

@@ -1,0 +1,339 @@
+{
+  "schema": 1,
+  "id": "saved-favorites",
+  "title": "Saved favorites",
+  "type": "feature",
+  "created_at": "2026-11-12T06:10:53Z",
+  "created_by": "claude-code",
+  "invocation": "/ai-dev-workflow Add saved favorites to the item list",
+  "stage": "FINAL_REPORT",
+  "status": "closed",
+  "outcome": "Completed with Limitations",
+  "template": {
+    "path": ".ai-dev-workflow/templates/example-spec-template.md",
+    "sha256": "378d5c0d4cec299e4b853ab16432b3c26187c420887558c57597f852266ff98b",
+    "rules": ".ai-dev-workflow/templates/example-spec-template.rules.json"
+  },
+  "discovery": {
+    "inspected": [
+      "app/items.py",
+      "tests/test_items.py",
+      "AGENTS.md"
+    ],
+    "summary": "Signed-in users save items with a heart and see them, newest first, on a favorites screen. Sharing and collections are out of scope. Affects app/ only; favorites are stored by the backend."
+  },
+  "approvals": {
+    "spec": {
+      "version": 1,
+      "sha256": "6aaca738346b96451cc9e9f13a35bb8e72db9696495b591d27094f439c5b2a3c",
+      "snapshot": "approved/spec.v1.md",
+      "approved_by": "user",
+      "evidence": "Approve the spec.",
+      "recorded_by": "claude-code",
+      "recorded_at": "2026-11-12T06:10:53Z"
+    },
+    "plan": {
+      "version": 1,
+      "sha256": "ef8e8100ba010364a0b98d2a5fd2044ff329b82d1fc558d0f88473148aeca4e9",
+      "snapshot": "approved/plan.v1.md",
+      "approved_by": "user",
+      "evidence": "Plan approved, go ahead.",
+      "recorded_by": "claude-code",
+      "recorded_at": "2026-11-12T06:10:53Z",
+      "spec_sha256": "6aaca738346b96451cc9e9f13a35bb8e72db9696495b591d27094f439c5b2a3c",
+      "spec_version": 1
+    }
+  },
+  "spec_review": {
+    "spec_sha256": "6aaca738346b96451cc9e9f13a35bb8e72db9696495b591d27094f439c5b2a3c",
+    "rules": {
+      "J1": {
+        "status": "pass",
+        "note": "",
+        "agent": "claude-code",
+        "at": "2026-11-12T06:10:53Z"
+      },
+      "J2": {
+        "status": "pass",
+        "note": "",
+        "agent": "claude-code",
+        "at": "2026-11-12T06:10:53Z"
+      },
+      "J3": {
+        "status": "pass",
+        "note": "New app/favorites.py mirrors the module layout of app/items.py, per AGENTS.md.",
+        "agent": "claude-code",
+        "at": "2026-11-12T06:10:53Z"
+      },
+      "J4": {
+        "status": "pass",
+        "note": "",
+        "agent": "claude-code",
+        "at": "2026-11-12T06:10:53Z"
+      }
+    },
+    "map": {
+      "REQ-1": [
+        "AC-1",
+        "AC-2",
+        "EC-1",
+        "EC-2"
+      ],
+      "REQ-2": [
+        "AC-1",
+        "EC-3"
+      ],
+      "REQ-3": [
+        "AC-3"
+      ]
+    },
+    "questions": {
+      "double-submit": "n/a:the heart is a toggle; repeated taps alternate state",
+      "offline": "EC-2",
+      "server-error": "EC-2",
+      "empty": "EC-3",
+      "interrupted": "n/a:each tap is a single request; state reloads from the server",
+      "concurrent": "n/a:favorites belong to one shopper",
+      "stale": "EC-1",
+      "lost-response": "n/a:PUT and DELETE are idempotent; the list reloads on open"
+    },
+    "dismissed": {}
+  },
+  "progress": {
+    "S1": {
+      "status": "done",
+      "files": [
+        "app/favorites.py"
+      ],
+      "note": "",
+      "agent": "codex",
+      "at": "2026-11-12T06:10:54Z"
+    },
+    "S2": {
+      "status": "done",
+      "files": [
+        "tests/test_favorites.py"
+      ],
+      "note": "",
+      "agent": "codex",
+      "at": "2026-11-12T06:10:54Z"
+    }
+  },
+  "checks": [
+    {
+      "id": "unit",
+      "name": "unit tests",
+      "kind": "result",
+      "agent": "codex",
+      "at": "2026-11-12T06:10:54Z",
+      "counts": null,
+      "reason": null,
+      "command": "python3 -m unittest discover -s tests -q",
+      "duration_s": 0.1,
+      "exit_code": 0,
+      "status": "passed",
+      "summary": "OK",
+      "fingerprint": "ca05faf7efae5d2653bb754d936c7b809f92a504fa0075c96545672112bde640"
+    }
+  ],
+  "checkpoints": [
+    {
+      "at": "2026-11-12T06:10:53Z",
+      "kind": "implementation-start",
+      "agent": "claude-code",
+      "fingerprint": "7f7d64708374bb8800e15cbb46c44c7119e287a6a7eba54d2b737fa21d5499fe",
+      "valid": true,
+      "changed_files": 0
+    },
+    {
+      "at": "2026-11-12T06:10:54Z",
+      "kind": "preflight",
+      "agent": "codex",
+      "fingerprint": "7f7d64708374bb8800e15cbb46c44c7119e287a6a7eba54d2b737fa21d5499fe",
+      "valid": true,
+      "changed_files": 0
+    },
+    {
+      "at": "2026-11-12T06:10:54Z",
+      "kind": "step",
+      "agent": "codex",
+      "fingerprint": "8d09a465291526f5a765b69546414c6411baacb90d927ca4a1b0736934997c6c",
+      "valid": true,
+      "changed_files": 1,
+      "step": "S1"
+    },
+    {
+      "at": "2026-11-12T06:10:54Z",
+      "kind": "step",
+      "agent": "codex",
+      "fingerprint": "ca05faf7efae5d2653bb754d936c7b809f92a504fa0075c96545672112bde640",
+      "valid": true,
+      "changed_files": 2,
+      "step": "S2"
+    }
+  ],
+  "decisions": [],
+  "excluded": [],
+  "history": [
+    {
+      "at": "2026-11-12T06:10:53Z",
+      "event": "created",
+      "agent": "claude-code",
+      "invocation": "/ai-dev-workflow Add saved favorites to the item list"
+    },
+    {
+      "at": "2026-11-12T06:10:53Z",
+      "event": "discovery",
+      "agent": "claude-code",
+      "inspected": 3
+    },
+    {
+      "at": "2026-11-12T06:10:53Z",
+      "event": "stage",
+      "agent": "claude-code",
+      "from": "DISCOVERY",
+      "to": "DEPENDENCIES"
+    },
+    {
+      "at": "2026-11-12T06:10:53Z",
+      "event": "stage",
+      "agent": "claude-code",
+      "from": "DEPENDENCIES",
+      "to": "SPECIFICATION"
+    },
+    {
+      "at": "2026-11-12T06:10:53Z",
+      "event": "spec-review",
+      "agent": "claude-code",
+      "spec_sha256": "6aaca738"
+    },
+    {
+      "at": "2026-11-12T06:10:53Z",
+      "event": "stage",
+      "agent": "claude-code",
+      "from": "SPECIFICATION",
+      "to": "SPEC_APPROVAL"
+    },
+    {
+      "at": "2026-11-12T06:10:53Z",
+      "event": "approved",
+      "agent": "claude-code",
+      "document": "spec",
+      "version": 1,
+      "sha256": "6aaca738"
+    },
+    {
+      "at": "2026-11-12T06:10:53Z",
+      "event": "stage",
+      "agent": "claude-code",
+      "from": "SPEC_APPROVAL",
+      "to": "PLANNING",
+      "reason": "spec approved"
+    },
+    {
+      "at": "2026-11-12T06:10:53Z",
+      "event": "stage",
+      "agent": "claude-code",
+      "from": "PLANNING",
+      "to": "PLAN_APPROVAL"
+    },
+    {
+      "at": "2026-11-12T06:10:53Z",
+      "event": "approved",
+      "agent": "claude-code",
+      "document": "plan",
+      "version": 1,
+      "sha256": "ef8e8100"
+    },
+    {
+      "at": "2026-11-12T06:10:53Z",
+      "event": "stage",
+      "agent": "claude-code",
+      "from": "PLAN_APPROVAL",
+      "to": "IMPLEMENTATION",
+      "reason": "plan approved"
+    },
+    {
+      "at": "2026-11-12T06:10:53Z",
+      "event": "resumed",
+      "agent": "codex",
+      "previous": "active"
+    },
+    {
+      "at": "2026-11-12T06:10:54Z",
+      "event": "preflight",
+      "agent": "codex",
+      "valid": true
+    },
+    {
+      "at": "2026-11-12T06:10:54Z",
+      "event": "step",
+      "agent": "codex",
+      "step": "S1",
+      "status": "done"
+    },
+    {
+      "at": "2026-11-12T06:10:54Z",
+      "event": "step",
+      "agent": "codex",
+      "step": "S2",
+      "status": "done"
+    },
+    {
+      "at": "2026-11-12T06:10:54Z",
+      "event": "stage",
+      "agent": "codex",
+      "from": "IMPLEMENTATION",
+      "to": "TESTING"
+    },
+    {
+      "at": "2026-11-12T06:10:54Z",
+      "event": "check",
+      "agent": "codex",
+      "check": "unit",
+      "status": "passed"
+    },
+    {
+      "at": "2026-11-12T06:10:55Z",
+      "event": "stage",
+      "agent": "codex",
+      "from": "TESTING",
+      "to": "AUDIT"
+    },
+    {
+      "at": "2026-11-12T06:10:55Z",
+      "event": "stage",
+      "agent": "codex",
+      "from": "AUDIT",
+      "to": "FINAL_REPORT"
+    },
+    {
+      "at": "2026-11-12T06:10:55Z",
+      "event": "closed",
+      "agent": "codex",
+      "outcome": "Completed with Limitations"
+    }
+  ],
+  "baseline": {
+    "start": {
+      "head": "837a2b73d4ab967863c33bfe18e52c8d8965e30d",
+      "dirty": {},
+      "captured_at": "2026-11-12T06:10:53Z"
+    },
+    "implementation": {
+      "head": "837a2b73d4ab967863c33bfe18e52c8d8965e30d",
+      "dirty": {},
+      "captured_at": "2026-11-12T06:10:53Z"
+    }
+  },
+  "updated_at": "2026-11-12T06:10:55Z",
+  "last_checkpoint": {
+    "at": "2026-11-12T06:10:54Z",
+    "fingerprint": "ca05faf7efae5d2653bb754d936c7b809f92a504fa0075c96545672112bde640",
+    "changes": {
+      "app/favorites.py": "a7f3f990d4246c8b0828b0fa7d309b15617cf3e8",
+      "tests/test_favorites.py": "377ce8dac7d6ed3ee1f6899d11069bfa946e58f3"
+    }
+  },
+  "closed_at": "2026-11-12T06:10:55Z"
+}
