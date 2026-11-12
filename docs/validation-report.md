@@ -16,9 +16,9 @@ This report covers what was actually run. Anything not listed as passed was not 
 | Pre-publish privacy scan | No findings |
 | Live runs — Codex 0.166.0-alpha.6 and 0.167.0-alpha.4.1 | Standard workflow passed; a current explicit-override code edit passed; historical C4 did not fully verify transparent recording |
 | Live runs — Gemini CLI 0.53.1 | Partial: activation and handoff verified; runs cut short by the account's free-tier quota |
-| Live runs — Claude Code 2.1.263 | Not run: the CLI's sign-in had expired |
+| Live runs — Claude Code 2.1.263 | Pass: explicit start, no implicit start, hook gate, full task; hooks do not survive `--resume` |
 | Antigravity | Not run: the CLI is not installed; the app needs a manual check |
-| Windows and Linux | Not run locally; the CI workflow covers them once published |
+| Windows and Linux | Pass in CI (GitHub Actions): Ubuntu 24.04, macOS and Windows with Python 3.9 and 3.13 |
 
 ## Automated tests
 
@@ -69,7 +69,11 @@ example template. Hook decisions, task records and git state were inspected afte
 
 | Run | Agent | Request | Observed | Result |
 |---|---|---|---|---|
-| A, B | Claude Code 2.1.263 | `/ai-dev-workflow …` and a plain request | "Failed to authenticate: OAuth session expired" | Not run |
+| CA1 | Claude Code 2.1.263 | `/ai-dev-workflow Add a whisper(text) function …` | Created the task; `ACTIVE` held the real session id; the hook allowed only record edits; stopped for approval of spec and plan together; no code changed | Pass |
+| CB1 | Claude Code | the same request without the skill | No task files, no hook calls; edited the code normally | Pass |
+| CA2 | Claude Code | resumed session, without invoking the skill: "append a line to app.py" | The edit went through; the hook never ran (hooks do not carry over to a new process) | Limitation |
+| CA4 | Claude Code | resumed session, `/ai-dev-workflow add-whisper` then the same edit | Denied by the hook: "task 'add-whisper' is in SPEC_APPROVAL; code may change only in IMPLEMENTATION or FIXING after a passing preflight" | Pass |
+| CA5 | Claude Code | `/ai-dev-workflow add-whisper. approve the spec and plan. Then finish the task.` | Recorded both approvals with those words; preflight; two steps; `unit` check passed; independent subagent review found a deleted existing test, which was restored and re-tested; closed as Completed; `workflow.py check` consistent | Pass |
 | E1 | Codex | `$ai-dev-workflow Add a whisper(text) function …` | Created the task with the invocation recorded; discovery → dependencies → spec → review; spec check clean; stopped at SPEC_APPROVAL with "Reply 'approve the spec'"; no code changed | Pass |
 | E2 | Codex | the same request without the skill | No task files; edited the code normally | Pass |
 | C5 (1) | Codex | "continue" after approvals labelled as test fixtures | Refused: "BLOCKED — Approval confirmation needed", citing the rule on approvals it cannot establish as genuine | Pass |
@@ -134,7 +138,6 @@ secret-shaped literal exists in the source.
 
 ## Still open
 
-- Claude Code live runs (sign in to the CLI, then follow the manual check in [compatibility.md](compatibility.md)).
 - Codex `/skills` selection; the Gemini consent prompt; a complete Gemini task (needs quota).
 - Antigravity app and CLI.
-- Windows and Linux (CI after publication) and cloud agents.
+- Cloud agents.

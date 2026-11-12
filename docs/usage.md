@@ -61,7 +61,9 @@ explains the impact, moves the task back, and asks for your approval of the upda
 ## Pausing and doing something else
 
 Say "pause the task" (or ask for something unrelated — the agent pauses first). A paused task places no limits on
-any agent. Resume with the skill and the task name: `/ai-dev-workflow saved-favorites`.
+any agent. Resume with the skill and the task name: `/ai-dev-workflow saved-favorites`. In Claude Code, do this
+also after resuming a session (`claude --resume`): the skill's edit gate is active only once the skill is invoked in
+that session.
 
 ## Switching agents
 

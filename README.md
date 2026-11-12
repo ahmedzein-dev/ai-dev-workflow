@@ -65,7 +65,7 @@ and asks which template to use and whether task records are committed. See [docs
 
 | Agent | Manual-only | Hooks | Evidence |
 |---|---|---|---|
-| Claude Code | Yes — `disable-model-invocation: true` | Skill-scoped: block code edits for the active task only | Checked in the installed version (2.1.263); live runs pending |
+| Claude Code | Yes — `disable-model-invocation: true` | Skill-scoped: block code edits for the active task only | Tested (2.1.263): explicit start, no implicit start, hook gate, a full task end to end |
 | Codex | Yes — `agents/openai.yaml`: `allow_implicit_invocation: false` | Not used (project-wide only) | Tested (0.166): explicit start, no implicit start, a full task end to end |
 | Gemini CLI | No setting exists; every model-initiated activation asks for consent | Not used (project-wide only) | Tested (0.53.1): slash command, by name, no implicit start, handoff; full task not run |
 | Antigravity | Not documented | Not used | Vendor docs; manual check described |

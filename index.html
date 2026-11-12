@@ -105,6 +105,11 @@ html[data-lang="ar"] .topnav.nav-en{display:none}
 .tbtn:hover{border-color:var(--accent)}
 .tbtn svg{width:17px;height:17px;flex:none}
 .tbtn.lang-switch{min-width:43px;justify-content:center;padding:6px 9px;font-size:.78rem;font-weight:700;letter-spacing:.04em}
+.language-switch{display:none;align-items:center;gap:2px;padding:3px;border:1px solid var(--border-strong);border-radius:10px;background:var(--surface-2);direction:ltr}
+.language-switch button{font:inherit;font-size:.73rem;font-weight:800;letter-spacing:.05em;line-height:1.4;min-width:36px;padding:5px 8px;border:0;border-radius:7px;background:transparent;color:var(--muted);cursor:pointer}
+.language-switch button[aria-pressed="true"]{background:var(--surface);color:var(--text);box-shadow:var(--shadow)}
+.language-switch button:hover{color:var(--accent)}
+html.js .language-switch{display:flex}
 .tbtn.needs-js{display:none}
 html.js .tbtn.needs-js{display:inline-flex}
 html.js .nojs{display:none}
@@ -317,7 +322,10 @@ details.more{margin-top:12px}
     <div class="top-controls">
       <a class="tbtn lang-switch nojs" href="#en" lang="en" aria-label="English">EN</a>
       <a class="tbtn lang-switch nojs" href="#ar" lang="ar" aria-label="العربية">AR</a>
-      <button id="lang-toggle" class="tbtn lang-switch needs-js" type="button" lang="ar"><span class="label">AR</span></button>
+      <div id="lang-toggle" class="language-switch" role="group" aria-label="Language / اللغة">
+        <button type="button" data-language="ar" lang="ar" aria-label="العربية" aria-pressed="false">AR</button>
+        <button type="button" data-language="en" lang="en" aria-label="English" aria-pressed="false">EN</button>
+      </div>
       <button id="theme-toggle" class="tbtn needs-js" type="button"><svg aria-hidden="true"><use href="#i-moon"/></svg><span class="label">Dark</span></button>
     </div>
   </div>
@@ -327,13 +335,11 @@ details.more{margin-top:12px}
   var root = document.documentElement;
   var TEXT = {
     en: {copy: "Copy", copied: "Copied", failed: "Select and copy", dark: "Dark", light: "Light",
-         toDark: "Switch to the dark theme", toLight: "Switch to the light theme",
-         lang: "AR", toLang: "اعرض الصفحة بالعربية"},
+         toDark: "Switch to the dark theme", toLight: "Switch to the light theme"},
     ar: {copy: "نسخ", copied: "تم النسخ", failed: "حدّد النص وانسخه", dark: "داكن", light: "فاتح",
-         toDark: "التبديل إلى المظهر الداكن", toLight: "التبديل إلى المظهر الفاتح",
-         lang: "EN", toLang: "Show this page in English"}
+         toDark: "التبديل إلى المظهر الداكن", toLight: "التبديل إلى المظهر الفاتح"}
   };
-  var langBtn = document.getElementById("lang-toggle");
+  var langButtons = document.querySelectorAll("#lang-toggle [data-language]");
   var themeBtn = document.getElementById("theme-toggle");
   function save(key, value) { try { window.localStorage.setItem(key, value); } catch (e) { /* storage unavailable */ } }
   function lang() { return root.getAttribute("data-lang") === "ar" ? "ar" : "en"; }
@@ -354,11 +360,9 @@ details.more{margin-top:12px}
     root.setAttribute("data-lang", value);
     root.setAttribute("lang", value);
     root.setAttribute("dir", value === "ar" ? "rtl" : "ltr");
-    var t = TEXT[value];
-    langBtn.querySelector(".label").textContent = t.lang;
-    langBtn.setAttribute("lang", value === "ar" ? "en" : "ar");
-    langBtn.setAttribute("aria-label", t.toLang);
-    langBtn.setAttribute("title", t.toLang);
+    Array.prototype.forEach.call(langButtons, function (button) {
+      button.setAttribute("aria-pressed", button.getAttribute("data-language") === value ? "true" : "false");
+    });
     if (remember) { save("aidw-lang", value); }
     labelTheme();
   }
@@ -370,15 +374,23 @@ details.more{margin-top:12px}
     return found;
   }
   setLang(lang(), false);
-  langBtn.addEventListener("click", function () {
-    var from = lang(), to = from === "ar" ? "en" : "ar";
-    var current = window.pageYOffset > 200 ? sectionInView(document.getElementById(from)) : null;
-    setLang(to, true);
-    var target = current ? document.getElementById(to + current.id.slice(2)) : null;
-    if (window.history && window.history.replaceState) {
-      window.history.replaceState(null, "", window.location.pathname + window.location.search + (target ? "#" + target.id : ""));
-    }
-    if (target) { target.scrollIntoView(); } else { window.scrollTo(0, 0); }
+  Array.prototype.forEach.call(langButtons, function (button) {
+    button.addEventListener("click", function () {
+      var from = lang(), to = button.getAttribute("data-language");
+      if (to === from) { return; }
+      var hash = window.location.hash, current = null;
+      if (hash.indexOf("#" + from + "-") === 0) {
+        current = document.getElementById(hash.slice(1));
+        if (current && current.tagName.toLowerCase() !== "section") { current = null; }
+      }
+      if (!current && window.pageYOffset > 200) { current = sectionInView(document.getElementById(from)); }
+      setLang(to, true);
+      var target = current ? document.getElementById(to + current.id.slice(2)) : null;
+      if (window.history && window.history.replaceState) {
+        window.history.replaceState(null, "", window.location.pathname + window.location.search + (target ? "#" + target.id : ""));
+      }
+      if (target) { target.scrollIntoView(); } else { window.scrollTo(0, 0); }
+    });
   });
   window.addEventListener("hashchange", function () {
     var hash = window.location.hash;
@@ -738,10 +750,10 @@ details.more{margin-top:12px}
       <h3><bdi>Claude Code</bdi></h3>
       <dl>
         <dt>مكان المهارة</dt><dd><code>~/.claude/skills</code> (رابط إلى <code>~/.agents/skills</code>) <span class="ev" data-evidence="checked" data-evidence-key="claude-discovery">مفحوص في النسخة المثبّتة</span></dd>
-        <dt>طريقة البدء</dt><dd><code>/ai-dev-workflow …</code> <span class="ev" data-evidence="checked" data-evidence-key="claude-invoke">مفحوص في النسخة المثبّتة</span></dd>
-        <dt>هل تبدأ وحدها؟</dt><dd>لا — <code>disable-model-invocation: true</code> <span class="ev" data-evidence="checked" data-evidence-key="claude-manual-only">مفحوص في النسخة المثبّتة</span></dd>
-        <dt>التعديل المبكر للكود</dt><dd>يمنعه خطّاف المهارة، وللمهمة التي بدأت في الجلسة نفسها فقط <span class="ev" data-evidence="checked" data-evidence-key="claude-hooks">مفحوص في النسخة المثبّتة</span></dd>
-        <dt>ملاحظة</dt><dd>لم يُشغَّل اختبار حي في <bdi>Claude Code</bdi> بعد. خطوات الفحص اليدوي في <a href="docs/compatibility.md"><code>docs/compatibility.md</code></a>.</dd>
+        <dt>طريقة البدء</dt><dd><code>/ai-dev-workflow …</code> <span class="ev" data-evidence="tested" data-evidence-key="claude-invoke">مُختبَر</span></dd>
+        <dt>هل تبدأ وحدها؟</dt><dd>لا — <code>disable-model-invocation: true</code> <span class="ev" data-evidence="tested" data-evidence-key="claude-manual-only">مُختبَر</span></dd>
+        <dt>التعديل المبكر للكود</dt><dd>يمنعه خطّاف المهارة، وللمهمة التي بدأت في الجلسة نفسها فقط <span class="ev" data-evidence="tested" data-evidence-key="claude-hooks">مُختبَر</span></dd>
+        <dt>ملاحظة</dt><dd>نجحت مهمة كاملة من البداية إلى النهاية. بعد استئناف جلسة سابقة، اكتب <code>/ai-dev-workflow</code> واسم المهمة من جديد، وإلا لا يعمل منع التعديل المبكر.</dd>
       </dl>
     </article>
     <article class="agent">
@@ -1131,10 +1143,10 @@ Could you share an example request and response? Thanks!</div>
       <h3>Claude Code</h3>
       <dl>
         <dt>Where the skill lives</dt><dd><code>~/.claude/skills</code> (a link to <code>~/.agents/skills</code>) <span class="ev" data-evidence="checked" data-evidence-key="claude-discovery">Checked in installed version</span></dd>
-        <dt>How to start it</dt><dd><code>/ai-dev-workflow …</code> <span class="ev" data-evidence="checked" data-evidence-key="claude-invoke">Checked in installed version</span></dd>
-        <dt>Starts on its own?</dt><dd>No — <code>disable-model-invocation: true</code> <span class="ev" data-evidence="checked" data-evidence-key="claude-manual-only">Checked in installed version</span></dd>
-        <dt>Early code edits</dt><dd>Blocked by the skill's hook, only for the task started in that session <span class="ev" data-evidence="checked" data-evidence-key="claude-hooks">Checked in installed version</span></dd>
-        <dt>Note</dt><dd>Not yet run live in Claude Code. The manual check is in <a href="docs/compatibility.md"><code>docs/compatibility.md</code></a>.</dd>
+        <dt>How to start it</dt><dd><code>/ai-dev-workflow …</code> <span class="ev" data-evidence="tested" data-evidence-key="claude-invoke">Tested</span></dd>
+        <dt>Starts on its own?</dt><dd>No — <code>disable-model-invocation: true</code> <span class="ev" data-evidence="tested" data-evidence-key="claude-manual-only">Tested</span></dd>
+        <dt>Early code edits</dt><dd>Blocked by the skill's hook, only for the task started in that session <span class="ev" data-evidence="tested" data-evidence-key="claude-hooks">Tested</span></dd>
+        <dt>Note</dt><dd>A full task passed end to end. After resuming an earlier session, type <code>/ai-dev-workflow</code> and the task name again; until then early edits are not blocked.</dd>
       </dl>
     </article>
     <article class="agent">

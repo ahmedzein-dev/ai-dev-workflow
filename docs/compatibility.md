@@ -34,11 +34,14 @@ Only **Tested** items are described as confirmed.
 | Does not read `~/.agents/skills` (hence the installer's link or copy) | Not in the docs and not referenced by the 2.1.263 binary |
 | `disable-model-invocation: true`: the description never enters Claude's context; only `/ai-dev-workflow` starts it | Vendor docs; key **Checked in installed version** |
 | `${CLAUDE_SKILL_DIR}` and `${CLAUDE_SESSION_ID}` substitution in SKILL.md | Vendor docs; `CLAUDE_SKILL_DIR` **Checked in installed version** |
-| Skill-scoped hooks register on invocation and last for the session; the edit gate acts only for the task started in that session | Vendor docs; hook logic **Tested** by the automated suite (not yet live) |
-| Live start, gate and handoff runs | **Not run**: the installed CLI's login had expired during validation; see the manual check below |
+| `/ai-dev-workflow …` starts it; `.ai-dev-workflow/ACTIVE` holds the real session id | **Tested** (2.1.263) |
+| A plain request did not start it and created no task files | **Tested** (one run) |
+| Skill-scoped hooks register on invocation; with the skill invoked, an edit to `app.py` before approval was denied with the AIDevWorkflow reason, and edits went through after approval and `preflight` | **Tested** (2.1.263) |
+| Hooks do not carry over to a resumed session (`claude --resume`, a new process): an edit there went through until `/ai-dev-workflow <task>` was typed again | **Tested** (2.1.263) |
+| A full task end to end: approvals recorded in the user's words, implementation, `unit` check, independent subagent review, report, closed as Completed | **Tested** (2.1.263) |
 
-Limits: hooks see Claude's edit tools, not shell commands that write files; whether hooks survive `--resume` is
-undocumented, so the resume procedure always re-invokes the skill.
+Limits: hooks see Claude's edit tools, not shell commands that write files. Hooks live only in the Claude process
+where the skill was invoked: after resuming a session, type `/ai-dev-workflow <task>` again before continuing.
 
 ## Codex
 
@@ -100,7 +103,7 @@ and ask, and `workflow.py new` refuses to create a task without the user's invok
 These need a person at the keyboard (or a login we did not have). Each takes a few minutes in a scratch repository
 with the skill installed.
 
-**Claude Code** (after `claude` is signed in)
+**Claude Code** (all five steps were run on 2.1.263; repeat them on a new version)
 1. `/ai-dev-workflow Add a whisper(text) function to app.py` → a task appears in `.ai-dev-workflow/tasks/`, and
    `.ai-dev-workflow/ACTIVE` contains a real session id (not `${CLAUDE_SESSION_ID}`).
 2. Ask it to edit `app.py` before the plan is approved → the edit is blocked with an AIDevWorkflow reason.
