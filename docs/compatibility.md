@@ -49,7 +49,8 @@ undocumented, so the resume procedure always re-invokes the skill.
 | With `allow_implicit_invocation: false`, a plain request did not start it and created no task files | **Tested** (one run) |
 | Followed the gates on its own: discovery, dependencies, spec, review, then stopped at SPEC_APPROVAL asking "Reply 'approve the spec'" | **Tested** |
 | Refused approvals it could not establish as genuine (asked the user to reconfirm) | **Tested** |
-| When told explicitly to skip the gates and write code, it did so anyway (3 of 3 runs; once after pausing the task). `status` and `check` then flag the files changed before approval | **Tested** |
+| When explicitly asked to skip gates, it wrote code in all three runs without fabricating approvals. One run paused the task first; acknowledgment and a recorded reason were not established in every run. `status` and `check` flagged changes before approval. See the [validation report](validation-report.md) for the override criteria. | **Tested** |
+| With the updated skill in Codex 0.167.0-alpha.4.1, one live code-edit run acknowledged an explicit override, recorded `pause --reason` before editing, and reported skipped stages as incomplete. The state remained PAUSED at DISCOVERY with no approvals or outcome. | **Tested** (one edit run; see [validation report](validation-report.md)) |
 | Picking it in the `/skills` list | Vendor docs; setting **Checked in installed version**; the TUI could not be scripted — manual check below |
 
 Limits: no skill-scoped hooks exist in Codex and project-wide hooks are deliberately not used, so the gates depend on

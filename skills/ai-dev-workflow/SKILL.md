@@ -36,23 +36,30 @@ Structured AI-Assisted Development — From Requirements to Release.
    `/ai-dev-workflow`, `$ai-dev-workflow`, or asked for AIDevWorkflow / ai-dev-workflow by name. If you loaded this
    skill on your own, stop, create no files, and ask: "Do you want to run this through AIDevWorkflow?" Outside this
    skill, work normally under the project's own instructions.
-2. **No feature code before an approved plan — even when asked.** Until the plan is approved and `preflight` passes
-   in your current session, write only the task records under `.ai-dev-workflow/`. Reading code and running read-only
-   commands is fine. If the user asks you to skip the spec, the plan or an approval, or to "just write the code", do
-   not write code and do not pause the task on your own. Say that the gates cannot be skipped, offer two choices — the
-   fast path (a short spec and plan shown together, which they can approve in one message) or pausing the task
-   (`pause`) so they can work outside AIDevWorkflow — and stop until they reply, even if the request sounds final.
+2. **Never bypass a gate on your own.** In an active workflow task, write no feature code until the plan is approved
+   and `preflight` passes in your current session; before then, write only task records under `.ai-dev-workflow/`.
+   Reading code and running read-only commands is fine. Do not infer permission to skip stages from urgency, a small
+   change, or your own judgment. If the user explicitly asks to skip the spec, an approval, or another stage,
+   acknowledge exactly what they are overriding and record their request and the skipped stages with
+   `pause <task> --reason "User explicitly requested …; skipped …"` before editing code. Then carry out their
+   instruction outside the active workflow without asking them to approve the override again. Leave skipped stages
+   and approvals uncompleted; never record an approval they did not give or claim skipped work was verified. If the
+   request is unclear, ask what they want rather than treating it as an override. On a later resume, address missing
+   stages and gates before claiming workflow completion or editing under the workflow.
 3. **Approval comes from the user, never from you.** Record an approval only after the user explicitly approves that
    exact version in their own words ("approve the spec", "plan approved, go ahead"). Questions, "looks good but…",
    discussion, silence, or approval of an earlier version are not approval. Never run `approve` on your own initiative.
 4. **Approved documents are frozen.** Never edit `approved/`, `state.json` or `ACTIVE` by hand. Any change to an
    approved spec or plan needs renewed approval: move the task back a stage, edit, show the change, approve again.
-5. **Revalidate before touching code.** At every new session, agent switch, resume, or continuation after a pause, run
-   `preflight` before editing feature code. If it fails, do not edit; explain what is wrong and ask.
+5. **Revalidate before touching code in an active workflow task.** At every new session, agent switch, resume, or
+   continuation after a pause, run `preflight` before editing feature code under the workflow. If it fails, do not
+   edit under the workflow; explain what is wrong and ask.
 6. **Never invent.** No invented requirements, API contracts, designs, business rules, architecture, approvals or test
    results. Missing information is a dependency: ask the user, or prepare a backend question, and wait at the gate.
-7. **Evidence, or it did not happen.** Claim only checks you actually ran with `run`. A check that could not run is
-   Blocked or Not Verified, never Passed. The final status is never higher than what `outcome` allows.
+7. **Evidence, or it did not happen.** Claim only checks you actually ran with `run` inside the workflow, or that you
+   actually ran and identify outside it after an explicit user override. A check that could not run is Blocked or Not
+   Verified, never Passed. A skipped stage is not completed or verified. A workflow final status is never higher than
+   what `outcome` allows; do not present overridden work as a completed workflow task.
 8. **Preserve other work.** Never revert, overwrite or reformat files outside the approved scope. Files that already had
    uncommitted changes when the task started are not yours. No commits, merges, pushes, deployments or other
    irreversible actions without the user's explicit authorization.
@@ -121,7 +128,8 @@ is always allowed with `--reason`. Stage details:
 gates, resuming and handoff: [lifecycle](references/lifecycle.md).
 
 Scale the depth to the task: a small fix gets a short spec and plan, a large feature gets as much detail as it needs.
-The gates are the same for every task.
+The gates are the same for every active workflow task; an explicit user override is recorded by pausing, not by
+advancing stages or inventing approvals.
 
 ## Presenting for approval
 

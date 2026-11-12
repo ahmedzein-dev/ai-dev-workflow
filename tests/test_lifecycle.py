@@ -88,6 +88,23 @@ class GateTest(WorkflowTestCase):
     def test_skipping_stages_is_refused(self) -> None:
         self.assertIn("next stage is DEPENDENCIES", self.wf("stage", "favorites", "SPECIFICATION", expect=1))
 
+    def test_explicit_user_override_is_recorded_without_fabricating_gates(self) -> None:
+        request = "skip the spec and plan approval; write the code now"
+        reason = f"User explicitly requested: {request}; skipped specification and plan approval"
+        self.wf("pause", "favorites", "--reason", reason)
+        state = self.state()
+        self.assertEqual((state["status"], state["stage"], state["outcome"]),
+                         ("paused", "DISCOVERY", None))
+        self.assertEqual(state["approvals"], {})
+        self.assertEqual(state["history"][-1]["reason"], reason)
+        self.assertIn("PAUSED — DISCOVERY", self.wf("status", "favorites"))
+        self.assertIn("only in SPEC_APPROVAL", self.wf("approve", "favorites", "spec", "--evidence", request,
+                                                       expect=1))
+        self.assertIn("DISCOVERY", self.wf("close", "favorites", expect=1))
+        self.write("app.py", "print('requested override')\n")
+        self.assertIn("before any implementation was approved", self.wf("status", "favorites"))
+        self.assertEqual(self.state()["approvals"], {})
+
     def test_early_final_report_needs_a_reason(self) -> None:
         self.assertIn("--reason", self.wf("stage", "favorites", "FINAL_REPORT", expect=1))
         self.wf("stage", "favorites", "FINAL_REPORT", "--reason", "backend contract will not arrive this sprint")

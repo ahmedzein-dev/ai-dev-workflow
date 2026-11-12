@@ -192,9 +192,14 @@ class HtmlGuideTest(unittest.TestCase):
         self.assertTrue(ids["en"])
         self.assertEqual(ids["ar"], ids["en"])
         for lang, part in self.parts.items():
+            targets = set(re.findall(rf'\bid="({lang}-[a-z-]+)"', part))
             for target in re.findall(r'<a\s[^>]*href="#([^"]*)"', part):
                 self.assertTrue(target.startswith(f"{lang}-"), f"{lang} links to #{target}")
-                self.assertIn(target[len(lang) + 1:], ids[lang], f"{lang}: #{target} does not exist")
+                self.assertIn(target, targets, f"{lang}: #{target} does not exist")
+            nav = re.search(rf'<nav class="topnav nav-{lang}"[^>]*>(.*?)</nav>', self.html, re.S)
+            self.assertIsNotNone(nav, f"{lang}: top navigation missing")
+            for target in re.findall(r'href="#([^"]+)"', nav.group(1)):
+                self.assertIn(target, targets, f"{lang}: top navigation links to missing #{target}")
 
     def test_every_command_block_is_marked_terminal_or_chat(self) -> None:
         def kinds(text: str) -> list:
