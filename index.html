@@ -252,7 +252,8 @@ th,td{text-align:start;vertical-align:top;padding:10px 14px;border-bottom:1px so
 tr:last-child td{border-bottom:none}
 th{background:var(--surface-2);font-size:.92em}
 .en-term{display:block;font-size:.8em;font-weight:600;color:var(--muted)}
-.howto{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.howto{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;align-items:start}
+.howto > li.wide{grid-column:1 / -1}
 .howto > li{margin:0;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 16px}
 .example{margin-top:14px;border:1px dashed var(--border-strong);border-radius:12px;padding:12px 16px}
 .example h4{margin:0 0 4px;font-size:1em}
@@ -637,7 +638,7 @@ details.more{margin-top:12px}
   <h2>الإيقاف والمتابعة وتبديل مساعد AI</h2>
   <p class="sub">كل ما في هذا القسم يُكتب في محادثة مساعد AI.</p>
   <ul class="howto">
-    <li>
+    <li class="wide">
       <h3 class="with-tag">متابعة مهمة لاحقًا <span class="where chat"><svg aria-hidden="true"><use href="#i-chat"/></svg>محادثة مساعد AI</span></h3>
       <p>اكتب اسم المهارة ثم اسم المهمة (هنا الاسم المثال <bdi>saved-favorites</bdi>). يخبرك مساعد AI باسم المهمة عند إنشائها.</p>
       <div class="act chat"><div class="act-head"><svg aria-hidden="true"><use href="#i-chat"/></svg><span><bdi>Claude Code</bdi>، <bdi>Gemini CLI</bdi>، <bdi>Antigravity</bdi></span></div><pre><code><span class="ln">/ai-dev-workflow saved-favorites</span></code></pre></div>
@@ -1050,7 +1051,7 @@ details.more{margin-top:12px}
   <h2>Pause, continue, switch agents</h2>
   <p class="sub">Everything in this section is typed in the agent chat.</p>
   <ul class="howto">
-    <li>
+    <li class="wide">
       <h3 class="with-tag">Continue a task later <span class="where chat"><svg aria-hidden="true"><use href="#i-chat"/></svg>Agent chat</span></h3>
       <p>Type the skill's name, then the task's name (here, the example name saved-favorites). The agent tells you the name when it creates the task.</p>
       <div class="act chat"><div class="act-head"><svg aria-hidden="true"><use href="#i-chat"/></svg><span>Claude Code, Gemini CLI, Antigravity</span></div><pre><code><span class="ln">/ai-dev-workflow saved-favorites</span></code></pre></div>
