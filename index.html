@@ -339,8 +339,8 @@ details.more{margin-top:12px}
   var TEXT = {
     en: {copy: "Copy", copied: "Copied", failed: "Select and copy", dark: "Dark", light: "Light",
          toDark: "Switch to the dark theme", toLight: "Switch to the light theme"},
-    ar: {copy: "نسخ", copied: "تم النسخ", failed: "حدّد النص وانسخه", dark: "داكن", light: "فاتح",
-         toDark: "التبديل إلى المظهر الداكن", toLight: "التبديل إلى المظهر الفاتح"}
+    ar: {copy: "نسخ", copied: "تم النسخ", failed: "علّم على النص وانسخه", dark: "داكن", light: "فاتح",
+         toDark: "حوّل للوضع الداكن", toLight: "حوّل للوضع الفاتح"}
   };
   var langButtons = document.querySelectorAll("#lang-toggle [data-language]");
   var themeBtn = document.getElementById("theme-toggle");
@@ -450,247 +450,247 @@ details.more{margin-top:12px}
 <div id="ar" class="lang" lang="ar" dir="rtl">
 
 <section class="hero">
-  <p class="kicker">مهارة لأدوات AI البرمجية · <bdi>ai-dev-workflow</bdi> · رخصة <bdi>MIT</bdi></p>
+  <p class="kicker">مهارة لأدوات AI بتاعة البرمجة · <bdi>ai-dev-workflow</bdi> · رخصة <bdi>MIT</bdi></p>
   <h1><bdi>AIDevWorkflow</bdi></h1>
-  <p class="tagline">تطوير منظّم بمساعدة الذكاء الاصطناعي — من المتطلبات حتى الإصدار.</p>
-  <p>مهارة (<bdi>Skill</bdi>) تضيفها إلى أداة AI التي تستخدمها للبرمجة. تبدأ فقط عندما تستدعيها، وتنقل طلبك إلى نتيجة مختبَرة ومراجَعة بعد موافقتك على المواصفات والخطة. تُحفظ الخطوات في ملفات داخل مشروعك لتتابعها لاحقًا أنت أو أداة AI أخرى.</p>
+  <p class="tagline">تطوير منظّم بمساعدة الـ AI، من المتطلبات لحد الـ release.</p>
+  <p>مهارة (<bdi>Skill</bdi>) بتضيفها لأداة الـ AI اللي بتبرمج بيها. مابتشتغلش غير لما إنت تناديها، وبتاخد طلبك لحد نتيجة متجرّبة ومتراجعة، بعد ما توافق على المواصفات والخطة. وكل خطوة بتتحفظ في ملفات جوه مشروعك، عشان تكمّل بعدين، إنت أو أداة AI تانية.</p>
   <p class="cta"><a class="btn primary" href="#ar-quickstart">ابدأ بسرعة</a><a class="btn" href="#ar-setup">شرح التثبيت</a><a class="btn" href="https://github.com/ahmedzein-dev/ai-dev-workflow"><bdi>GitHub</bdi></a></p>
 </section>
 
 <section id="ar-quickstart" class="quickstart">
-  <div class="quickstart-head"><div><h2>ابدأ بسرعة</h2><p>هذا هو المسار المختصر لتشغيل أول مهمة. التثبيت مرة واحدة على جهازك، ثم تعمل المهارة داخل مشروعك.</p></div><a href="#ar-setup">التفاصيل وخيارات التثبيت</a></div>
+  <div class="quickstart-head"><div><h2>ابدأ بسرعة</h2><p>ده أقصر طريق لأول مهمة. بتثبّت مرة واحدة على جهازك، وبعدين المهارة بتشتغل جوه مشروعك.</p></div><a href="#ar-setup">التفاصيل وطرق التثبيت</a></div>
   <ol class="quicksteps">
     <li>
       <h3>ثبّت المهارة</h3>
-      <p>تحتاج <bdi>git</bdi> و <bdi>Python 3.9</bdi> أو أحدث. افتح <bdi>Terminal</bdi> (أو <bdi>PowerShell</bdi> على <bdi>Windows</bdi>) ونفّذ الأوامر التالية كما هي. سيُنزَّل مجلد اسمه <code>ai-dev-workflow</code> في المكان المفتوح حاليًا في سطر الأوامر، وهو عادةً مجلد المستخدم. لا تنفّذها داخل مجلد مشروعك: هذا المجلد أداة لجهازك كله، وداخل المشروع قد يُضاف إلى <bdi>git</bdi> مشروعك بالخطأ. (لوضع المهارة داخل مشروع معيّن، استخدم <a href="#ar-setup">بديل التثبيت داخل مشروع</a>.) واحتفظ بهذا المجلد لأنك ستحتاجه للتحديث. على <bdi>Windows</bdi> اكتب <code>python</code> بدل <code>python3</code>:</p>
+      <p>محتاج <bdi>git</bdi> و<bdi>Python 3.9</bdi> أو أحدث. افتح <bdi>Terminal</bdi> (أو <bdi>PowerShell</bdi> على <bdi>Windows</bdi>) وشغّل الأوامر دي زي ما هي. هيتنزل فولدر اسمه <code>ai-dev-workflow</code> في المكان اللي سطر الأوامر فاتح فيه دلوقتي، وده عادةً فولدر المستخدم. ماتشغّلهاش جوه فولدر مشروعك: الفولدر ده أداة لجهازك كله، ولو اتنزل جوه المشروع ممكن يتضاف لـ <bdi>git</bdi> بتاع المشروع بالغلط. (لو عايز المهارة جوه مشروع معيّن، استخدم <a href="#ar-setup">التثبيت جوه مشروع</a>.) وخلّي الفولدر ده عندك، لأنك هتحتاجه للتحديث. على <bdi>Windows</bdi> اكتب <code>python</code> بدل <code>python3</code>:</p>
       <div class="act term"><div class="act-head"><svg aria-hidden="true"><use href="#i-term"/></svg><span>سطر الأوامر</span></div><pre><code><span class="ln">git clone https://github.com/ahmedzein-dev/ai-dev-workflow.git</span>
 <span class="ln">cd ai-dev-workflow</span>
 <span class="ln">python3 skills/ai-dev-workflow/scripts/install.py</span>
 <span class="ln">python3 skills/ai-dev-workflow/scripts/install.py doctor</span></code></pre></div>
-      <p class="note">إذا انتهى الفحص بعبارة <code>No problems found.</code>، أغلق أداة AI وافتحها من جديد.</p>
+      <p class="note">لو الفحص خلص بجملة <code>No problems found.</code>، اقفل أداة الـ AI وافتحها تاني.</p>
     </li>
     <li>
       <h3>افتح مشروعك وابدأ المهمة</h3>
-      <p>افتح مجلد مشروعك، وهو مستودع <bdi>git</bdi>، في أداة AI. اكتب طلبك في المحادثة باسم المهارة؛ اختر الصيغة التي تناسب أداتك:</p>
-      <div class="act chat mixed"><div class="act-head"><svg aria-hidden="true"><use href="#i-chat"/></svg><span><bdi>Claude Code</bdi>، <bdi>Gemini CLI</bdi>، <bdi>Antigravity</bdi></span></div><pre><code><span class="ln"><bdi dir="ltr">/ai-dev-workflow</bdi> أضف المفضلة إلى قائمة المنتجات</span></code></pre></div>
-      <div class="act chat mixed"><div class="act-head"><svg aria-hidden="true"><use href="#i-chat"/></svg><span><bdi>Codex</bdi></span></div><pre><code><span class="ln"><bdi dir="ltr">$ai-dev-workflow</bdi> أضف المفضلة إلى قائمة المنتجات</span></code></pre></div>
-      <p class="note">استبدل طلب المفضلة بطلبك أنت.</p>
+      <p>افتح فولدر مشروعك في أداة الـ AI، ولازم يكون ريبو <bdi>git</bdi>. اكتب طلبك في الشات ومعاه اسم المهارة، بالشكل اللي يناسب أداتك:</p>
+      <div class="act chat mixed"><div class="act-head"><svg aria-hidden="true"><use href="#i-chat"/></svg><span><bdi>Claude Code</bdi>، <bdi>Gemini CLI</bdi>، <bdi>Antigravity</bdi></span></div><pre><code><span class="ln"><bdi dir="ltr">/ai-dev-workflow</bdi> ضيف المفضلة لقايمة المنتجات</span></code></pre></div>
+      <div class="act chat mixed"><div class="act-head"><svg aria-hidden="true"><use href="#i-chat"/></svg><span><bdi>Codex</bdi></span></div><pre><code><span class="ln"><bdi dir="ltr">$ai-dev-workflow</bdi> ضيف المفضلة لقايمة المنتجات</span></code></pre></div>
+      <p class="note">حط طلبك إنت مكان طلب المفضلة.</p>
     </li>
     <li>
-      <h3>أكّد الإعداد ثم وافق</h3>
-      <p>في أول مهمة فقط، يقترح AI قالب المواصفات وفحوص مشروعك وطريقة حفظ السجلات، ويشرح كل اقتراح؛ وافق عليها كما هي أو غيّر ما تريد. بعد ذلك يعرض المواصفات، ثم الخطة. اقرأ كل واحدة واكتب الموافقة المناسبة في وقتها إن كانت صحيحة:</p>
-      <div class="reply"><span class="reply-label">ردّان منفصلان:</span><span class="say">أوافق على المواصفات</span><span class="say">أوافق على الخطة</span></div>
-      <p>بعد الموافقتين، ينفّذ AI التغيير ويشغّل الفحوص ويعطيك تقريرًا بالنتيجة.</p>
+      <h3>أكّد الإعداد ووافق</h3>
+      <p>في أول مهمة بس، الـ AI بيقترح قالب المواصفات، والفحوص بتاعة مشروعك، وطريقة حفظ السجلات، وبيشرح كل اقتراح. وافق عليها زي ما هي، أو غيّر اللي إنت عايزه. بعدها بيعرض المواصفات، وبعدين الخطة. اقرا كل واحدة، ولو صح، اكتب الموافقة بتاعتها في وقتها:</p>
+      <div class="reply"><span class="reply-label">ردّين منفصلين:</span><span class="say">موافق على المواصفات</span><span class="say">موافق على الخطة</span></div>
+      <p>بعد الموافقتين، الـ AI بينفّذ التغيير، ويشغّل الفحوص، ويديك تقرير بالنتيجة.</p>
     </li>
   </ol>
-  <p class="quickstart-foot">مثبّتة بالفعل؟ ابدأ من الخطوة 2. ولشرح كل قرار ومكان الملفات، راجع <a href="#ar-use">خطوات المهمة الكاملة</a>.</p>
+  <p class="quickstart-foot">مثبّتها قبل كده؟ ابدأ من الخطوة 2. ولو عايز تعرف كل قرار والملفات فين، شوف <a href="#ar-use">خطوات المهمة كاملة</a>.</p>
 </section>
 
 <section id="ar-legend">
-  <h2>كيف تقرأ هذه الصفحة</h2>
-  <p class="sub">على كل خطوة علامة تبيّن أين تنفّذها:</p>
+  <h2>تقرا الصفحة دي إزاي</h2>
+  <p class="sub">على كل خطوة علامة بتقولك تعملها فين:</p>
   <div class="legend">
-    <div class="legend-item"><span><span class="where term"><svg aria-hidden="true"><use href="#i-term"/></svg>سطر الأوامر</span></span><p>افتح تطبيق <bdi>Terminal</bdi> على <bdi>macOS</bdi> أو <bdi>Linux</bdi>، أو <bdi>PowerShell</bdi> على <bdi>Windows</bdi>. انسخ الأمر والصقه هناك ثم اضغط <kbd>Enter</kbd>. علامة <code>$</code> الظاهرة قبل الأمر ليست جزءًا منه، وزر «نسخ» لا ينقلها.</p></div>
-    <div class="legend-item"><span><span class="where chat"><svg aria-hidden="true"><use href="#i-chat"/></svg>محادثة مساعد AI</span></span><p>نص تكتبه في خانة الرسائل داخل مساعد AI: <bdi>Claude Code</bdi> أو <bdi>Codex</bdi> أو <bdi>Gemini CLI</bdi> أو <bdi>Antigravity</bdi>.</p></div>
-    <div class="legend-item"><span><span class="where you"><svg aria-hidden="true"><use href="#i-you"/></svg>أنت</span></span><p>قرار أو عمل منك: تقرأ ثم توافق أو تطلب تعديلًا، أو ترسل رسالة إلى زميل.</p></div>
-    <div class="legend-item"><span><span class="where auto"><svg aria-hidden="true"><use href="#i-auto"/></svg>تلقائي</span></span><p>يقوم به مساعد AI وحده. أنت تنتظر فقط.</p></div>
+    <div class="legend-item"><span><span class="where term"><svg aria-hidden="true"><use href="#i-term"/></svg>سطر الأوامر</span></span><p>افتح <bdi>Terminal</bdi> على <bdi>macOS</bdi> أو <bdi>Linux</bdi>، أو <bdi>PowerShell</bdi> على <bdi>Windows</bdi>. انسخ الأمر والزقه هناك، ودوس <kbd>Enter</kbd>. علامة <code>$</code> اللي قبل الأمر مش جزء منه، وزرار «نسخ» مش بينسخها.</p></div>
+    <div class="legend-item"><span><span class="where chat"><svg aria-hidden="true"><use href="#i-chat"/></svg>محادثة مساعد AI</span></span><p>كلام بتكتبه في خانة الرسايل جوه مساعد الـ AI: <bdi>Claude Code</bdi> أو <bdi>Codex</bdi> أو <bdi>Gemini CLI</bdi> أو <bdi>Antigravity</bdi>.</p></div>
+    <div class="legend-item"><span><span class="where you"><svg aria-hidden="true"><use href="#i-you"/></svg>أنت</span></span><p>قرار أو حاجة إنت اللي بتعملها: تقرا وتوافق أو تطلب تعديل، أو تبعت رسالة لحد في الـ team.</p></div>
+    <div class="legend-item"><span><span class="where auto"><svg aria-hidden="true"><use href="#i-auto"/></svg>تلقائي</span></span><p>مساعد الـ AI بيعمله لوحده. إنت بتستنى بس.</p></div>
   </div>
 </section>
 
 <section id="ar-setup">
   <h2>ثبّت المهارة</h2>
-  <p class="sub">اختر طريقة واحدة: ثبّتها على جهازك لتستخدمها في كل مشاريعك (الخطوات التالية)، أو <a href="#ar-project-install">داخل مشروع واحد</a> إذا أردت أن تصل نسخة منها إلى زملائك وبيئات العمل السحابية.</p>
+  <p class="sub">اختار طريقة واحدة: ثبّتها على جهازك عشان تستخدمها في كل مشاريعك (الخطوات اللي تحت)، أو <a href="#ar-project-install">جوه مشروع واحد</a> لو عايز نسخة منها توصل لزمايلك ولبيئات الشغل على الـ cloud.</p>
   <ol class="steps">
     <li class="step">
       <div class="step-tags"><span class="where term"><svg aria-hidden="true"><use href="#i-term"/></svg>سطر الأوامر</span></div>
-      <h3>افتح تطبيق سطر الأوامر وتأكّد من وجود <bdi>git</bdi> و <bdi>Python</bdi></h3>
-      <p>تحتاج إلى <bdi>git</bdi>، وإلى <bdi>Python 3.9</bdi> أو أحدث. اكتب:</p>
+      <h3>افتح سطر الأوامر واتأكد إن <bdi>git</bdi> و<bdi>Python</bdi> موجودين</h3>
+      <p>محتاج <bdi>git</bdi>، و<bdi>Python 3.9</bdi> أو أحدث. اكتب:</p>
       <div class="act term"><div class="act-head"><svg aria-hidden="true"><use href="#i-term"/></svg><span>سطر الأوامر</span></div><pre><code><span class="ln">git --version</span>
 <span class="ln">python3 --version</span></code></pre></div>
-      <p>يجب أن يظهر رقم إصدار لكل منهما، مثل <code>Python 3.12.4</code>.</p>
-      <p class="note">على <bdi>Windows</bdi>: اكتب <code>python</code> بدلًا من <code>python3</code> في كل أوامر هذه الصفحة.</p>
+      <p>لازم يظهر رقم نسخة لكل واحد، زي <code>Python 3.12.4</code>.</p>
+      <p class="note">على <bdi>Windows</bdi>: اكتب <code>python</code> بدل <code>python3</code> في كل أوامر الصفحة دي.</p>
     </li>
     <li class="step">
       <div class="step-tags"><span class="where term"><svg aria-hidden="true"><use href="#i-term"/></svg>سطر الأوامر</span></div>
       <h3>نزّل <bdi>AIDevWorkflow</bdi></h3>
-      <p>نفّذ هذا خارج مجلد مشروعك، مثلًا في مجلد المستخدم (المكان الذي يفتح فيه سطر الأوامر عادةً). سيُنزَّل مجلد اسمه <code>ai-dev-workflow</code> هناك:</p>
+      <p>شغّل ده برّه فولدر مشروعك، مثلاً في فولدر المستخدم (المكان اللي سطر الأوامر بيفتح فيه عادةً). هيتنزل هناك فولدر اسمه <code>ai-dev-workflow</code>:</p>
       <div class="act term"><div class="act-head"><svg aria-hidden="true"><use href="#i-term"/></svg><span>سطر الأوامر</span></div><pre><code><span class="ln">git clone https://github.com/ahmedzein-dev/ai-dev-workflow.git</span>
 <span class="ln">cd ai-dev-workflow</span></code></pre></div>
-      <p class="note">احتفظ بهذا المجلد؛ ستحتاجه للتحديث ولإلغاء التثبيت.</p>
+      <p class="note">خلّي الفولدر ده عندك، هتحتاجه للتحديث ولإلغاء التثبيت.</p>
     </li>
     <li class="step">
       <div class="step-tags"><span class="where term"><svg aria-hidden="true"><use href="#i-term"/></svg>سطر الأوامر</span></div>
       <h3>ثبّت المهارة</h3>
       <div class="act term"><div class="act-head"><svg aria-hidden="true"><use href="#i-term"/></svg><span>سطر الأوامر</span></div><pre><code><span class="ln">python3 skills/ai-dev-workflow/scripts/install.py</span></code></pre></div>
-      <p>يضع المثبّت نسخة واحدة في <code>~/.agents/skills</code> يقرؤها <bdi>Codex</bdi> و <bdi>Gemini CLI</bdi> مباشرة، ويربط بها <bdi>Claude Code</bdi>، و <bdi>Antigravity</bdi> إن كان مثبّتًا.</p>
+      <p>المثبّت بيحط نسخة واحدة في <code>~/.agents/skills</code>. <bdi>Codex</bdi> و<bdi>Gemini CLI</bdi> بيقروها من هناك على طول، وبيربطها بـ <bdi>Claude Code</bdi>، وبـ <bdi>Antigravity</bdi> لو متثبّت.</p>
     </li>
     <li class="step">
       <div class="step-tags"><span class="where term"><svg aria-hidden="true"><use href="#i-term"/></svg>سطر الأوامر</span></div>
-      <h3>تحقّق من التثبيت</h3>
+      <h3>اتأكد إن التثبيت تمام</h3>
       <div class="act term"><div class="act-head"><svg aria-hidden="true"><use href="#i-term"/></svg><span>سطر الأوامر</span></div><pre><code><span class="ln">python3 skills/ai-dev-workflow/scripts/install.py doctor</span></code></pre></div>
-      <p>آخر سطر في النتيجة الصحيحة: <code>No problems found.</code></p>
+      <p>لو كله تمام، آخر سطر هيبقى: <code>No problems found.</code></p>
     </li>
     <li class="step">
       <div class="step-tags"><span class="where you"><svg aria-hidden="true"><use href="#i-you"/></svg>أنت</span></div>
-      <h3>أعد تشغيل مساعد AI</h3>
-      <p>أغلق مساعد AI ثم افتحه من جديد حتى يتعرّف على المهارة.</p>
+      <h3>شغّل مساعد الـ AI من جديد</h3>
+      <p>اقفل مساعد الـ AI وافتحه تاني، عشان يشوف المهارة.</p>
     </li>
   </ol>
   <details class="more" id="ar-project-install">
-    <summary>بديل التثبيت على الجهاز: ثبّتها داخل مشروع واحد للفريق أو للسحابة</summary>
-    <p>استخدم هذه الطريقة إذا كان مساعد AI يعمل في نسخة من مشروعك على جهاز زميل أو في السحابة ولا يرى المهارات المثبّتة على جهازك. يجب أن يكون المشروع مستودع <bdi>git</bdi>. نزّل <bdi>AIDevWorkflow</bdi> كما في الخطوة 2، ثم نفّذ الأمر التالي من داخل مجلده:</p>
+    <summary>بدل التثبيت على الجهاز: ثبّتها جوه مشروع واحد للـ team أو للـ cloud</summary>
+    <p>استخدم الطريقة دي لو مساعد الـ AI شغال على نسخة من مشروعك على جهاز زميلك أو على الـ cloud، ومش شايف المهارات المتثبّتة على جهازك. لازم المشروع يكون ريبو <bdi>git</bdi>. نزّل <bdi>AIDevWorkflow</bdi> زي الخطوة 2، وبعدين شغّل الأمر ده من جوه الفولدر بتاعه:</p>
     <div class="act term"><div class="act-head"><svg aria-hidden="true"><use href="#i-term"/></svg><span>سطر الأوامر</span></div><pre><code><span class="ln">python3 skills/ai-dev-workflow/scripts/install.py install --project ../my-app</span>
 <span class="ln">python3 skills/ai-dev-workflow/scripts/install.py doctor --project ../my-app</span></code></pre></div>
-    <p><code>../my-app</code> مثال لمشروع اسمه <code>my-app</code> بجانب مجلد <code>ai-dev-workflow</code>. استبدله بمسار مجلد مشروعك الفعلي؛ إذا كان في مكان آخر، اكتب مساره الكامل بين علامتي اقتباس. ينسخ المثبّت المهارة إلى <code>.agents/skills/ai-dev-workflow</code> و <code>.claude/skills/ai-dev-workflow</code> داخل المشروع. احفظ المجلدين في <bdi>git</bdi> وارفعهما مع مشروعك حتى يراهما الفريق ومساعدو AI في السحابة.</p>
-    <p class="note">إذا ظهرت المهارة مرتين داخل هذا المشروع، فهناك نسخة مثبّتة على جهازك وأخرى داخل المشروع. اختر طريقة واحدة لهذا المشروع؛ يفحص أمر <code>doctor</code> النسخ المكرّرة.</p>
+    <p><code>../my-app</code> مثال لمشروع اسمه <code>my-app</code> جنب فولدر <code>ai-dev-workflow</code>. حط مكانه مسار فولدر مشروعك الحقيقي، ولو في مكان تاني، اكتب المسار كامل بين علامتين تنصيص. المثبّت بينسخ المهارة لـ <code>.agents/skills/ai-dev-workflow</code> و<code>.claude/skills/ai-dev-workflow</code> جوه المشروع. احفظ الفولدرين دول في <bdi>git</bdi> وارفعهم مع مشروعك، عشان الـ team ومساعدين الـ AI على الـ cloud يشوفوهم.</p>
+    <p class="note">لو المهارة ظهرت مرتين جوه المشروع ده، يبقى فيه نسخة على جهازك ونسخة جوه المشروع. اختار طريقة واحدة للمشروع ده. وأمر <code>doctor</code> بيدوّر على النسخ المتكررة.</p>
   </details>
   <details class="more">
-    <summary>اختياري: سجّل قالب المواصفات الخاص بك مرة واحدة</summary>
-    <p><strong>قالب المواصفات</strong> ملف <code>.md</code> فيه أقسام المواصفات فارغة، ويملؤه مساعد AI لكل مهمة. عندما تسجّله قالبًا افتراضيًا، يقترحه مساعد AI تلقائيًا في كل مشروع جديد، فلا تحدده كل مرة.</p>
+    <summary>اختياري: سجّل قالب المواصفات بتاعك مرة واحدة</summary>
+    <p><strong>قالب المواصفات</strong> ملف <code>.md</code> فيه أقسام المواصفات فاضية، ومساعد الـ AI بيملاه لكل مهمة. لما تسجّله كقالب افتراضي، مساعد الـ AI بيقترحه لوحده في كل مشروع جديد، فمش هتحتاج تحدده كل مرة.</p>
     <ol>
-      <li><strong>جهّز الملف:</strong> انسخ <code>examples/templates/example-spec-template.md</code> إلى مجلد خارج أي مستودع، مثل <code>../my-templates/spec.md</code>، وعدّل أقسامه كما تريد.</li>
-      <li><strong>سجّله قالبًا افتراضيًا</strong> من داخل مجلد <code>ai-dev-workflow</code>. <code>my-template</code> اسم تختاره له:
+      <li><strong>جهّز الملف:</strong> انسخ <code>examples/templates/example-spec-template.md</code> لفولدر برّه أي ريبو، زي <code>../my-templates/spec.md</code>، وعدّل أقسامه زي ما تحب.</li>
+      <li><strong>سجّله كقالب افتراضي</strong> من جوه فولدر <code>ai-dev-workflow</code>. <code>my-template</code> اسم إنت بتختاره:
         <div class="act term"><div class="act-head"><svg aria-hidden="true"><use href="#i-term"/></svg><span>سطر الأوامر</span></div><pre><code><span class="ln">python3 skills/ai-dev-workflow/scripts/install.py add-template my-template ../my-templates/spec.md --default</span></code></pre></div></li>
-      <li><strong>ملف القواعد (اختياري):</strong> ملف <code>.json</code> يحدد ما يفحصه المحرك في المواصفات، مثل الأقسام المطلوبة وصيغة معايير القبول. إن أردته، انسخ <code>examples/templates/example-spec-template.rules.json</code> إلى <code>../my-templates/spec.rules.json</code> وعدّله ليطابق أقسام قالبك، ثم استخدم هذا الأمر <strong>بدلًا من</strong> أمر الخطوة 2:
+      <li><strong>ملف القواعد (اختياري):</strong> ملف <code>.json</code> بيحدد المحرك يفحص إيه في المواصفات، زي الأقسام المطلوبة وشكل معايير القبول. لو عايزه، انسخ <code>examples/templates/example-spec-template.rules.json</code> لـ <code>../my-templates/spec.rules.json</code> وعدّله على أقسام قالبك، وبعدين استخدم الأمر ده <strong>بدل</strong> أمر الخطوة 2:
         <div class="act term"><div class="act-head"><svg aria-hidden="true"><use href="#i-term"/></svg><span>سطر الأوامر — مع ملف قواعد</span></div><pre><code><span class="ln">python3 skills/ai-dev-workflow/scripts/install.py add-template my-template ../my-templates/spec.md --rules ../my-templates/spec.rules.json --default</span></code></pre></div></li>
     </ol>
-    <p>يُحفظ القالب في مكتبتك الخاصة على جهازك، خارج كل المشاريع. لجعل قالب آخر هو الافتراضي لاحقًا، استخدم <code>install.py default-template</code> متبوعًا باسمه. وإن لم تسجّل قالبًا، يخبرك مساعد AI بذلك ويسألك عن القالب؛ لا ينشئ قالبًا من عنده.</p>
+    <p>القالب بيتحفظ في مكتبتك الخاصة على جهازك، برّه كل المشاريع. لو عايز قالب تاني يبقى الافتراضي بعدين، استخدم <code>install.py default-template</code> وبعده اسمه. ولو ماسجّلتش قالب، مساعد الـ AI هيقولك ويسألك عن القالب، ومش هيعمل قالب من عنده.</p>
   </details>
 </section>
 
 <section id="ar-use">
   <h2>تشغيل مهمة</h2>
-  <p class="sub">من طلبك حتى نتيجة مراجَعة. دورك في الخطوات التي عليها علامة «أنت».</p>
+  <p class="sub">من طلبك لحد نتيجة متراجعة. دورك في الخطوات اللي عليها علامة «أنت».</p>
   <ol class="steps">
     <li class="step">
       <div class="step-tags"><span class="where term"><svg aria-hidden="true"><use href="#i-term"/></svg>سطر الأوامر</span></div>
-      <h3>افتح مساعد AI داخل مشروعك</h3>
-      <p>انتقل إلى مجلد مشروعك، ثم شغّل مساعد AI. <code>../my-app</code> مثال؛ استبدله بمسار مشروعك كما في خطوة التثبيت:</p>
+      <h3>افتح مساعد الـ AI جوه مشروعك</h3>
+      <p>روح لفولدر مشروعك، وشغّل مساعد الـ AI. <code>../my-app</code> مثال، حط مكانه مسار مشروعك زي خطوة التثبيت:</p>
       <div class="act term"><div class="act-head"><svg aria-hidden="true"><use href="#i-term"/></svg><span>سطر الأوامر</span></div><pre><code><span class="ln">cd ../my-app</span>
 <span class="ln">claude</span></code></pre></div>
-      <p>اكتب <code>codex</code> أو <code>gemini</code> بدلًا من <code>claude</code> حسب مساعد AI الذي تستخدمه. وإن كنت تستخدم تطبيقًا على سطح المكتب (مثل <bdi>Claude</bdi> أو <bdi>Codex</bdi> أو <bdi>Antigravity</bdi>)، فافتح مجلد المشروع في التطبيق بدلًا من ذلك.</p>
-      <p class="note">يجب أن يكون المشروع مستودع <bdi>git</bdi>.</p>
+      <p>اكتب <code>codex</code> أو <code>gemini</code> بدل <code>claude</code> حسب مساعد الـ AI اللي بتستخدمه. ولو بتستخدم تطبيق desktop (زي <bdi>Claude</bdi> أو <bdi>Codex</bdi> أو <bdi>Antigravity</bdi>)، افتح فولدر المشروع في التطبيق بدل كده.</p>
+      <p class="note">لازم المشروع يكون ريبو <bdi>git</bdi>.</p>
     </li>
     <li class="step">
       <div class="step-tags"><span class="where chat"><svg aria-hidden="true"><use href="#i-chat"/></svg>محادثة مساعد AI</span></div>
       <h3>ابدأ المهمة</h3>
-      <p>اكتب اسم المهارة ثم طلبك. ضع طلبك أنت مكان المثال، بالعربية أو بالإنجليزية:</p>
-      <div class="act chat mixed"><div class="act-head"><svg aria-hidden="true"><use href="#i-chat"/></svg><span><bdi>Claude Code</bdi>، <bdi>Gemini CLI</bdi>، <bdi>Antigravity</bdi></span></div><pre><code><span class="ln"><bdi dir="ltr">/ai-dev-workflow</bdi> أضف المفضلة إلى قائمة المنتجات</span></code></pre></div>
-      <div class="act chat mixed"><div class="act-head"><svg aria-hidden="true"><use href="#i-chat"/></svg><span><bdi>Codex</bdi></span></div><pre><code><span class="ln"><bdi dir="ltr">$ai-dev-workflow</bdi> أضف المفضلة إلى قائمة المنتجات</span></code></pre></div>
-      <p class="note">الطلب العادي من دون اسم المهارة لا يبدأ سير العمل.</p>
+      <p>اكتب اسم المهارة وبعده طلبك. حط طلبك إنت مكان المثال، بالعربي أو بالإنجليزي:</p>
+      <div class="act chat mixed"><div class="act-head"><svg aria-hidden="true"><use href="#i-chat"/></svg><span><bdi>Claude Code</bdi>، <bdi>Gemini CLI</bdi>، <bdi>Antigravity</bdi></span></div><pre><code><span class="ln"><bdi dir="ltr">/ai-dev-workflow</bdi> ضيف المفضلة لقايمة المنتجات</span></code></pre></div>
+      <div class="act chat mixed"><div class="act-head"><svg aria-hidden="true"><use href="#i-chat"/></svg><span><bdi>Codex</bdi></span></div><pre><code><span class="ln"><bdi dir="ltr">$ai-dev-workflow</bdi> ضيف المفضلة لقايمة المنتجات</span></code></pre></div>
+      <p class="note">الطلب العادي من غير اسم المهارة مش بيشغّل الـ workflow.</p>
     </li>
     <li class="step">
       <div class="step-tags"><span class="where you"><svg aria-hidden="true"><use href="#i-you"/></svg>أنت</span><span class="where chat"><svg aria-hidden="true"><use href="#i-chat"/></svg>محادثة مساعد AI</span></div>
-      <h3>أول مرة في المشروع فقط: أكّد الإعداد</h3>
-      <p>يفحص مساعد AI مشروعك ويقترح إعدادًا جاهزًا، ويشرح كل اقتراح. وافق عليه كما هو، أو غيّر أي بند:</p>
+      <h3>أول مرة في المشروع بس: أكّد الإعداد</h3>
+      <p>مساعد الـ AI بيفحص مشروعك ويقترح إعداد جاهز، وبيشرح كل اقتراح. وافق عليه زي ما هو، أو غيّر أي بند:</p>
       <ul>
-        <li><strong>ملفات التعليمات</strong> التي وجدها، مثل <code>CLAUDE.md</code> أو <code>AGENTS.md</code>.</li>
-        <li><strong>قالب المواصفات:</strong> قالبك الافتراضي إن سجّلته في مكتبتك الخاصة، وإلا يخبرك بذلك ويسألك عن القالب.</li>
-        <li><strong>الفحوص:</strong> يستنتجها من ملفات مشروعك، مثل <code>flutter analyze</code> و <code>flutter test</code>، مع سطر يشرح كل أمر. لا تحتاج إلى معرفتها مسبقًا.</li>
-        <li><strong>حفظ سجلات المهام في <bdi>git</bdi>:</strong> يشرح الخيارات الثلاثة ويوصي بأنسبها لمشروعك:
+        <li><strong>ملفات التعليمات</strong> اللي لقاها، زي <code>CLAUDE.md</code> أو <code>AGENTS.md</code>.</li>
+        <li><strong>قالب المواصفات:</strong> قالبك الافتراضي لو سجّلته في مكتبتك، ولو لأ هيقولك ويسألك عن القالب.</li>
+        <li><strong>الفحوص:</strong> بيطلّعها من ملفات مشروعك، زي <code>flutter analyze</code> و<code>flutter test</code>، ومعاها سطر بيشرح كل أمر. مش محتاج تكون عارفها قبلها.</li>
+        <li><strong>حفظ سجلات المهام في <bdi>git</bdi>:</strong> بيشرح التلات اختيارات، وبيقولك أنهي فيهم أنسب لمشروعك:
           <ul class="sublist">
-            <li><code>all</code> — كل السجلات في <bdi>git</bdi>: يكمل المهمة أي مطوّر أو مساعد AI على جهاز آخر، لكن كل من يصل إلى المستودع يقرأ المواصفات والخطط.</li>
-            <li><code>config-only</code> — الإعدادات فقط في <bdi>git</bdi>: المهام على جهازك وحده، فلا تكتمل على جهاز آخر وتضيع إن ضاع الجهاز.</li>
-            <li><code>none</code> — لا شيء في <bdi>git</bdi>: كل شيء على جهازك وحده.</li>
+            <li><code>all</code> — كل السجلات في <bdi>git</bdi>: أي developer أو مساعد AI على جهاز تاني يقدر يكمّل المهمة، بس أي حد يوصل للريبو يقدر يقرا المواصفات والخطط.</li>
+            <li><code>config-only</code> — الإعدادات بس في <bdi>git</bdi>: المهام على جهازك لوحده، فماينفعش تكمّلها من جهاز تاني، وتضيع لو الجهاز ضاع.</li>
+            <li><code>none</code> — ولا حاجة في <bdi>git</bdi>: كله على جهازك لوحده.</li>
           </ul>
         </li>
       </ul>
-      <p>تجيب مرة واحدة فقط لكل مشروع، وتُستخدم الإعدادات نفسها في كل المهام التالية.</p>
+      <p>بترد مرة واحدة بس لكل مشروع، ونفس الإعدادات بتتستخدم في كل المهام اللي بعد كده.</p>
     </li>
     <li class="step">
       <div class="step-tags"><span class="where auto"><svg aria-hidden="true"><use href="#i-auto"/></svg>تلقائي</span><span class="where you"><svg aria-hidden="true"><use href="#i-you"/></svg>أنت</span></div>
-      <h3>الاستكشاف: أجب عن أسئلة مساعد AI</h3>
-      <p>يقرأ مساعد AI الكود أولًا، ثم يسأل فقط عمّا لا يجيب عنه الكود. أجب باختصار في المحادثة.</p>
+      <h3>الاستكشاف: رد على أسئلة مساعد الـ AI</h3>
+      <p>مساعد الـ AI بيقرا الكود الأول، وبعدين بيسأل بس عن اللي الكود مش بيجاوب عليه. رد باختصار في الشات.</p>
     </li>
     <li class="step">
       <div class="step-tags"><span class="where you"><svg aria-hidden="true"><use href="#i-you"/></svg>أنت</span><span class="where chat"><svg aria-hidden="true"><use href="#i-chat"/></svg>محادثة مساعد AI</span></div>
-      <h3>إن نقصت تفاصيل من الواجهة البرمجية: أرسل الرسالة</h3>
-      <p>يكتب مساعد AI رسالة جاهزة لمطوّر الواجهة الخلفية (<bdi>Backend</bdi>) ويتوقف. أرسلها له بالطريقة المعتادة (بريد، <bdi>Slack</bdi>…)، ثم الصق رده في المحادثة.</p>
+      <h3>لو تفاصيل الـ API ناقصة: ابعت الرسالة</h3>
+      <p>مساعد الـ AI بيكتب رسالة جاهزة لـ developer الـ <bdi>Backend</bdi> ويقف. ابعتهاله بالطريقة اللي متعود عليها (إيميل، <bdi>Slack</bdi>…)، وبعدين الزق رده في الشات.</p>
     </li>
     <li class="step gate">
       <div class="step-tags"><span class="where you"><svg aria-hidden="true"><use href="#i-you"/></svg>أنت</span><span class="where chat"><svg aria-hidden="true"><use href="#i-chat"/></svg>محادثة مساعد AI</span><span class="flag gate">بوابة موافقة</span></div>
       <h3>وافق على المواصفات</h3>
-      <p><strong>المواصفات (<bdi>spec</bdi>)</strong> تصف ما سيُبنى قبل كتابة أي كود. أقسامها يحددها قالب مشروعك، وغالبًا تشمل:</p>
+      <p><strong>المواصفات (<bdi>spec</bdi>)</strong> بتوصف هيتبني إيه قبل ما أي كود يتكتب. أقسامها بيحددها قالب مشروعك، وغالباً فيها:</p>
       <ul>
-        <li><strong>الهدف:</strong> المشكلة التي تحلّها الميزة، والنتيجة المطلوبة.</li>
-        <li><strong>المتطلبات:</strong> ما يجب أن تفعله الميزة، وما ليس ضمنها.</li>
-        <li><strong>الحالات الخاصة:</strong> مثل انقطاع الإنترنت أو قائمة فارغة.</li>
-        <li><strong>القيود:</strong> ما يجب ألا يتغيّر.</li>
-        <li><strong>معايير القبول:</strong> كيف نعرف أن العمل اكتمل.</li>
+        <li><strong>الهدف:</strong> الميزة بتحل أنهي مشكلة، وإيه النتيجة المطلوبة.</li>
+        <li><strong>المتطلبات:</strong> الميزة لازم تعمل إيه، وإيه اللي مش جزء منها.</li>
+        <li><strong>الحالات الخاصة:</strong> زي النت يقطع أو القايمة تبقى فاضية.</li>
+        <li><strong>القيود:</strong> إيه اللي ماينفعش يتغير.</li>
+        <li><strong>معايير القبول:</strong> نعرف إزاي إن الشغل خلص.</li>
       </ul>
-      <p>اقرأها. إن كانت صحيحة، اكتب:</p>
-      <div class="reply"><span class="reply-label">ردّك:</span><span class="say">أوافق على المواصفات</span></div>
-      <p>وإن أردت تغيير شيء، اكتب ما تريد تغييره. الأسئلة أو عبارة «جيد، لكن…» لا تُعدّ موافقة.</p>
+      <p>اقراها. لو صح، اكتب:</p>
+      <div class="reply"><span class="reply-label">ردّك:</span><span class="say">موافق على المواصفات</span></div>
+      <p>ولو عايز تغيّر حاجة، اكتب عايز تغيّر إيه. الأسئلة أو «حلو، بس…» مش بتتحسب موافقة.</p>
     </li>
     <li class="step gate">
       <div class="step-tags"><span class="where you"><svg aria-hidden="true"><use href="#i-you"/></svg>أنت</span><span class="where chat"><svg aria-hidden="true"><use href="#i-chat"/></svg>محادثة مساعد AI</span><span class="flag gate">بوابة موافقة</span></div>
       <h3>وافق على الخطة</h3>
-      <p>اقرأ خطة التنفيذ. إن كانت صحيحة، اكتب:</p>
-      <div class="reply"><span class="reply-label">ردّك:</span><span class="say">أوافق على الخطة</span></div>
+      <p>اقرا خطة التنفيذ. لو صح، اكتب:</p>
+      <div class="reply"><span class="reply-label">ردّك:</span><span class="say">موافق على الخطة</span></div>
     </li>
     <li class="step">
       <div class="step-tags"><span class="where auto"><svg aria-hidden="true"><use href="#i-auto"/></svg>تلقائي</span></div>
-      <h3>التنفيذ والاختبار والإصلاح والمراجعة</h3>
-      <p>يعدّل مساعد AI الكود خطوة بخطوة حسب الخطة، ويشغّل فحوص المشروع، ويصلح ما يفشل، ثم يراجع النتيجة. أنت تنتظر فقط.</p>
-      <p class="note">قد يطلب مساعد AI إذنك لتشغيل أمر أو تعديل ملف؛ هذا من إعدادات مساعد AI نفسه.</p>
+      <h3>التنفيذ والاختبار والتصليح والمراجعة</h3>
+      <p>مساعد الـ AI بيعدّل الكود خطوة خطوة حسب الخطة، ويشغّل فحوص المشروع، ويصلّح اللي يفشل، وبعدين يراجع النتيجة. إنت بتستنى بس.</p>
+      <p class="note">ممكن مساعد الـ AI يطلب إذنك عشان يشغّل أمر أو يعدّل ملف. ده من إعدادات مساعد الـ AI نفسه.</p>
     </li>
     <li class="step">
       <div class="step-tags"><span class="where you"><svg aria-hidden="true"><use href="#i-you"/></svg>أنت</span></div>
-      <h3>اقرأ التقرير النهائي</h3>
-      <p>ملخص قصير: ما الذي نُفّذ، وما الذي اختُبر، وما الذي بقي مفتوحًا. والحالة فيه لا تتجاوز أبدًا ما تثبته الأدلة.</p>
+      <h3>اقرا التقرير النهائي</h3>
+      <p>ملخص قصير: إيه اللي اتعمل، وإيه اللي اتجرّب، وإيه اللي لسه مفتوح. والحالة اللي فيه عمرها ما بتقول أكتر من اللي الأدلة بتثبته.</p>
     </li>
   </ol>
-  <div class="tip"><strong>تغيير صغير؟</strong> اكتب في المحادثة <span class="say">استخدم المسار السريع</span>. يعرض مساعد AI المواصفات والخطة معًا، فتوافق عليهما في رسالة واحدة: <span class="say">أوافق على المواصفات والخطة</span></div>
+  <div class="tip"><strong>تغيير صغير؟</strong> اكتب في الشات <span class="say">استخدم المسار السريع</span>. مساعد الـ AI هيعرض المواصفات والخطة مع بعض، فتوافق عليهم في رسالة واحدة: <span class="say">موافق على المواصفات والخطة</span></div>
 </section>
 
 <section id="ar-continue">
-  <h2>الإيقاف والمتابعة وتبديل مساعد AI</h2>
-  <p class="sub">كل ما في هذا القسم يُكتب في محادثة مساعد AI.</p>
+  <h2>الإيقاف والمتابعة وتغيير مساعد الـ AI</h2>
+  <p class="sub">كل اللي في الجزء ده بيتكتب في شات مساعد الـ AI.</p>
   <ul class="howto">
     <li>
-      <h3 class="with-tag">متابعة مهمة لاحقًا <span class="where chat"><svg aria-hidden="true"><use href="#i-chat"/></svg>محادثة مساعد AI</span></h3>
-      <p>اكتب اسم المهارة ثم اسم المهمة (هنا الاسم المثال <bdi>saved-favorites</bdi>). يخبرك مساعد AI باسم المهمة عند إنشائها.</p>
+      <h3 class="with-tag">تكمّل مهمة بعدين <span class="where chat"><svg aria-hidden="true"><use href="#i-chat"/></svg>محادثة مساعد AI</span></h3>
+      <p>اكتب اسم المهارة وبعده اسم المهمة (هنا الاسم المثال <bdi>saved-favorites</bdi>). مساعد الـ AI بيقولك اسم المهمة لما يعملها.</p>
       <div class="act chat"><div class="act-head"><svg aria-hidden="true"><use href="#i-chat"/></svg><span><bdi>Claude Code</bdi>، <bdi>Gemini CLI</bdi>، <bdi>Antigravity</bdi></span></div><pre><code><span class="ln">/ai-dev-workflow saved-favorites</span></code></pre></div>
       <div class="act chat"><div class="act-head"><svg aria-hidden="true"><use href="#i-chat"/></svg><span><bdi>Codex</bdi></span></div><pre><code><span class="ln">$ai-dev-workflow saved-favorites</span></code></pre></div>
-      <div class="tip"><strong>قاعدة مهمة:</strong> في كل مرة تفتح جلسة جديدة لتكمل مهمة بدأتها بـ <bdi>AIDevWorkflow</bdi>، استدعِ المهارة من جديد باسم المهمة، <strong>حتى لو رجعت لنفس المحادثة القديمة</strong>. في <bdi>Claude Code</bdi> لا يعمل منع التعديل المبكر إلا بعد هذا الاستدعاء.</div>
+      <div class="tip"><strong>قاعدة مهمة:</strong> كل مرة تفتح session جديدة عشان تكمّل مهمة بدأتها بـ <bdi>AIDevWorkflow</bdi>، نادي المهارة تاني باسم المهمة، <strong>حتى لو رجعت لنفس الشات القديم</strong>. في <bdi>Claude Code</bdi>، منع التعديل بدري مابيشتغلش غير بعد النداء ده.</div>
       <div class="example">
-        <h4>مثال: تكمل مهمة في اليوم التالي</h4>
-        <p>تخيّل المهارة <strong>مشرفًا</strong> على العمل: عندما تكتب <code>/ai-dev-workflow</code> يحضر، فيتأكد من موافقتك قبل أي كود ويمنع التعديل المبكر. لكنه يغادر عندما تغلق <bdi>Claude</bdi>. وعندما تفتحه من جديد، حتى في المحادثة القديمة نفسها، يبقى الكلام القديم ظاهرًا أمامك، لكن المشرف لم يعد موجودًا.</p>
+        <h4>مثال: بتكمّل مهمة تاني يوم</h4>
+        <p>تخيّل المهارة <strong>مشرف</strong> على الشغل: لما تكتب <code>/ai-dev-workflow</code> بيحضر، فيتأكد إنك وافقت قبل أي كود، ويمنع التعديل بدري. بس بيمشي لما تقفل <bdi>Claude</bdi>. ولما تفتحه تاني، حتى في نفس الشات القديم، الكلام القديم بيفضل ظاهر قدامك، بس المشرف مش موجود.</p>
         <ol>
-          <li>افتح <bdi>Claude</bdi>: محادثة جديدة، أو المحادثة القديمة نفسها (<code>claude --resume</code>).</li>
-          <li>أول رسالة تكتبها: استدعِ المهارة باسم المهمة.
+          <li>افتح <bdi>Claude</bdi>: شات جديد، أو نفس الشات القديم (<code>claude --resume</code>).</li>
+          <li>أول رسالة تكتبها: نادي المهارة باسم المهمة.
             <div class="act chat"><div class="act-head"><svg aria-hidden="true"><use href="#i-chat"/></svg><span><bdi>Claude Code</bdi></span></div><pre><code><span class="ln">/ai-dev-workflow saved-favorites</span></code></pre></div></li>
-          <li>بعد ذلك اكتب طلبك كالمعتاد، مثل «كمّل».</li>
+          <li>بعد كده اكتب طلبك عادي، زي «كمّل».</li>
         </ol>
         <table>
-          <thead><tr><th></th><th>إذا كتبت «كمّل» مباشرة</th><th>إذا استدعيت المهارة أولًا</th></tr></thead>
+          <thead><tr><th></th><th>لو كتبت «كمّل» على طول</th><th>لو ناديت المهارة الأول</th></tr></thead>
           <tbody>
-            <tr><td>المشرف</td><td>غير موجود</td><td>عاد</td></tr>
-            <tr><td>إذا حاول الوكيل كتابة كود قبل موافقتك</td><td>يُكتب الكود</td><td>يُمنع</td></tr>
-            <tr><td>حالة المهمة</td><td>يكمل من ذاكرة المحادثة، وقد يخطئ</td><td>يقرأ ملفات المهمة ويكمل من المكان الصحيح</td></tr>
+            <tr><td>المشرف</td><td>مش موجود</td><td>رجع</td></tr>
+            <tr><td>لو الـ agent حاول يكتب كود قبل موافقتك</td><td>الكود بيتكتب</td><td>بيتمنع</td></tr>
+            <tr><td>حالة المهمة</td><td>بيكمّل من ذاكرة الشات، وممكن يغلط</td><td>بيقرا ملفات المهمة ويكمّل من المكان الصح</td></tr>
           </tbody>
         </table>
-        <p class="note">جرّبنا ذلك فعلًا: رجعنا إلى محادثة قديمة وطلبنا تعديل الكود دون استدعاء المهارة، فمرّ التعديل. وعندما استدعينا المهارة أولًا، رُفض الطلب نفسه.</p>
+        <p class="note">جربنا ده فعلاً: رجعنا لشات قديم وطلبنا تعديل في الكود من غير ما ننادي المهارة، فالتعديل عدّى. ولما نادينا المهارة الأول، نفس الطلب اترفض.</p>
       </div>
     </li>
     <li>
-      <h3 class="with-tag">المتابعة في مساعد AI آخر <span class="where chat"><svg aria-hidden="true"><use href="#i-chat"/></svg>محادثة مساعد AI</span></h3>
-      <p>افتح مساعد AI الآخر في المشروع نفسه، واكتب أمر المتابعة نفسه بالعلامة التي يستخدمها: <code>/</code> أو <code>$</code>. يعيد التحقق من كل موافقة قبل أن يلمس الكود.</p>
+      <h3 class="with-tag">تكمّل في مساعد AI تاني <span class="where chat"><svg aria-hidden="true"><use href="#i-chat"/></svg>محادثة مساعد AI</span></h3>
+      <p>افتح مساعد الـ AI التاني في نفس المشروع، واكتب نفس أمر المتابعة بالعلامة اللي بيستخدمها: <code>/</code> أو <code>$</code>. هيتأكد من كل موافقة تاني قبل ما يلمس الكود.</p>
     </li>
     <li>
-      <h3 class="with-tag">مراجعة مستقلة بمساعد AI آخر <span class="where chat"><svg aria-hidden="true"><use href="#i-chat"/></svg>محادثة مساعد AI</span></h3>
-      <p>بعد التنفيذ في مساعد AI، اطلب المراجعة من مساعد AI آخر:</p>
+      <h3 class="with-tag">مراجعة من مساعد AI تاني <span class="where chat"><svg aria-hidden="true"><use href="#i-chat"/></svg>محادثة مساعد AI</span></h3>
+      <p>بعد التنفيذ في مساعد AI، اطلب المراجعة من مساعد AI تاني:</p>
       <div class="act chat"><div class="act-head"><svg aria-hidden="true"><use href="#i-chat"/></svg><span><bdi>Claude Code</bdi>، <bdi>Gemini CLI</bdi>، <bdi>Antigravity</bdi></span></div><pre><code><span class="ln">/ai-dev-workflow audit saved-favorites</span></code></pre></div>
       <div class="act chat"><div class="act-head"><svg aria-hidden="true"><use href="#i-chat"/></svg><span><bdi>Codex</bdi></span></div><pre><code><span class="ln">$ai-dev-workflow audit saved-favorites</span></code></pre></div>
     </li>
     <li>
-      <h3 class="with-tag">إيقاف المهمة مؤقتًا <span class="where chat"><svg aria-hidden="true"><use href="#i-chat"/></svg>محادثة مساعد AI</span></h3>
-      <p>لتطلب شيئًا لا علاقة له بالمهمة، اكتب أولًا:</p>
-      <div class="reply"><span class="reply-label">ردّك:</span><span class="say">أوقف المهمة مؤقتًا</span></div>
-      <p>المهمة الموقوفة لا تقيّد مساعد AI في أي شيء، وتتابعها لاحقًا باسمها.</p>
+      <h3 class="with-tag">توقّف المهمة مؤقتاً <span class="where chat"><svg aria-hidden="true"><use href="#i-chat"/></svg>محادثة مساعد AI</span></h3>
+      <p>لو عايز تطلب حاجة مالهاش علاقة بالمهمة، اكتب الأول:</p>
+      <div class="reply"><span class="reply-label">ردّك:</span><span class="say">وقّف المهمة مؤقتاً</span></div>
+      <p>المهمة الموقوفة مش بتقيّد مساعد الـ AI في أي حاجة، وتكمّلها بعدين باسمها.</p>
     </li>
     <li>
-      <h3 class="with-tag">عرض كل المهام ومرحلة كل منها <span class="where chat"><svg aria-hidden="true"><use href="#i-chat"/></svg>محادثة مساعد AI</span></h3>
+      <h3 class="with-tag">تشوف كل المهام وكل واحدة في أنهي مرحلة <span class="where chat"><svg aria-hidden="true"><use href="#i-chat"/></svg>محادثة مساعد AI</span></h3>
       <div class="act chat"><div class="act-head"><svg aria-hidden="true"><use href="#i-chat"/></svg><span><bdi>Claude Code</bdi>، <bdi>Gemini CLI</bdi>، <bdi>Antigravity</bdi></span></div><pre><code><span class="ln">/ai-dev-workflow status</span></code></pre></div>
       <div class="act chat"><div class="act-head"><svg aria-hidden="true"><use href="#i-chat"/></svg><span><bdi>Codex</bdi></span></div><pre><code><span class="ln">$ai-dev-workflow status</span></code></pre></div>
     </li>
@@ -698,175 +698,175 @@ details.more{margin-top:12px}
 </section>
 
 <section id="ar-stages">
-  <h2>المراحل الإحدى عشرة</h2>
-  <p class="sub">كل مهمة تمر بالمراحل نفسها بالترتيب. البوابتان المحاطتان بخط متقطّع تنتظران موافقتك، والكود لا يُعدَّل إلا في المرحلتين ذواتي الشريط الأخضر.</p>
+  <h2>المراحل الـ 11</h2>
+  <p class="sub">كل مهمة بتعدّي على نفس المراحل بالترتيب. البوابتين اللي حواليهم خط متقطّع بيستنوا موافقتك، والكود مابيتعدّلش غير في المرحلتين اللي عليهم الشريط الأخضر.</p>
   <ol class="flow">
-    <li class="node"><span class="n">1</span><div class="card"><h3>الاستكشاف<bdi class="id">DISCOVERY</bdi></h3><p>يقرأ الكود وملفات التعليمات، ولا يسأل إلا عمّا ينقص.</p><p class="who"><span class="where auto"><svg aria-hidden="true"><use href="#i-auto"/></svg>تلقائي</span><span class="where you"><svg aria-hidden="true"><use href="#i-you"/></svg>أنت</span></p></div></li>
-    <li class="node"><span class="n">2</span><div class="card"><h3>المتطلبات الخارجية<bdi class="id">DEPENDENCIES</bdi></h3><p>يحدد ما يحتاجه من خارج الكود: تصميمات، وتفاصيل الواجهة البرمجية، وقرارات.</p><p class="who"><span class="where auto"><svg aria-hidden="true"><use href="#i-auto"/></svg>تلقائي</span><span class="where you"><svg aria-hidden="true"><use href="#i-you"/></svg>أنت</span></p></div></li>
-    <li class="node"><span class="n">3</span><div class="card"><h3>كتابة المواصفات<bdi class="id">SPECIFICATION</bdi></h3><p>يملأ قالب المواصفات، ويتحقق منه وفق قواعد القالب.</p><p class="who"><span class="where auto"><svg aria-hidden="true"><use href="#i-auto"/></svg>تلقائي</span></p></div></li>
-    <li class="node gate"><span class="n">4</span><div class="card"><h3>الموافقة على المواصفات<bdi class="id">SPEC_APPROVAL</bdi><span class="flag gate">بوابة</span></h3><p>ينتظر ردك: «أوافق على المواصفات».</p><p class="who"><span class="where you"><svg aria-hidden="true"><use href="#i-you"/></svg>أنت</span></p></div></li>
-    <li class="node"><span class="n">5</span><div class="card"><h3>التخطيط<bdi class="id">PLANNING</bdi></h3><p>يكتب الخطة من الكود الفعلي: الخطوات، والمخاطر، والاختبارات.</p><p class="who"><span class="where auto"><svg aria-hidden="true"><use href="#i-auto"/></svg>تلقائي</span></p></div></li>
-    <li class="node gate"><span class="n">6</span><div class="card"><h3>الموافقة على الخطة<bdi class="id">PLAN_APPROVAL</bdi><span class="flag gate">بوابة</span></h3><p>ينتظر ردك: «أوافق على الخطة».</p><p class="who"><span class="where you"><svg aria-hidden="true"><use href="#i-you"/></svg>أنت</span></p></div></li>
-    <li class="node code"><span class="n">7</span><div class="card"><h3>التنفيذ<bdi class="id">IMPLEMENTATION</bdi><span class="flag code">يُعدَّل الكود هنا</span></h3><p>هنا فقط يبدأ تعديل الكود، بعد فحص مسبق للموافقات (<bdi>preflight</bdi>).</p><p class="who"><span class="where auto"><svg aria-hidden="true"><use href="#i-auto"/></svg>تلقائي</span></p></div></li>
-    <li class="node"><span class="n">8</span><div class="card"><h3>الاختبار<bdi class="id">TESTING</bdi></h3><p>يشغّل الفحوص ويسجّل نتائجها.</p><p class="who"><span class="where auto"><svg aria-hidden="true"><use href="#i-auto"/></svg>تلقائي</span></p></div></li>
-    <li class="node code"><span class="n">9</span><div class="card"><h3>الإصلاح<bdi class="id">FIXING</bdi><span class="flag code">يُعدَّل الكود هنا</span></h3><p>إن فشل شيء، يصلحه ثم يعود إلى الاختبار.</p><p class="who"><span class="where auto"><svg aria-hidden="true"><use href="#i-auto"/></svg>تلقائي</span></p></div></li>
-    <li class="node"><span class="n">10</span><div class="card"><h3>المراجعة<bdi class="id">AUDIT</bdi></h3><p>يراجع التغييرات الفعلية مقابل المواصفات والخطة ومعايير مشروعك. وإن وجد مشكلة تحتاج تعديل الكود، يعود إلى الإصلاح.</p><p class="who"><span class="where auto"><svg aria-hidden="true"><use href="#i-auto"/></svg>تلقائي</span></p></div></li>
-    <li class="node"><span class="n">11</span><div class="card"><h3>التقرير النهائي<bdi class="id">FINAL_REPORT</bdi></h3><p>يذكر النتيجة دون أن يتجاوز ما تثبته الأدلة.</p><p class="who"><span class="where you"><svg aria-hidden="true"><use href="#i-you"/></svg>أنت تقرؤه</span></p></div></li>
+    <li class="node"><span class="n">1</span><div class="card"><h3>الاستكشاف<bdi class="id">DISCOVERY</bdi></h3><p>بيقرا الكود وملفات التعليمات، ومابيسألش غير عن الناقص.</p><p class="who"><span class="where auto"><svg aria-hidden="true"><use href="#i-auto"/></svg>تلقائي</span><span class="where you"><svg aria-hidden="true"><use href="#i-you"/></svg>أنت</span></p></div></li>
+    <li class="node"><span class="n">2</span><div class="card"><h3>المتطلبات من برّه<bdi class="id">DEPENDENCIES</bdi></h3><p>بيحدد محتاج إيه من برّه الكود: تصميمات، وتفاصيل الـ API، وقرارات.</p><p class="who"><span class="where auto"><svg aria-hidden="true"><use href="#i-auto"/></svg>تلقائي</span><span class="where you"><svg aria-hidden="true"><use href="#i-you"/></svg>أنت</span></p></div></li>
+    <li class="node"><span class="n">3</span><div class="card"><h3>كتابة المواصفات<bdi class="id">SPECIFICATION</bdi></h3><p>بيملا قالب المواصفات، ويتأكد منه على قواعد القالب.</p><p class="who"><span class="where auto"><svg aria-hidden="true"><use href="#i-auto"/></svg>تلقائي</span></p></div></li>
+    <li class="node gate"><span class="n">4</span><div class="card"><h3>الموافقة على المواصفات<bdi class="id">SPEC_APPROVAL</bdi><span class="flag gate">بوابة</span></h3><p>بيستنى ردك: «موافق على المواصفات».</p><p class="who"><span class="where you"><svg aria-hidden="true"><use href="#i-you"/></svg>أنت</span></p></div></li>
+    <li class="node"><span class="n">5</span><div class="card"><h3>التخطيط<bdi class="id">PLANNING</bdi></h3><p>بيكتب الخطة من الكود الحقيقي: الخطوات، والمخاطر، والاختبارات.</p><p class="who"><span class="where auto"><svg aria-hidden="true"><use href="#i-auto"/></svg>تلقائي</span></p></div></li>
+    <li class="node gate"><span class="n">6</span><div class="card"><h3>الموافقة على الخطة<bdi class="id">PLAN_APPROVAL</bdi><span class="flag gate">بوابة</span></h3><p>بيستنى ردك: «موافق على الخطة».</p><p class="who"><span class="where you"><svg aria-hidden="true"><use href="#i-you"/></svg>أنت</span></p></div></li>
+    <li class="node code"><span class="n">7</span><div class="card"><h3>التنفيذ<bdi class="id">IMPLEMENTATION</bdi><span class="flag code">الكود بيتعدّل هنا</span></h3><p>هنا بس بيبدأ تعديل الكود، بعد فحص للموافقات قبلها (<bdi>preflight</bdi>).</p><p class="who"><span class="where auto"><svg aria-hidden="true"><use href="#i-auto"/></svg>تلقائي</span></p></div></li>
+    <li class="node"><span class="n">8</span><div class="card"><h3>الاختبار<bdi class="id">TESTING</bdi></h3><p>بيشغّل الفحوص ويسجّل نتايجها.</p><p class="who"><span class="where auto"><svg aria-hidden="true"><use href="#i-auto"/></svg>تلقائي</span></p></div></li>
+    <li class="node code"><span class="n">9</span><div class="card"><h3>التصليح<bdi class="id">FIXING</bdi><span class="flag code">الكود بيتعدّل هنا</span></h3><p>لو حاجة فشلت، بيصلّحها ويرجع للاختبار.</p><p class="who"><span class="where auto"><svg aria-hidden="true"><use href="#i-auto"/></svg>تلقائي</span></p></div></li>
+    <li class="node"><span class="n">10</span><div class="card"><h3>المراجعة<bdi class="id">AUDIT</bdi></h3><p>بيراجع التغييرات الحقيقية على المواصفات والخطة ومعايير مشروعك. ولو لقى مشكلة محتاجة تعديل في الكود، بيرجع للتصليح.</p><p class="who"><span class="where auto"><svg aria-hidden="true"><use href="#i-auto"/></svg>تلقائي</span></p></div></li>
+    <li class="node"><span class="n">11</span><div class="card"><h3>التقرير النهائي<bdi class="id">FINAL_REPORT</bdi></h3><p>بيقول النتيجة من غير ما يقول أكتر من اللي الأدلة بتثبته.</p><p class="who"><span class="where you"><svg aria-hidden="true"><use href="#i-you"/></svg>أنت تقرؤه</span></p></div></li>
   </ol>
-  <p class="note">الرجوع إلى مرحلة سابقة مسموح دائمًا: تغيير النطاق يعيد المهمة إلى المواصفات أو الخطة، ويحتاج موافقتك من جديد.</p>
+  <p class="note">الرجوع لمرحلة قبلها مسموح دايماً: لو النطاق اتغير، المهمة بترجع للمواصفات أو الخطة، ومحتاجة موافقتك من جديد.</p>
 </section>
 
 <section id="ar-approvals">
   <h2>موافقتك وقواعد الأمان</h2>
   <ul class="rules">
-    <li><strong>كلماتك وحدها هي الموافقة.</strong>يسجّل مساعد AI ردك كما كتبته، مثل «أوافق على المواصفات»، ولا يوافق نيابة عنك أبدًا.</li>
-    <li><strong>ما توافق عليه يُجمَّد.</strong>تُحفظ كل نسخة وافقت عليها للقراءة فقط مع بصمة رقمية. وإن تغيّر المستند بعد ذلك، يحتاج موافقتك من جديد.</li>
-    <li><strong>لا كود قبل الموافقة على الخطة في المهمة النشطة.</strong>في <bdi>Claude Code</bdi> يمنع خطّاف (<bdi>hook</bdi>) التعديل المبكر للكود. أما أدوات AI الأخرى فتلتزم بالقاعدة، والمحرك يكشف الملفات التي تغيّرت قبل الموافقة.</li>
-    <li><strong>فحص قبل كل جلسة تعديل داخل سير العمل.</strong>عند بدء جلسة جديدة، أو تبديل مساعد AI، أو استئناف مهمة، يعيد مساعد AI التحقق من الموافقات قبل تعديل الكود ضمن المهمة النشطة.</li>
-    <li><strong>إذا طلبت أنت تخطي مرحلة.</strong>يذكر مساعد AI المراحل التي طلبت تخطيها ويسجّل طلبك وسبب الإيقاف المؤقت، ثم ينفّذ طلبك خارج المهمة النشطة. تظل المراحل المتخطاة غير مكتملة، ولا تُسجَّل موافقة لم تمنحها أو نتيجة لم تُختبَر. لا يقرر مساعد AI تخطي أي مرحلة من تلقاء نفسه.</li>
-    <li><strong>لا أسرار في السجلات.</strong>كلمات المرور والرموز والمفاتيح لا تُحفظ أبدًا في ملفات المهمة.</li>
+    <li><strong>كلامك إنت بس هو الموافقة.</strong>مساعد الـ AI بيسجّل ردك زي ما كتبته، زي «موافق على المواصفات»، وعمره ما بيوافق بالنيابة عنك.</li>
+    <li><strong>اللي توافق عليه بيتجمّد.</strong>كل نسخة وافقت عليها بتتحفظ للقراية بس، ومعاها بصمة رقمية. ولو المستند اتغير بعدها، محتاج موافقتك من جديد.</li>
+    <li><strong>مفيش كود قبل الموافقة على الخطة في المهمة الشغالة.</strong>في <bdi>Claude Code</bdi> فيه <bdi>hook</bdi> بيمنع تعديل الكود بدري. أدوات الـ AI التانية بتلتزم بالقاعدة، والمحرك بيكشف الملفات اللي اتغيرت قبل الموافقة.</li>
+    <li><strong>فحص قبل كل session تعديل جوه الـ workflow.</strong>لما تبدأ session جديدة، أو تغيّر مساعد الـ AI، أو ترجع لمهمة، مساعد الـ AI بيتأكد من الموافقات تاني قبل ما يعدّل الكود في المهمة الشغالة.</li>
+    <li><strong>لو إنت طلبت تتخطى مرحلة.</strong>مساعد الـ AI بيقول المراحل اللي طلبت تتخطاها، ويسجّل طلبك وسبب الإيقاف المؤقت، وبعدين ينفّذ طلبك برّه المهمة الشغالة. المراحل اللي اتخطت بتفضل مش مكتملة، ومش بتتسجّل موافقة إنت ماوافقتش عليها أو نتيجة ماتجربتش. ومساعد الـ AI عمره ما بيقرر يتخطى مرحلة من نفسه.</li>
+    <li><strong>مفيش أسرار في السجلات.</strong>الباسوردات والـ tokens والمفاتيح عمرها ما بتتحفظ في ملفات المهمة.</li>
   </ul>
 </section>
 
 <section id="ar-dependencies">
-  <h2>عندما تنقص معلومة</h2>
-  <p class="sub">يحدد مساعد AI ما تحتاجه هذه المهمة فقط، ويصنّف كل عنصر:</p>
+  <h2>لما معلومة تبقى ناقصة</h2>
+  <p class="sub">مساعد الـ AI بيحدد المهمة دي محتاجة إيه بس، وبيصنّف كل حاجة:</p>
   <dl class="classes">
-    <dt>مانع <bdi>(Blocking)</bdi></dt><dd>مطلوب قبل أن تكتمل مرحلة: المواصفات أو الخطة أو التنفيذ أو الإنهاء.</dd>
-    <dt>غير مانع <bdi>(Non-blocking)</bdi></dt><dd>مفيد، لكنه ليس ضروريًا.</dd>
-    <dt>مؤكَّد <bdi>(Verified)</bdi></dt><dd>تم التحقق منه بدليل موثوق.</dd>
-    <dt>غير منطبق <bdi>(Not applicable)</bdi></dt><dd>لا علاقة له بهذه المهمة.</dd>
+    <dt>مانع <bdi>(Blocking)</bdi></dt><dd>لازم يبقى موجود قبل ما مرحلة تخلص: المواصفات أو الخطة أو التنفيذ أو الإنهاء.</dd>
+    <dt>مش مانع <bdi>(Non-blocking)</bdi></dt><dd>مفيد، بس مش ضروري.</dd>
+    <dt>متأكَّد منه <bdi>(Verified)</bdi></dt><dd>اتأكدنا منه بدليل موثوق.</dd>
+    <dt>مالوش علاقة <bdi>(Not applicable)</bdi></dt><dd>مالوش دعوة بالمهمة دي.</dd>
   </dl>
-  <p>عندما يتوقف العمل بسبب عنصر مانع، تبدأ رسالة الحالة بسطر مثل هذا (معناه: متوقف بانتظار عقد الواجهة البرمجية):</p>
+  <p>لما الشغل يقف بسبب حاجة مانعة، رسالة الحالة بتبدأ بسطر زي ده (معناه: واقف مستني الـ contract بتاع الـ API):</p>
   <p class="status-line">BLOCKED — Awaiting backend API contract</p>
-  <p>وعندما تنقص تفاصيل الواجهة البرمجية، يكتب مساعد AI رسالة ترسلها كما هي، مثل:</p>
-  <div class="message">مرحبًا! نضيف ميزة المفضلة إلى التطبيق: يضغط المستخدم المسجَّل على رمز القلب ليحفظ منتجًا، ويرى المنتجات المحفوظة في شاشة المفضلة.
-لإكمال المواصفات نحتاج إلى:
-1. ما الواجهات (<bdi>endpoints</bdi>) الخاصة بالحفظ والحذف وعرض القائمة؟
-2. هل القائمة مقسّمة إلى صفحات، وكيف تُرتَّب؟
-3. ماذا تُرجع الواجهة إذا لم يعد المنتج موجودًا؟
-هل يمكنك مشاركة مثال لطلب واستجابة؟ شكرًا!</div>
+  <p>ولما تفاصيل الـ API تبقى ناقصة، مساعد الـ AI بيكتب رسالة تبعتها زي ما هي، زي كده:</p>
+  <div class="message">أهلاً! بنضيف ميزة المفضلة للأبلكيشن: المستخدم اللي عامل login بيدوس على القلب عشان يحفظ منتج، ويشوف المنتجات المحفوظة في شاشة المفضلة.
+عشان نكمّل المواصفات محتاجين:
+1. إيه الـ <bdi>endpoints</bdi> بتاعة الحفظ والمسح وعرض القايمة؟
+2. القايمة متقسمة صفحات؟ ومترتبة إزاي؟
+3. الـ API بيرجّع إيه لو المنتج مابقاش موجود؟
+ممكن تبعتلي مثال لـ request و response؟ شكراً!</div>
 </section>
 
 <section id="ar-quality">
   <h2>الاختبار والمراجعة والحالة النهائية</h2>
   <ul class="rules">
-    <li><strong>أدلة حقيقية.</strong>يشغّل المحرك كل فحص ويسجّل نتيجته مع بصمة للكود. وإن تغيّر الكود بعد ذلك، تصبح النتيجة قديمة ويجب تشغيل الفحص من جديد.</li>
-    <li><strong>المشكلات القديمة منفصلة.</strong>المشكلات الموجودة قبل المهمة تُعرض منفصلة عن المشكلات الجديدة.</li>
-    <li><strong>الفحص الذي لم يعمل لا يُعدّ ناجحًا أبدًا.</strong>يُسجَّل «متوقفًا» مع ذكر السبب.</li>
-    <li><strong>مراجعة مستقلة.</strong>يراجع العمل مساعد AI آخر أو جلسة منفصلة كلما أمكن، وإلا يذكر التقرير أنها مراجعة ثانية من مساعد AI نفسه.</li>
+    <li><strong>أدلة حقيقية.</strong>المحرك بيشغّل كل فحص ويسجّل نتيجته مع بصمة للكود. ولو الكود اتغير بعدها، النتيجة بتبقى قديمة، ولازم الفحص يتشغّل تاني.</li>
+    <li><strong>المشاكل القديمة لوحدها.</strong>المشاكل اللي كانت موجودة قبل المهمة بتتعرض لوحدها، بعيد عن المشاكل الجديدة.</li>
+    <li><strong>الفحص اللي ماشتغلش عمره ما بيتحسب ناجح.</strong>بيتسجّل «واقف» ومعاه السبب.</li>
+    <li><strong>مراجعة مستقلة.</strong>مساعد AI تاني أو session منفصلة بيراجع الشغل لو ينفع، ولو مش هينفع، التقرير بيقول إنها مراجعة تانية من نفس مساعد الـ AI.</li>
   </ul>
   <h3 style="margin-top:20px">الحالة النهائية</h3>
   <table>
     <thead><tr><th>الحالة</th><th>معناها</th></tr></thead>
     <tbody>
-      <tr><td>مكتمل<small class="en-term"><bdi>Completed</bdi></small></td><td>نجح كل شيء بأدلة، ولا توجد ملاحظة حرجة أو مهمة دون حل.</td></tr>
-      <tr><td>مكتمل مع قيود<small class="en-term"><bdi>Completed with Limitations</bdi></small></td><td>لم يفشل شيء، لكن تعذّر التحقق من بعض العناصر، أو قبلتَ ملاحظة مهمة.</td></tr>
-      <tr><td>مكتمل جزئيًا<small class="en-term"><bdi>Partially Completed</bdi></small></td><td>فشل شيء، أو بقيت خطوات، أو بقيت ملاحظة حرجة حتى لو قبلتها.</td></tr>
-      <tr><td>متوقف<small class="en-term"><bdi>Blocked</bdi></small></td><td>لا يمكن المتابعة حتى يوفّر أحدٌ ما ينقص.</td></tr>
+      <tr><td>خلصت<small class="en-term"><bdi>Completed</bdi></small></td><td>كل حاجة نجحت بأدلة، ومفيش ملاحظة حرجة أو مهمة من غير حل.</td></tr>
+      <tr><td>خلصت مع قيود<small class="en-term"><bdi>Completed with Limitations</bdi></small></td><td>مفيش حاجة فشلت، بس مقدرناش نتأكد من شوية حاجات، أو إنت قبلت ملاحظة مهمة.</td></tr>
+      <tr><td>خلصت جزئياً<small class="en-term"><bdi>Partially Completed</bdi></small></td><td>حاجة فشلت، أو فاضل خطوات، أو فاضل ملاحظة حرجة حتى لو قبلتها.</td></tr>
+      <tr><td>واقفة<small class="en-term"><bdi>Blocked</bdi></small></td><td>مانقدرش نكمّل لحد ما حد يجيب الناقص.</td></tr>
     </tbody>
   </table>
-  <p class="note">الملاحظات نوعان أساسيان: حرجة <bdi>(Critical)</bdi> ومهمة <bdi>(Important)</bdi>. وقبولك لملاحظة حرجة أو مهمة معروفة لا يعطي أبدًا حالة «مكتمل».</p>
+  <p class="note">الملاحظات نوعين أساسيين: حرجة <bdi>(Critical)</bdi> ومهمة <bdi>(Important)</bdi>. ولو قبلت ملاحظة حرجة أو مهمة معروفة، عمرها ما هتدّي حالة «خلصت».</p>
 </section>
 
 <section id="ar-agents">
-  <h2>أدوات AI المدعومة</h2>
-  <p class="sub">أين يجد كل مساعد AI المهارة، وكيف تبدؤها فيه، وإلى أي حد تحققنا من ذلك.</p>
+  <h2>أدوات الـ AI اللي بتشتغل معاها</h2>
+  <p class="sub">كل مساعد AI بيلاقي المهارة فين، وتبدأها فيه إزاي، واتأكدنا من ده لحد فين.</p>
   <ul class="evlegend">
-    <li><span class="ev" data-evidence="tested">مُختبَر</span>شغّلناه بأنفسنا.</li>
-    <li><span class="ev" data-evidence="checked">مفحوص في النسخة المثبّتة</span>وجدناه في كود مساعد AI المثبّت، ولم نشغّله كاملًا.</li>
-    <li><span class="ev" data-evidence="docs">حسب الوثائق الرسمية</span>موثَّق، ولم نشغّله.</li>
-    <li><span class="ev" data-evidence="unverified">غير متحقَّق منه</span>لا هذا ولا ذاك.</li>
+    <li><span class="ev" data-evidence="tested">مُختبَر</span>شغّلناه بنفسنا.</li>
+    <li><span class="ev" data-evidence="checked">مفحوص في النسخة المثبّتة</span>لقيناه في كود مساعد الـ AI المتثبّت، بس ماشغّلناهوش كامل.</li>
+    <li><span class="ev" data-evidence="docs">حسب الوثائق الرسمية</span>مكتوب في الـ docs، بس ماشغّلناهوش.</li>
+    <li><span class="ev" data-evidence="unverified">غير متحقَّق منه</span>لا ده ولا ده.</li>
   </ul>
   <div class="agents">
     <article class="agent">
       <h3><bdi>Claude Code</bdi></h3>
       <dl>
-        <dt>مكان المهارة</dt><dd><code>~/.claude/skills</code> (رابط إلى <code>~/.agents/skills</code>) <span class="ev" data-evidence="checked" data-evidence-key="claude-discovery">مفحوص في النسخة المثبّتة</span></dd>
-        <dt>طريقة البدء</dt><dd><code>/ai-dev-workflow …</code> <span class="ev" data-evidence="tested" data-evidence-key="claude-invoke">مُختبَر</span></dd>
-        <dt>هل تبدأ وحدها؟</dt><dd>لا — <code>disable-model-invocation: true</code> <span class="ev" data-evidence="tested" data-evidence-key="claude-manual-only">مُختبَر</span></dd>
-        <dt>التعديل المبكر للكود</dt><dd>يمنعه خطّاف المهارة، وللمهمة التي بدأت في الجلسة نفسها فقط <span class="ev" data-evidence="tested" data-evidence-key="claude-hooks">مُختبَر</span></dd>
-        <dt>ملاحظة</dt><dd>نجحت مهمة كاملة من البداية إلى النهاية. بعد استئناف جلسة سابقة، اكتب <code>/ai-dev-workflow</code> واسم المهمة من جديد، وإلا لا يعمل منع التعديل المبكر.</dd>
+        <dt>مكان المهارة</dt><dd><code>~/.claude/skills</code> (رابط لـ <code>~/.agents/skills</code>) <span class="ev" data-evidence="checked" data-evidence-key="claude-discovery">مفحوص في النسخة المثبّتة</span></dd>
+        <dt>تبدأها إزاي</dt><dd><code>/ai-dev-workflow …</code> <span class="ev" data-evidence="tested" data-evidence-key="claude-invoke">مُختبَر</span></dd>
+        <dt>بتبدأ لوحدها؟</dt><dd>لأ — <code>disable-model-invocation: true</code> <span class="ev" data-evidence="tested" data-evidence-key="claude-manual-only">مُختبَر</span></dd>
+        <dt>تعديل الكود بدري</dt><dd>الـ hook بتاع المهارة بيمنعه، بس للمهمة اللي بدأت في نفس الـ session <span class="ev" data-evidence="tested" data-evidence-key="claude-hooks">مُختبَر</span></dd>
+        <dt>ملاحظة</dt><dd>مهمة كاملة نجحت من أولها لآخرها. لو رجعت لـ session قديمة، اكتب <code>/ai-dev-workflow</code> واسم المهمة تاني، وإلا منع التعديل بدري مش هيشتغل.</dd>
       </dl>
     </article>
     <article class="agent">
       <h3><bdi>Codex</bdi></h3>
       <dl>
         <dt>مكان المهارة</dt><dd><code>~/.agents/skills</code> <span class="ev" data-evidence="tested" data-evidence-key="codex-discovery">مُختبَر</span></dd>
-        <dt>طريقة البدء</dt><dd><code>$ai-dev-workflow …</code> <span class="ev" data-evidence="tested" data-evidence-key="codex-invoke-dollar">مُختبَر</span>، أو اخترها من قائمة <code>/skills</code> <span class="ev" data-evidence="checked" data-evidence-key="codex-invoke-picker">مفحوص في النسخة المثبّتة</span></dd>
-        <dt>من سطر الأوامر مباشرة</dt><dd><code>codex exec '$ai-dev-workflow …'</code> — أبقِ علامتي الاقتباس المفردتين <span class="ev" data-evidence="tested" data-evidence-key="codex-exec">مُختبَر</span></dd>
-        <dt>هل تبدأ وحدها؟</dt><dd>لا — <code>allow_implicit_invocation: false</code> <span class="ev" data-evidence="tested" data-evidence-key="codex-manual-only">مُختبَر</span></dd>
-        <dt>ملاحظة</dt><dd>نجحت مهمة كاملة من البداية إلى النهاية. لم يثبت تسجيل التجاوز في كل الاختبارات القديمة؛ وفي اختبار أحدث، أقرّ <bdi>Codex</bdi> بطلب المستخدم وسجّله قبل تعديل الكود، وذكر أن المراحل المتخطاة غير مكتملة.</dd>
+        <dt>تبدأها إزاي</dt><dd><code>$ai-dev-workflow …</code> <span class="ev" data-evidence="tested" data-evidence-key="codex-invoke-dollar">مُختبَر</span>، أو اختارها من قايمة <code>/skills</code> <span class="ev" data-evidence="checked" data-evidence-key="codex-invoke-picker">مفحوص في النسخة المثبّتة</span></dd>
+        <dt>من سطر الأوامر على طول</dt><dd><code>codex exec '$ai-dev-workflow …'</code> — سيب علامتين التنصيص المفردة زي ما هم <span class="ev" data-evidence="tested" data-evidence-key="codex-exec">مُختبَر</span></dd>
+        <dt>بتبدأ لوحدها؟</dt><dd>لأ — <code>allow_implicit_invocation: false</code> <span class="ev" data-evidence="tested" data-evidence-key="codex-manual-only">مُختبَر</span></dd>
+        <dt>ملاحظة</dt><dd>مهمة كاملة نجحت من أولها لآخرها. تسجيل التخطي ماظهرش في كل الاختبارات القديمة. وفي اختبار أحدث، <bdi>Codex</bdi> اعترف بطلب المستخدم وسجّله قبل ما يعدّل الكود، وقال إن المراحل اللي اتخطت مش مكتملة.</dd>
       </dl>
     </article>
     <article class="agent">
       <h3><bdi>Gemini CLI</bdi></h3>
       <dl>
         <dt>مكان المهارة</dt><dd><code>~/.agents/skills</code> <span class="ev" data-evidence="tested" data-evidence-key="gemini-discovery">مُختبَر</span></dd>
-        <dt>طريقة البدء</dt><dd><code>/ai-dev-workflow …</code> <span class="ev" data-evidence="tested" data-evidence-key="gemini-slash">مُختبَر</span>، أو اكتب: <code>Use the ai-dev-workflow skill to …</code> <span class="ev" data-evidence="tested" data-evidence-key="gemini-by-name">مُختبَر</span></dd>
-        <dt>طريقة بديلة</dt><dd>اطلب منه قراءة ملف <code>SKILL.md</code> الخاص بالمهارة واتّباعه <span class="ev" data-evidence="unverified" data-evidence-key="gemini-read-fallback">غير متحقَّق منه</span></dd>
-        <dt>هل تبدأ وحدها؟</dt><dd>لا يوجد إعداد يمنع ذلك، لكن <bdi>Gemini</bdi> يطلب موافقتك قبل تفعيل أي مهارة.</dd>
-        <dt>ملاحظة</dt><dd>يحتاج مفتاح <bdi>Gemini API</bdi> مدفوعًا أو ترخيص <bdi>Code Assist</bdi>. ومهارات المشروع تعمل في المجلدات الموثوقة فقط.</dd>
+        <dt>تبدأها إزاي</dt><dd><code>/ai-dev-workflow …</code> <span class="ev" data-evidence="tested" data-evidence-key="gemini-slash">مُختبَر</span>، أو اكتب: <code>Use the ai-dev-workflow skill to …</code> <span class="ev" data-evidence="tested" data-evidence-key="gemini-by-name">مُختبَر</span></dd>
+        <dt>طريقة تانية</dt><dd>اطلب منه يقرا ملف <code>SKILL.md</code> بتاع المهارة ويمشي عليه <span class="ev" data-evidence="unverified" data-evidence-key="gemini-read-fallback">غير متحقَّق منه</span></dd>
+        <dt>بتبدأ لوحدها؟</dt><dd>مفيش إعداد بيمنع ده، بس <bdi>Gemini</bdi> بيطلب موافقتك قبل ما يشغّل أي مهارة.</dd>
+        <dt>ملاحظة</dt><dd>محتاج مفتاح <bdi>Gemini API</bdi> مدفوع أو ترخيص <bdi>Code Assist</bdi>. ومهارات المشروع بتشتغل في الفولدرات الموثوقة بس.</dd>
       </dl>
     </article>
     <article class="agent">
       <h3><bdi>Antigravity</bdi></h3>
       <dl>
         <dt>مكان المهارة</dt><dd><code>~/.gemini/config/skills</code> <span class="ev" data-evidence="docs" data-evidence-key="antigravity-app-discovery">حسب الوثائق الرسمية</span></dd>
-        <dt>طريقة البدء (التطبيق)</dt><dd><code>/ai-dev-workflow …</code> <span class="ev" data-evidence="docs" data-evidence-key="antigravity-app-invoke">حسب الوثائق الرسمية</span></dd>
-        <dt>هل تبدأ وحدها؟</dt><dd>غير موثَّق <span class="ev" data-evidence="unverified" data-evidence-key="antigravity-manual-only">غير متحقَّق منه</span></dd>
-        <dt>نسخة سطر الأوامر</dt><dd>لم تُختبر <span class="ev" data-evidence="docs" data-evidence-key="antigravity-cli">حسب الوثائق الرسمية</span></dd>
+        <dt>تبدأها إزاي (التطبيق)</dt><dd><code>/ai-dev-workflow …</code> <span class="ev" data-evidence="docs" data-evidence-key="antigravity-app-invoke">حسب الوثائق الرسمية</span></dd>
+        <dt>بتبدأ لوحدها؟</dt><dd>مش مكتوب <span class="ev" data-evidence="unverified" data-evidence-key="antigravity-manual-only">غير متحقَّق منه</span></dd>
+        <dt>نسخة سطر الأوامر</dt><dd>ماتجربتش <span class="ev" data-evidence="docs" data-evidence-key="antigravity-cli">حسب الوثائق الرسمية</span></dd>
       </dl>
     </article>
     <article class="agent">
-      <h3>أدوات AI أخرى</h3>
-      <p><bdi>Cursor</bdi> و <bdi>GitHub Copilot</bdi> و <bdi>OpenCode</bdi> وغيرها: انسخ مجلد المهارة إلى مجلد المهارات الذي تستخدمه الأداة. تطلب المهارة من مساعد AI أن يسألك قبل البدء. <span class="ev" data-evidence="unverified" data-evidence-key="other-agents">غير متحقَّق منه</span></p>
+      <h3>أدوات AI تانية</h3>
+      <p><bdi>Cursor</bdi> و<bdi>GitHub Copilot</bdi> و<bdi>OpenCode</bdi> وغيرهم: انسخ فولدر المهارة لفولدر المهارات اللي الأداة بتستخدمه. المهارة بتطلب من مساعد الـ AI يسألك قبل ما يبدأ. <span class="ev" data-evidence="unverified" data-evidence-key="other-agents">غير متحقَّق منه</span></p>
     </article>
   </div>
 </section>
 
 <section id="ar-files">
   <h2>ملفات المهمة</h2>
-  <p class="sub">كل شيء داخل المجلد <code>.ai-dev-workflow</code> في مشروعك:</p>
+  <p class="sub">كله جوه فولدر <code>.ai-dev-workflow</code> في مشروعك:</p>
   <dl class="files">
     <div><dt><code>config.json</code></dt><dd>إعداد المشروع: ملفات التعليمات، والقالب، والفحوص.</dd></div>
-    <div><dt><code>templates/</code></dt><dd>قالب المواصفات الخاص بالمشروع.</dd></div>
-    <div><dt><code>tasks/saved-favorites/</code></dt><dd>مجلد لكل مهمة، وفيه:</dd></div>
+    <div><dt><code>templates/</code></dt><dd>قالب المواصفات بتاع المشروع.</dd></div>
+    <div><dt><code>tasks/saved-favorites/</code></dt><dd>فولدر لكل مهمة، وفيه:</dd></div>
     <div class="indent"><dt><code>spec.md</code></dt><dd>المواصفات.</dd></div>
-    <div class="indent"><dt><code>dependencies.md</code></dt><dd>ما احتاجته المهمة من الخارج، مع الرسائل والردود.</dd></div>
-    <div class="indent"><dt><code>plan.md</code></dt><dd>خطة التنفيذ، وتُجمَّد بعد الموافقة.</dd></div>
-    <div class="indent"><dt><code>approved/</code></dt><dd>نسخ للقراءة فقط من كل نسخة وافقت عليها.</dd></div>
-    <div class="indent"><dt><code>state.json</code></dt><dd>المرحلة والموافقات والتقدم، ولا يكتبه إلا المحرك.</dd></div>
-    <div class="indent"><dt><code>verification.md</code></dt><dd>الفحوص ونتائجها.</dd></div>
+    <div class="indent"><dt><code>dependencies.md</code></dt><dd>المهمة احتاجت إيه من برّه، مع الرسايل والردود.</dd></div>
+    <div class="indent"><dt><code>plan.md</code></dt><dd>خطة التنفيذ، وبتتجمّد بعد الموافقة.</dd></div>
+    <div class="indent"><dt><code>approved/</code></dt><dd>نسخ للقراية بس من كل نسخة وافقت عليها.</dd></div>
+    <div class="indent"><dt><code>state.json</code></dt><dd>المرحلة والموافقات والتقدم، والمحرك بس هو اللي بيكتبه.</dd></div>
+    <div class="indent"><dt><code>verification.md</code></dt><dd>الفحوص ونتايجها.</dd></div>
     <div class="indent"><dt><code>audit.md</code></dt><dd>ملاحظات المراجعة.</dd></div>
     <div class="indent"><dt><code>report.md</code></dt><dd>التقرير النهائي.</dd></div>
   </dl>
-  <p>حفظ هذه الملفات في <bdi>git</bdi> اختيارك لكل مشروع: <code>all</code> أو <code>config-only</code> أو <code>none</code>.</p>
+  <p>تحفظ الملفات دي في <bdi>git</bdi> ولا لأ، ده اختيارك لكل مشروع: <code>all</code> أو <code>config-only</code> أو <code>none</code>.</p>
 </section>
 
 <section id="ar-faq">
-  <h2>أسئلة شائعة والتحديث وإلغاء التثبيت</h2>
-  <details><summary>لماذا لا تبدأ المهارة وحدها؟</summary><p>كي تبقى طلباتك العادية عادية. أنت تقرر متى تمر المهمة بسير العمل.</p></details>
-  <details><summary>هل أستطيع استخدام قالب المواصفات الخاص بي؟</summary><p>نعم. لكل مشروع القالب الذي تختاره عند الإعداد. القواعد التي تحددها إلزامية تمنع الموافقة حتى تُستوفى، والتوصيات تعطي تنبيهًا فقط. ولا يوجد حد لعدد المتطلبات في المواصفات.</p></details>
-  <details><summary>هل تحتاج إلى اتصال بالإنترنت؟</summary><p>المهارة نفسها تعمل دون اتصال، أما مساعد AI فيحتاج اتصاله المعتاد.</p></details>
-  <details><summary>هل تغيّر شيئًا في مشروعي غير المجلد <code>.ai-dev-workflow</code>؟</summary><p>لا، سوى تعديلات الكود في الخطط التي وافقت عليها. ملفات التعليمات مثل <code>CLAUDE.md</code> لا تُعدَّل أبدًا. وحسب اختيارك لحفظ السجلات، قد يُضاف سطر إلى <code>.git/info/exclude</code>.</p></details>
-  <details><summary>التحديث إلى إصدار أحدث</summary>
-    <p>من المجلد الذي نزّلت فيه <code>ai-dev-workflow</code> في خطوة التثبيت، اكتب ما يلي. إذا كنت داخل المجلد بالفعل، تخطَّ سطر <code>cd</code>:</p>
+  <h2>أسئلة بتتكرر، والتحديث، وإلغاء التثبيت</h2>
+  <details><summary>ليه المهارة مش بتبدأ لوحدها؟</summary><p>عشان طلباتك العادية تفضل عادية. إنت اللي بتقرر إمتى المهمة تمشي في الـ workflow.</p></details>
+  <details><summary>أقدر أستخدم قالب المواصفات بتاعي؟</summary><p>أيوه. كل مشروع بياخد القالب اللي بتختاره وقت الإعداد. القواعد اللي بتحددها إجبارية بتمنع الموافقة لحد ما تتحقق، والتوصيات بتدّي تنبيه بس. ومفيش حد لعدد المتطلبات في المواصفات.</p></details>
+  <details><summary>محتاجة نت؟</summary><p>المهارة نفسها بتشتغل من غير نت، بس مساعد الـ AI محتاج النت زي العادة.</p></details>
+  <details><summary>بتغيّر حاجة في مشروعي غير فولدر <code>.ai-dev-workflow</code>؟</summary><p>لأ، غير تعديلات الكود اللي في الخطط اللي وافقت عليها. ملفات التعليمات زي <code>CLAUDE.md</code> عمرها ما بتتعدّل. وحسب اختيارك لحفظ السجلات، ممكن سطر يتضاف لـ <code>.git/info/exclude</code>.</p></details>
+  <details><summary>التحديث لنسخة أحدث</summary>
+    <p>من الفولدر اللي نزّلت فيه <code>ai-dev-workflow</code> في خطوة التثبيت، اكتب الأوامر دي. لو إنت جوه الفولدر أصلاً، اتخطى سطر <code>cd</code>:</p>
     <div class="act term"><div class="act-head"><svg aria-hidden="true"><use href="#i-term"/></svg><span>سطر الأوامر</span></div><pre><code><span class="ln">cd ai-dev-workflow</span>
 <span class="ln">git pull</span>
 <span class="ln">python3 skills/ai-dev-workflow/scripts/install.py update</span></code></pre></div>
   </details>
   <details><summary>إلغاء التثبيت</summary>
-    <p>من المجلد الذي نزّلت فيه <code>ai-dev-workflow</code> في خطوة التثبيت، اعرض أولًا ما سيُحذف. إذا كنت داخل المجلد بالفعل، تخطَّ سطر <code>cd</code>:</p>
+    <p>من الفولدر اللي نزّلت فيه <code>ai-dev-workflow</code> في خطوة التثبيت، اعرض الأول إيه اللي هيتمسح. لو إنت جوه الفولدر أصلاً، اتخطى سطر <code>cd</code>:</p>
     <div class="act term"><div class="act-head"><svg aria-hidden="true"><use href="#i-term"/></svg><span>سطر الأوامر</span></div><pre><code><span class="ln">cd ai-dev-workflow</span>
 <span class="ln">python3 skills/ai-dev-workflow/scripts/install.py uninstall</span></code></pre></div>
-    <p>ثم احذفه:</p>
+    <p>وبعدين امسحه:</p>
     <div class="act term"><div class="act-head"><svg aria-hidden="true"><use href="#i-term"/></svg><span>سطر الأوامر</span></div><pre><code><span class="ln">python3 skills/ai-dev-workflow/scripts/install.py uninstall --yes</span></code></pre></div>
-    <p>ملفات المهام داخل مشاريعك لا تُمسّ أبدًا.</p>
+    <p>ملفات المهام اللي جوه مشاريعك عمرها ما بتتلمس.</p>
   </details>
 </section>
 
-<footer class="page-foot">رخصة <bdi>MIT</bdi> · الإصدار <bdi>1.0.0</bdi> · <a href="https://github.com/ahmedzein-dev/ai-dev-workflow"><bdi>github.com/ahmedzein-dev/ai-dev-workflow</bdi></a></footer>
+<footer class="page-foot">رخصة <bdi>MIT</bdi> · النسخة <bdi>1.0.0</bdi> · <a href="https://github.com/ahmedzein-dev/ai-dev-workflow"><bdi>github.com/ahmedzein-dev/ai-dev-workflow</bdi></a></footer>
 </div>
 
 <!-- ============================== English ============================== -->
