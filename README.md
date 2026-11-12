@@ -49,6 +49,12 @@ The installer keeps one copy in `~/.agents/skills/ai-dev-workflow` (read by Code
 Code (and Antigravity, if present) to it, falling back to a copy where links are not available. See
 [docs/installation.md](docs/installation.md) for project-level installs, Windows and cloud agents.
 
+Optional: register your own spec template once, so every new project is offered it first:
+
+```bash
+python3 skills/ai-dev-workflow/scripts/install.py add-template my-template /path/to/spec-template.md --default
+```
+
 Then, in a project:
 
 | Agent | Start a task | Resume it |
@@ -58,8 +64,13 @@ Then, in a project:
 | Gemini CLI | `/ai-dev-workflow Add saved favorites to the item list` | `/ai-dev-workflow saved-favorites` |
 | Antigravity | `/ai-dev-workflow Add saved favorites to the item list` | `/ai-dev-workflow saved-favorites` |
 
-The first time in a project, the agent shows you the instruction files, template candidates and checks it found,
-and asks which template to use and whether task records are committed. See [docs/usage.md](docs/usage.md).
+In Claude Code, also type `/ai-dev-workflow <task>` again after resuming an earlier session (`claude --resume`):
+the skill's edit gate works only once the skill is invoked in that session.
+
+The first time in a project, the agent inspects it and proposes a setup: your default template, checks found from
+the project's own files (each with a one-line explanation), and how task records are saved in git, with a
+recommendation and its trade-off. Accept it or change any item; later tasks reuse these settings. See
+[docs/usage.md](docs/usage.md).
 
 ## Supported agents
 
