@@ -1,0 +1,2 @@
+* favorites                        SPECIFICATION                                    Saved favorites
+(* = active in this checkout)  Details: workflow.py status <task>

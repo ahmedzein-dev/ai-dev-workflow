@@ -1,0 +1,6 @@
+AIDevWorkflow task 'favorites' (feature): Saved favorites
+Status: SPECIFICATION  ·  stage 3/11  ·  active  ·  active in this checkout
+Spec: not valid — The spec has not been approved. (current file 92d62b20)
+Plan: not valid — The plan has not been approved. (current file fcf94a7e)
+Next: Fill spec.md from the project template, run `spec-check`, fix every mandatory violation and flag, record the review with `review`, then move to SPEC_APPROVAL.
+Read: references/specification.md

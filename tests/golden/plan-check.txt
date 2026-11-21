@@ -1,0 +1,4 @@
+Plan check for 'favorites' — plan ec024368, steps: S1
+Mandatory: 0
+Advisory: 0
+Ready for approval: yes

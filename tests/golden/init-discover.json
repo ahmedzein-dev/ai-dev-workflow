@@ -1,0 +1,64 @@
+{
+  "repository": "repo",
+  "existing": null,
+  "instruction_files": [],
+  "template_candidates": [],
+  "user_templates": [],
+  "default_template": null,
+  "template": {
+    "recommended": null,
+    "reason": "No default template is registered in your private library. No template was found; ask the user to provide one. Never pick an example template on their behalf."
+  },
+  "suggested_checks": [
+    {
+      "id": "test",
+      "name": "make test",
+      "command": "make test",
+      "required": true,
+      "explain": "Runs the project's test target.",
+      "evidence": "Makefile",
+      "tool_found": "<TOOL_FOUND>"
+    }
+  ],
+  "ci_commands": [],
+  "records": {
+    "options": [
+      {
+        "mode": "all",
+        "label": "Save everything in git",
+        "what": "Nothing is excluded: config.json, PROJECT.md, the template and every task folder (spec, plan, approved versions, state.json with approvals, progress and check results, verification, audit and report) are included whenever you commit. Only the local pointer ACTIVE is never committed.",
+        "after_clone": "Yes: a clone has the setup and the full history of every committed task.",
+        "other_machine": "Yes: another developer or AI agent on another computer can resume a task after pulling.",
+        "if_lost": "Nothing that was committed and pushed; uncommitted work is lost, as with any file.",
+        "privacy": "Specs, plans, the wording of approvals and audit findings are visible to everyone with access to the repository, and stay in its history."
+      },
+      {
+        "mode": "config-only",
+        "label": "Save only the setup in git",
+        "what": "config.json, PROJECT.md and the template are included when you commit. Task folders are excluded through the local file .git/info/exclude, so they stay on the computer where they were created.",
+        "after_clone": "The setup, yes. Task records, no.",
+        "other_machine": "No for existing tasks: the same setup works for new tasks, but these tasks cannot be resumed elsewhere.",
+        "if_lost": "All task records on that computer: specs, plans, approval history, progress, audit and reports.",
+        "privacy": "Task details stay on your computer; only the setup is shared."
+      },
+      {
+        "mode": "none",
+        "label": "Save nothing in git",
+        "what": "The whole .ai-dev-workflow folder is excluded through the local file .git/info/exclude; nothing from AIDevWorkflow is committed.",
+        "after_clone": "No: a clone has no setup and no task records.",
+        "other_machine": "No: every computer needs its own setup, and tasks cannot move between computers.",
+        "if_lost": "The setup and all task records.",
+        "privacy": "Nothing from AIDevWorkflow leaves your computer."
+      }
+    ],
+    "notes": [
+      "AIDevWorkflow never commits by itself: 'saved in git' means the files are included when you commit.",
+      "The exclusion is a local git setting of each clone; it is re-applied automatically when a task starts in a new clone.",
+      "Excluding files later does not remove what was already committed; it stays in the history."
+    ],
+    "recommended": {
+      "mode": "all",
+      "reason": "The repository has no remote yet. Saving task records keeps their history next to the code and ready to share; the trade-off is that once you push, everyone with access can read them."
+    }
+  }
+}

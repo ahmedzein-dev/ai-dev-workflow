@@ -1,0 +1,118 @@
+{
+  "schema": 1,
+  "name": "spec-kit",
+  "description": "Rules for the personal spec-kit template (template/spec-template.md), classified from the template and its Arabic guide (README-ar.md). Structure and the four rules the guide labels 'القاعدة' are mandatory; the guide's questions and common-mistake tips are advisory. Numeric guidance in the guide (how many FRs, out-of-scope items or ACs) is non-binding and deliberately not encoded.",
+  "id_prefixes": ["FR", "EC", "AC"],
+  "patterns": [
+    {
+      "id": "M-user-story",
+      "target": "label:User story",
+      "regex": "^As an? .+?, I want .+? so that .+",
+      "message": "write the user story as: As a …, I want to … so that ….",
+      "source": "template: User story field"
+    },
+    {
+      "id": "M-ac-form",
+      "target": "ids:AC",
+      "regex": "^Given .+?, when .+?, then .+",
+      "message": "write each acceptance criterion as: Given …, when …, then ….",
+      "source": "template §4; guide §4 (write every criterion in this form)"
+    }
+  ],
+  "tables": [
+    {
+      "id": "M-edge-cases",
+      "id_prefix": "EC",
+      "message": "every edge case needs a scenario and a specific expected behavior.",
+      "source": "template §2; guide §2 rule (every edge case must have a specific behavior)"
+    }
+  ],
+  "content_required": [
+    {"target": "label:Goal"},
+    {"target": "label:User story"},
+    {"target": "ids:FR"},
+    {"target": "label:Out of scope", "allow_none": true},
+    {"target": "section:2. Edge Cases", "allow_none": true},
+    {"target": "ids:AC"},
+    {"target": "label:Done when"}
+  ],
+  "verification": {"ids": ["AC", "EC"], "checklist_label": "Done when", "checklist_prefix": "DW"},
+  "judgment": [
+    {
+      "id": "J1",
+      "rule": "Every FR is testable",
+      "source": "guide §1 (القاعدة): every FR must be testable",
+      "detectors": [{"type": "vague-words", "target": "ids:FR"}]
+    },
+    {
+      "id": "J2",
+      "rule": "Every edge case has a specific behavior",
+      "source": "guide §2 (القاعدة): 'handles the error' is not a behavior",
+      "detectors": [
+        {
+          "type": "vague-words",
+          "target": "table:EC:2",
+          "words": ["handle", "handles", "handled", "handles the error", "gracefully", "appropriately", "properly",
+                    "show an error", "shows an error", "as expected"]
+        }
+      ]
+    },
+    {
+      "id": "J3",
+      "rule": "Proposed classes, use cases and layers are based on the inspected project and cite the code they follow; the user reviews and approves them",
+      "source": "guide §3 (القاعدة), adjusted: the AI proposes from the inspected code instead of asking the user to write the names",
+      "requires_note": true,
+      "detectors": [{"type": "inspected-files"}]
+    },
+    {
+      "id": "J4",
+      "rule": "Every requirement can be verified by an acceptance criterion, edge case, Done-when item or named test",
+      "source": "guide §4 (القاعدة): if you cannot write an acceptance criterion, go back to section 1",
+      "detectors": [{"type": "coverage-map", "of": "FR"}]
+    }
+  ],
+  "advisory": [
+    {
+      "id": "A1",
+      "type": "questions",
+      "source": "guide §2 question list",
+      "questions": {
+        "double-tap": "The user taps twice",
+        "offline": "No internet connection",
+        "server-error": "Server error or timeout",
+        "empty-result": "Empty result",
+        "app-killed": "The app is closed mid-operation",
+        "concurrent-change": "Someone else changes the same data at the same moment (another driver, seller, admin)",
+        "stale-data": "Data changed since the user saw it (price, stock, fees)",
+        "lost-response": "The request succeeded but the response was lost"
+      }
+    },
+    {
+      "id": "A2",
+      "type": "label-mentions",
+      "target": "label:Done when",
+      "words": ["test"],
+      "message": "Name the required tests in Done when.",
+      "source": "guide §4 (name the required tests)"
+    },
+    {
+      "id": "A3",
+      "type": "none-entry",
+      "target": "label:Out of scope",
+      "message": "Out of scope says None; list what an agent might wrongly think is required.",
+      "source": "guide: common mistakes (leaving Out of scope empty)"
+    },
+    {
+      "id": "A4",
+      "type": "prompts",
+      "source": "guide §1 and §3 questions",
+      "prompts": [
+        "When does each button appear and disappear?",
+        "Where does the data come from, and who computes it: the server or the app?",
+        "Which files and modules must the agent not touch?",
+        "Which interfaces and APIs must stay as they are?",
+        "Who decides the business rules: the server or the app?"
+      ]
+    }
+  ]
+}

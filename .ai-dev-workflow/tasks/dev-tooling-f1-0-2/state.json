@@ -1,0 +1,1173 @@
+{
+  "schema": 1,
+  "id": "dev-tooling-f1-0-2",
+  "title": "F1.0.2 Dev tooling: ruff, mypy and golden CLI outputs",
+  "type": "enhancement",
+  "created_at": "2026-11-21T22:09:11Z",
+  "created_by": "claude-code",
+  "invocation": "عايزين نستخدم AIDevWorkflow نفسه لتطوير AIDevWorkflow بصورة تدريجية، باستخدام النسخة المستقرة المثبتة منه. — اه كمل شغل",
+  "stage": "FINAL_REPORT",
+  "status": "closed",
+  "outcome": "Completed with Limitations",
+  "template": {
+    "path": ".ai-dev-workflow/templates/spec-kit.md",
+    "sha256": "574d3677a6a4f773352e6ffadf959e794bd9c985e25dea0556c53f37b5296ffc",
+    "rules": ".ai-dev-workflow/templates/spec-kit.rules.json"
+  },
+  "discovery": {
+    "inspected": [
+      "skills/ai-dev-workflow/scripts/workflow.py",
+      "skills/ai-dev-workflow/scripts/install.py",
+      "tests/helpers.py",
+      "tests/test_docs.py",
+      "tests/test_lifecycle.py",
+      ".github/workflows/tests.yml",
+      "tools/prepublish_check.py",
+      ".gitignore",
+      "README.md",
+      "docs/roadmap/phases/PHASE_01.md",
+      "docs/roadmap/TECHNICAL_DEBT.md"
+    ],
+    "summary": "Goal: add dev-only quality tooling (ruff lint, mypy type check) and golden CLI output tests as the safety net for the F1.0.3 module split, without changing the shipped skill's behaviour. Scope: tool configuration in a repo-root pyproject.toml (dev only, no packaging), pinned dev requirements file, a CI job running ruff and mypy, golden tests for workflow.py --help and per-command help, status, spec-check, plan-check, outcome and init --discover --json (normalized for temp paths, times and machine-specific tool presence), with an explicit regeneration switch. Exclusions: no runtime dependency, nothing new inside the skill folder, no behaviour change, no refactoring beyond mechanical lint fixes (unused names, import order) proven safe by the full suite and the golden tests. Affected areas: pyproject.toml (new), requirements-dev.txt (new), tests/test_golden.py and tests/golden/ (new), .github/workflows/tests.yml, possibly lint-only edits in workflow.py, install.py, tests and tools. Existing: no linter or type checker configured (TD-17); tests drive workflow.main() in-process with an isolated home (tests/helpers.py)."
+  },
+  "approvals": {
+    "spec": {
+      "version": 1,
+      "sha256": "6415e7ce7e1e8331f025c1ff1b261b57178c19699591ac8c8787a29c2f4ef820",
+      "snapshot": "approved/spec.v1.md",
+      "approved_by": "user",
+      "evidence": "موافق على كله ومش فارقه تتنشر",
+      "recorded_by": "claude-code",
+      "recorded_at": "2026-11-21T22:19:39Z"
+    },
+    "plan": {
+      "version": 1,
+      "sha256": "e0647c9798a26e0cccd5c99821b9ad4a4000a89c82f95fe564205ad361bedb55",
+      "snapshot": "approved/plan.v1.md",
+      "approved_by": "user",
+      "evidence": "موافق على كله ومش فارقه تتنشر",
+      "recorded_by": "claude-code",
+      "recorded_at": "2026-11-21T22:19:39Z",
+      "spec_sha256": "6415e7ce7e1e8331f025c1ff1b261b57178c19699591ac8c8787a29c2f4ef820",
+      "spec_version": 1
+    }
+  },
+  "spec_review": {
+    "spec_sha256": "6415e7ce7e1e8331f025c1ff1b261b57178c19699591ac8c8787a29c2f4ef820",
+    "rules": {
+      "J1": {
+        "status": "pass",
+        "note": "",
+        "agent": "claude-code",
+        "at": "2026-11-21T22:11:20Z"
+      },
+      "J2": {
+        "status": "pass",
+        "note": "",
+        "agent": "claude-code",
+        "at": "2026-11-21T22:11:20Z"
+      },
+      "J3": {
+        "status": "pass",
+        "note": "No new engine structures. tests/test_golden.py follows tests/helpers.py WorkflowTestCase (in-process workflow.main with an isolated AI_DEV_WORKFLOW_HOME) and the existing one-module-per-area layout of tests/; tool configuration uses the standard repo-root pyproject.toml read by ruff and mypy; the lint job follows the existing job style in .github/workflows/tests.yml.",
+        "agent": "claude-code",
+        "at": "2026-11-21T22:11:20Z"
+      },
+      "J4": {
+        "status": "pass",
+        "note": "",
+        "agent": "claude-code",
+        "at": "2026-11-21T22:11:20Z"
+      }
+    },
+    "map": {
+      "FR-1": [
+        "AC-1",
+        "AC-2"
+      ],
+      "FR-2": [
+        "AC-1"
+      ],
+      "FR-3": [
+        "AC-2",
+        "EC-7"
+      ],
+      "FR-4": [
+        "AC-3"
+      ],
+      "FR-5": [
+        "AC-4",
+        "AC-5"
+      ],
+      "FR-6": [
+        "AC-4",
+        "EC-1",
+        "EC-2",
+        "EC-3",
+        "EC-5"
+      ],
+      "FR-7": [
+        "AC-6",
+        "EC-4"
+      ],
+      "FR-8": [
+        "AC-7"
+      ]
+    },
+    "questions": {
+      "double-tap": "n/a:dev tooling and tests run as commands; there is no interactive UI",
+      "offline": "EC-6",
+      "server-error": "n/a:no server is involved; CI failures surface as failed jobs, covered by AC-3",
+      "empty-result": "EC-4",
+      "app-killed": "n/a:an interrupted test or lint run writes nothing except with AIDW_UPDATE_GOLDEN=1, which rewrites whole files",
+      "concurrent-change": "n/a:golden files change only through an explicit regeneration run by one maintainer",
+      "stale-data": "EC-4",
+      "lost-response": "n/a:no network request is part of the checks"
+    },
+    "dismissed": {}
+  },
+  "progress": {
+    "S1": {
+      "status": "done",
+      "files": [
+        "tests/test_golden.py"
+      ],
+      "note": "Audit fixes F-4 noqa removed, F-5 subTest, F-6 exit codes checked, F-7 script-entry smoke test",
+      "agent": "claude-code",
+      "at": "2026-11-21T22:36:20Z"
+    },
+    "S2": {
+      "status": "done",
+      "files": [
+        "pyproject.toml",
+        "requirements-dev.txt"
+      ],
+      "note": "Pinned ruff 0.17.6 and mypy 1.20.2 (plan said latest; mypy 2.4.1 refuses python_version 3.9, which FR-3 requires). Tools in git-ignored .venv/ (DEP-1).",
+      "agent": "claude-code",
+      "at": "2026-11-21T22:24:24Z"
+    },
+    "S3": {
+      "status": "done",
+      "files": [
+        "skills/ai-dev-workflow/scripts/workflow.py",
+        "tools/prepublish_check.py",
+        "tests/test_scenarios.py"
+      ],
+      "note": "ruff: 2 unused imports removed. mypy: 18 findings fixed by renames (digest->hasher, line->lineno, result->spec_result), annotations and typing.cast; no type: ignore needed; no behaviour change (golden files unchanged, 146 tests OK on 3.13 and 3.9).",
+      "agent": "claude-code",
+      "at": "2026-11-21T22:24:24Z"
+    },
+    "S4": {
+      "status": "done",
+      "files": [
+        ".github/workflows/tests.yml"
+      ],
+      "note": "",
+      "agent": "claude-code",
+      "at": "2026-11-21T22:24:43Z"
+    },
+    "S5": {
+      "status": "done",
+      "files": [
+        "README.md"
+      ],
+      "note": "Audit F-8: Windows venv path",
+      "agent": "claude-code",
+      "at": "2026-11-21T22:36:20Z"
+    }
+  },
+  "checks": [
+    {
+      "id": "unit",
+      "name": "Unit, scenario and doc tests",
+      "kind": "result",
+      "agent": "claude-code",
+      "at": "2026-11-21T22:25:06Z",
+      "counts": null,
+      "reason": null,
+      "command": "python3 -m unittest discover -s tests",
+      "duration_s": 45.8,
+      "exit_code": 0,
+      "status": "passed",
+      "summary": "OK",
+      "fingerprint": "21d07fa831f0502d24b4bdcc5cd32c3e8cf3ca04f72879579ca8b0d8819ac48c"
+    },
+    {
+      "id": "privacy",
+      "name": "Pre-publish secret and privacy scan",
+      "kind": "result",
+      "agent": "claude-code",
+      "at": "2026-11-21T22:25:52Z",
+      "counts": null,
+      "reason": null,
+      "command": "python3 tools/prepublish_check.py",
+      "duration_s": 0.2,
+      "exit_code": 0,
+      "status": "passed",
+      "summary": "Scanned 112 files: no findings.",
+      "fingerprint": "21d07fa831f0502d24b4bdcc5cd32c3e8cf3ca04f72879579ca8b0d8819ac48c"
+    },
+    {
+      "id": "ruff",
+      "name": "ruff",
+      "kind": "result",
+      "agent": "claude-code",
+      "at": "2026-11-21T22:25:52Z",
+      "counts": null,
+      "reason": null,
+      "command": ".venv/bin/ruff check .",
+      "duration_s": 0.0,
+      "exit_code": 0,
+      "status": "passed",
+      "summary": "All checks passed!",
+      "fingerprint": "21d07fa831f0502d24b4bdcc5cd32c3e8cf3ca04f72879579ca8b0d8819ac48c"
+    },
+    {
+      "id": "mypy",
+      "name": "mypy",
+      "kind": "result",
+      "agent": "claude-code",
+      "at": "2026-11-21T22:25:53Z",
+      "counts": null,
+      "reason": null,
+      "command": ".venv/bin/mypy",
+      "duration_s": 1.0,
+      "exit_code": 0,
+      "status": "passed",
+      "summary": "Success: no issues found in 3 source files",
+      "fingerprint": "21d07fa831f0502d24b4bdcc5cd32c3e8cf3ca04f72879579ca8b0d8819ac48c"
+    },
+    {
+      "id": "unit-py39",
+      "name": "unit-py39",
+      "kind": "result",
+      "agent": "claude-code",
+      "at": "2026-11-21T22:25:54Z",
+      "counts": null,
+      "reason": null,
+      "command": "/usr/bin/python3 -m unittest discover -s tests",
+      "duration_s": 34.0,
+      "exit_code": 0,
+      "status": "passed",
+      "summary": "OK",
+      "fingerprint": "21d07fa831f0502d24b4bdcc5cd32c3e8cf3ca04f72879579ca8b0d8819ac48c"
+    },
+    {
+      "id": "golden-ac5-ac6",
+      "name": "golden-ac5-ac6",
+      "kind": "result",
+      "agent": "claude-code",
+      "at": "2026-11-21T22:26:47Z",
+      "counts": null,
+      "reason": null,
+      "command": "python3 /private/tmp/claude-501/-Users-ahmedalhosani-Desktop-Ahmed-Zein-downloads-ZEIN-ORIGINALS/78554fc3-22ec-4f7b-b324-d53654d9842d/scratchpad/ac5_ac6.py .",
+      "duration_s": 4.8,
+      "exit_code": 0,
+      "status": "passed",
+      "summary": "OK",
+      "fingerprint": "21d07fa831f0502d24b4bdcc5cd32c3e8cf3ca04f72879579ca8b0d8819ac48c"
+    },
+    {
+      "id": "unit",
+      "name": "Unit, scenario and doc tests",
+      "kind": "result",
+      "agent": "claude-code",
+      "at": "2026-11-21T22:27:36Z",
+      "counts": null,
+      "reason": null,
+      "command": "python3 -m unittest discover -s tests",
+      "duration_s": 45.7,
+      "exit_code": 0,
+      "status": "passed",
+      "summary": "OK",
+      "fingerprint": "6947f069e6f521620c48574ff53b3dba9ce52f8b305da76df9acaf2a6b4ba941"
+    },
+    {
+      "id": "privacy",
+      "name": "Pre-publish secret and privacy scan",
+      "kind": "result",
+      "agent": "claude-code",
+      "at": "2026-11-21T22:28:22Z",
+      "counts": null,
+      "reason": null,
+      "command": "python3 tools/prepublish_check.py",
+      "duration_s": 0.2,
+      "exit_code": 0,
+      "status": "passed",
+      "summary": "Scanned 112 files: no findings.",
+      "fingerprint": "6947f069e6f521620c48574ff53b3dba9ce52f8b305da76df9acaf2a6b4ba941"
+    },
+    {
+      "id": "ruff",
+      "name": "ruff",
+      "kind": "result",
+      "agent": "claude-code",
+      "at": "2026-11-21T22:28:22Z",
+      "counts": null,
+      "reason": null,
+      "command": ".venv/bin/ruff check .",
+      "duration_s": 0.1,
+      "exit_code": 0,
+      "status": "passed",
+      "summary": "All checks passed!",
+      "fingerprint": "6947f069e6f521620c48574ff53b3dba9ce52f8b305da76df9acaf2a6b4ba941"
+    },
+    {
+      "id": "mypy",
+      "name": "mypy",
+      "kind": "result",
+      "agent": "claude-code",
+      "at": "2026-11-21T22:28:22Z",
+      "counts": null,
+      "reason": null,
+      "command": ".venv/bin/mypy",
+      "duration_s": 0.1,
+      "exit_code": 0,
+      "status": "passed",
+      "summary": "Success: no issues found in 3 source files",
+      "fingerprint": "6947f069e6f521620c48574ff53b3dba9ce52f8b305da76df9acaf2a6b4ba941"
+    },
+    {
+      "id": "unit-py39",
+      "name": "unit-py39",
+      "kind": "result",
+      "agent": "claude-code",
+      "at": "2026-11-21T22:28:23Z",
+      "counts": null,
+      "reason": null,
+      "command": "/usr/bin/python3 -m unittest discover -s tests",
+      "duration_s": 34.0,
+      "exit_code": 0,
+      "status": "passed",
+      "summary": "OK",
+      "fingerprint": "6947f069e6f521620c48574ff53b3dba9ce52f8b305da76df9acaf2a6b4ba941"
+    },
+    {
+      "id": "golden-ac5-ac6",
+      "name": "golden-ac5-ac6",
+      "kind": "result",
+      "agent": "claude-code",
+      "at": "2026-11-21T22:28:57Z",
+      "counts": null,
+      "reason": null,
+      "command": "python3 /private/tmp/claude-501/-Users-ahmedalhosani-Desktop-Ahmed-Zein-downloads-ZEIN-ORIGINALS/78554fc3-22ec-4f7b-b324-d53654d9842d/scratchpad/ac5_ac6.py .",
+      "duration_s": 4.9,
+      "exit_code": 0,
+      "status": "passed",
+      "summary": "OK",
+      "fingerprint": "6947f069e6f521620c48574ff53b3dba9ce52f8b305da76df9acaf2a6b4ba941"
+    },
+    {
+      "id": "golden-narrow-terminal",
+      "name": "golden-narrow-terminal",
+      "kind": "result",
+      "agent": "claude-code",
+      "at": "2026-11-21T22:29:02Z",
+      "counts": null,
+      "reason": null,
+      "command": "env COLUMNS=40 python3 -m unittest discover -s tests -p test_golden.py",
+      "duration_s": 1.6,
+      "exit_code": 0,
+      "status": "passed",
+      "summary": "OK",
+      "fingerprint": "6947f069e6f521620c48574ff53b3dba9ce52f8b305da76df9acaf2a6b4ba941"
+    },
+    {
+      "id": "ec6-missing-tool",
+      "name": "ec6-missing-tool",
+      "kind": "result",
+      "agent": "claude-code",
+      "at": "2026-11-21T22:29:03Z",
+      "counts": null,
+      "reason": "Could not run: 'aidw-tool-that-does-not-exist' was not found on PATH.",
+      "command": "aidw-tool-that-does-not-exist --version",
+      "duration_s": 0.0,
+      "exit_code": null,
+      "status": "blocked",
+      "summary": "",
+      "fingerprint": "6947f069e6f521620c48574ff53b3dba9ce52f8b305da76df9acaf2a6b4ba941"
+    },
+    {
+      "id": "unit",
+      "name": "Unit, scenario and doc tests",
+      "kind": "result",
+      "agent": "claude-code",
+      "at": "2026-11-21T22:36:20Z",
+      "counts": null,
+      "reason": null,
+      "command": "python3 -m unittest discover -s tests",
+      "duration_s": 46.0,
+      "exit_code": 0,
+      "status": "passed",
+      "summary": "OK",
+      "fingerprint": "1705ed3d78b3d558110a04a2dcc274afef35119bc949fa47757b4f66fc5392dc"
+    },
+    {
+      "id": "privacy",
+      "name": "Pre-publish secret and privacy scan",
+      "kind": "result",
+      "agent": "claude-code",
+      "at": "2026-11-21T22:37:06Z",
+      "counts": null,
+      "reason": null,
+      "command": "python3 tools/prepublish_check.py",
+      "duration_s": 0.2,
+      "exit_code": 0,
+      "status": "passed",
+      "summary": "Scanned 113 files: no findings.",
+      "fingerprint": "1705ed3d78b3d558110a04a2dcc274afef35119bc949fa47757b4f66fc5392dc"
+    },
+    {
+      "id": "ruff",
+      "name": "ruff",
+      "kind": "result",
+      "agent": "claude-code",
+      "at": "2026-11-21T22:37:07Z",
+      "counts": null,
+      "reason": null,
+      "command": ".venv/bin/ruff check .",
+      "duration_s": 0.0,
+      "exit_code": 0,
+      "status": "passed",
+      "summary": "All checks passed!",
+      "fingerprint": "1705ed3d78b3d558110a04a2dcc274afef35119bc949fa47757b4f66fc5392dc"
+    },
+    {
+      "id": "mypy",
+      "name": "mypy",
+      "kind": "result",
+      "agent": "claude-code",
+      "at": "2026-11-21T22:37:07Z",
+      "counts": null,
+      "reason": null,
+      "command": ".venv/bin/mypy",
+      "duration_s": 0.1,
+      "exit_code": 0,
+      "status": "passed",
+      "summary": "Success: no issues found in 3 source files",
+      "fingerprint": "1705ed3d78b3d558110a04a2dcc274afef35119bc949fa47757b4f66fc5392dc"
+    },
+    {
+      "id": "unit-py39",
+      "name": "unit-py39",
+      "kind": "result",
+      "agent": "claude-code",
+      "at": "2026-11-21T22:37:07Z",
+      "counts": null,
+      "reason": null,
+      "command": "/usr/bin/python3 -m unittest discover -s tests",
+      "duration_s": 34.3,
+      "exit_code": 0,
+      "status": "passed",
+      "summary": "OK",
+      "fingerprint": "1705ed3d78b3d558110a04a2dcc274afef35119bc949fa47757b4f66fc5392dc"
+    },
+    {
+      "id": "golden-ac5-ac6",
+      "name": "golden-ac5-ac6",
+      "kind": "result",
+      "agent": "claude-code",
+      "at": "2026-11-21T22:37:41Z",
+      "counts": null,
+      "reason": null,
+      "command": "python3 /private/tmp/claude-501/-Users-ahmedalhosani-Desktop-Ahmed-Zein-downloads-ZEIN-ORIGINALS/78554fc3-22ec-4f7b-b324-d53654d9842d/scratchpad/ac5_ac6.py .",
+      "duration_s": 6.1,
+      "exit_code": 0,
+      "status": "passed",
+      "summary": "OK",
+      "fingerprint": "1705ed3d78b3d558110a04a2dcc274afef35119bc949fa47757b4f66fc5392dc"
+    },
+    {
+      "id": "golden-narrow-terminal",
+      "name": "golden-narrow-terminal",
+      "kind": "result",
+      "agent": "claude-code",
+      "at": "2026-11-21T22:37:47Z",
+      "counts": null,
+      "reason": null,
+      "command": "env COLUMNS=40 python3 -m unittest discover -s tests -p test_golden.py",
+      "duration_s": 2.0,
+      "exit_code": 0,
+      "status": "passed",
+      "summary": "OK",
+      "fingerprint": "1705ed3d78b3d558110a04a2dcc274afef35119bc949fa47757b4f66fc5392dc"
+    },
+    {
+      "id": "ec6-missing-tool",
+      "name": "ec6-missing-tool",
+      "kind": "result",
+      "agent": "claude-code",
+      "at": "2026-11-21T22:37:50Z",
+      "counts": null,
+      "reason": "Could not run: 'aidw-tool-that-does-not-exist' was not found on PATH.",
+      "command": "aidw-tool-that-does-not-exist --version",
+      "duration_s": 0.0,
+      "exit_code": null,
+      "status": "blocked",
+      "summary": "",
+      "fingerprint": "1705ed3d78b3d558110a04a2dcc274afef35119bc949fa47757b4f66fc5392dc"
+    }
+  ],
+  "checkpoints": [
+    {
+      "at": "2026-11-21T22:19:40Z",
+      "kind": "implementation-start",
+      "agent": "claude-code",
+      "fingerprint": "20f2fbd5cd0b30684c7d3d0f069dd4e660378684a885353dc82c702c29b97590",
+      "valid": true,
+      "changed_files": 0
+    },
+    {
+      "at": "2026-11-21T22:19:45Z",
+      "kind": "preflight",
+      "agent": "claude-code",
+      "fingerprint": "20f2fbd5cd0b30684c7d3d0f069dd4e660378684a885353dc82c702c29b97590",
+      "valid": true,
+      "changed_files": 0
+    },
+    {
+      "at": "2026-11-21T22:21:12Z",
+      "kind": "step",
+      "agent": "claude-code",
+      "fingerprint": "af87039973300742bba29418c16c33947b047e136ff3a9b1b1741ca283e0a5ac",
+      "valid": true,
+      "changed_files": 9,
+      "step": "S1"
+    },
+    {
+      "at": "2026-11-21T22:24:24Z",
+      "kind": "step",
+      "agent": "claude-code",
+      "fingerprint": "2bc00259b34d0278b6b3cad309e7aab2228511ea7f8109bf8f7db0a7fe853cba",
+      "valid": true,
+      "changed_files": 14,
+      "step": "S2"
+    },
+    {
+      "at": "2026-11-21T22:24:24Z",
+      "kind": "step",
+      "agent": "claude-code",
+      "fingerprint": "2bc00259b34d0278b6b3cad309e7aab2228511ea7f8109bf8f7db0a7fe853cba",
+      "valid": true,
+      "changed_files": 14,
+      "step": "S3"
+    },
+    {
+      "at": "2026-11-21T22:24:43Z",
+      "kind": "step",
+      "agent": "claude-code",
+      "fingerprint": "5d99486dbe626f6622f2bec16827dee4da0b5638bf261f640454abe776f4acd7",
+      "valid": true,
+      "changed_files": 15,
+      "step": "S4"
+    },
+    {
+      "at": "2026-11-21T22:24:43Z",
+      "kind": "step",
+      "agent": "claude-code",
+      "fingerprint": "5d99486dbe626f6622f2bec16827dee4da0b5638bf261f640454abe776f4acd7",
+      "valid": true,
+      "changed_files": 15,
+      "step": "S5"
+    },
+    {
+      "at": "2026-11-21T22:24:49Z",
+      "kind": "step",
+      "agent": "claude-code",
+      "fingerprint": "5d99486dbe626f6622f2bec16827dee4da0b5638bf261f640454abe776f4acd7",
+      "valid": true,
+      "changed_files": 15,
+      "step": "S5"
+    },
+    {
+      "at": "2026-11-21T22:24:55Z",
+      "kind": "step",
+      "agent": "claude-code",
+      "fingerprint": "21d07fa831f0502d24b4bdcc5cd32c3e8cf3ca04f72879579ca8b0d8819ac48c",
+      "valid": true,
+      "changed_files": 16,
+      "step": "S5"
+    },
+    {
+      "at": "2026-11-21T22:27:23Z",
+      "kind": "preflight",
+      "agent": "claude-code",
+      "fingerprint": "21d07fa831f0502d24b4bdcc5cd32c3e8cf3ca04f72879579ca8b0d8819ac48c",
+      "valid": true,
+      "changed_files": 16
+    },
+    {
+      "at": "2026-11-21T22:27:28Z",
+      "kind": "step",
+      "agent": "claude-code",
+      "fingerprint": "6947f069e6f521620c48574ff53b3dba9ce52f8b305da76df9acaf2a6b4ba941",
+      "valid": true,
+      "changed_files": 16,
+      "step": "S1"
+    },
+    {
+      "at": "2026-11-21T22:35:49Z",
+      "kind": "preflight",
+      "agent": "claude-code",
+      "fingerprint": "b3786a8c4b4754fdd236fd692d3d1ff1333b30551642c1644d4cc92703463d31",
+      "valid": true,
+      "changed_files": 17,
+      "unattributed": [
+        "docs/roadmap/ENGINEERING_INTELLIGENCE.md"
+      ]
+    },
+    {
+      "at": "2026-11-21T22:36:20Z",
+      "kind": "step",
+      "agent": "claude-code",
+      "fingerprint": "1705ed3d78b3d558110a04a2dcc274afef35119bc949fa47757b4f66fc5392dc",
+      "valid": true,
+      "changed_files": 17,
+      "step": "S1"
+    },
+    {
+      "at": "2026-11-21T22:36:20Z",
+      "kind": "step",
+      "agent": "claude-code",
+      "fingerprint": "1705ed3d78b3d558110a04a2dcc274afef35119bc949fa47757b4f66fc5392dc",
+      "valid": true,
+      "changed_files": 17,
+      "step": "S5"
+    }
+  ],
+  "decisions": [
+    {
+      "text": "The spec-kit template copy in .ai-dev-workflow/templates/ may be committed to this public repository (records.commit=all)",
+      "evidence": "موافق على كله ومش فارقه تتنشر",
+      "by": "user",
+      "recorded_by": "claude-code",
+      "at": "2026-11-21T22:19:45Z"
+    }
+  ],
+  "excluded": [
+    "docs/roadmap/CURRENT_ARCHITECTURE.md",
+    "docs/roadmap/DECISIONS.md",
+    "docs/roadmap/GAP_ANALYSIS.md",
+    "docs/roadmap/MASTER_ROADMAP.md",
+    "docs/roadmap/PROGRESS.md",
+    "docs/roadmap/RISK_REGISTER.md",
+    "docs/roadmap/TARGET_ARCHITECTURE.md",
+    "docs/roadmap/TECHNICAL_DEBT.md",
+    "docs/roadmap/phases/PHASE_00.md",
+    "docs/roadmap/phases/PHASE_01.md",
+    "docs/roadmap/phases/PHASE_02.md",
+    "docs/roadmap/phases/PHASE_03.md",
+    "docs/roadmap/phases/PHASE_04.md",
+    "docs/roadmap/phases/PHASE_05.md",
+    "docs/roadmap/phases/PHASE_06.md",
+    "docs/roadmap/phases/PHASE_07.md",
+    "docs/roadmap/phases/PHASE_08.md",
+    "docs/roadmap/phases/PHASE_09.md",
+    "docs/roadmap/phases/PHASE_10.md",
+    "docs/roadmap/roadmap-data.js",
+    "docs/roadmap/roadmap.html"
+  ],
+  "history": [
+    {
+      "at": "2026-11-21T22:09:11Z",
+      "event": "created",
+      "agent": "claude-code",
+      "invocation": "عايزين نستخدم AIDevWorkflow نفسه لتطوير AIDevWorkflow بصورة تدريجية، باستخدام النسخة المستقرة المثبتة منه. — اه كمل شغل"
+    },
+    {
+      "at": "2026-11-21T22:09:36Z",
+      "event": "discovery",
+      "agent": "claude-code",
+      "inspected": 11
+    },
+    {
+      "at": "2026-11-21T22:09:36Z",
+      "event": "stage",
+      "agent": "claude-code",
+      "from": "DISCOVERY",
+      "to": "DEPENDENCIES"
+    },
+    {
+      "at": "2026-11-21T22:09:56Z",
+      "event": "stage",
+      "agent": "claude-code",
+      "from": "DEPENDENCIES",
+      "to": "SPECIFICATION"
+    },
+    {
+      "at": "2026-11-21T22:11:20Z",
+      "event": "spec-review",
+      "agent": "claude-code",
+      "spec_sha256": "6415e7ce"
+    },
+    {
+      "at": "2026-11-21T22:11:27Z",
+      "event": "stage",
+      "agent": "claude-code",
+      "from": "SPECIFICATION",
+      "to": "SPEC_APPROVAL"
+    },
+    {
+      "at": "2026-11-21T22:19:39Z",
+      "event": "approved",
+      "agent": "claude-code",
+      "document": "spec",
+      "version": 1,
+      "sha256": "6415e7ce"
+    },
+    {
+      "at": "2026-11-21T22:19:39Z",
+      "event": "stage",
+      "agent": "claude-code",
+      "from": "SPEC_APPROVAL",
+      "to": "PLANNING",
+      "reason": "spec approved"
+    },
+    {
+      "at": "2026-11-21T22:19:39Z",
+      "event": "stage",
+      "agent": "claude-code",
+      "from": "PLANNING",
+      "to": "PLAN_APPROVAL"
+    },
+    {
+      "at": "2026-11-21T22:19:39Z",
+      "event": "approved",
+      "agent": "claude-code",
+      "document": "plan",
+      "version": 1,
+      "sha256": "e0647c97"
+    },
+    {
+      "at": "2026-11-21T22:19:39Z",
+      "event": "stage",
+      "agent": "claude-code",
+      "from": "PLAN_APPROVAL",
+      "to": "IMPLEMENTATION",
+      "reason": "plan approved"
+    },
+    {
+      "at": "2026-11-21T22:19:40Z",
+      "event": "scope-exclude",
+      "agent": "claude-code",
+      "files": [
+        "docs/roadmap/CURRENT_ARCHITECTURE.md",
+        "docs/roadmap/DECISIONS.md",
+        "docs/roadmap/GAP_ANALYSIS.md",
+        "docs/roadmap/MASTER_ROADMAP.md",
+        "docs/roadmap/PROGRESS.md",
+        "docs/roadmap/RISK_REGISTER.md",
+        "docs/roadmap/TARGET_ARCHITECTURE.md",
+        "docs/roadmap/TECHNICAL_DEBT.md",
+        "docs/roadmap/phases/PHASE_00.md",
+        "docs/roadmap/phases/PHASE_01.md",
+        "docs/roadmap/phases/PHASE_02.md",
+        "docs/roadmap/phases/PHASE_03.md",
+        "docs/roadmap/phases/PHASE_04.md",
+        "docs/roadmap/phases/PHASE_05.md",
+        "docs/roadmap/phases/PHASE_06.md",
+        "docs/roadmap/phases/PHASE_07.md",
+        "docs/roadmap/phases/PHASE_08.md",
+        "docs/roadmap/phases/PHASE_09.md",
+        "docs/roadmap/phases/PHASE_10.md",
+        "docs/roadmap/roadmap-data.js",
+        "docs/roadmap/roadmap.html"
+      ],
+      "reason": "Owner confirmed (DEP-3): roadmap status files are project-management records, outside this task"
+    },
+    {
+      "at": "2026-11-21T22:19:45Z",
+      "event": "decision",
+      "agent": "claude-code"
+    },
+    {
+      "at": "2026-11-21T22:19:45Z",
+      "event": "preflight",
+      "agent": "claude-code",
+      "valid": true
+    },
+    {
+      "at": "2026-11-21T22:21:12Z",
+      "event": "step",
+      "agent": "claude-code",
+      "step": "S1",
+      "status": "done"
+    },
+    {
+      "at": "2026-11-21T22:24:24Z",
+      "event": "step",
+      "agent": "claude-code",
+      "step": "S2",
+      "status": "done"
+    },
+    {
+      "at": "2026-11-21T22:24:24Z",
+      "event": "step",
+      "agent": "claude-code",
+      "step": "S3",
+      "status": "done"
+    },
+    {
+      "at": "2026-11-21T22:24:43Z",
+      "event": "step",
+      "agent": "claude-code",
+      "step": "S4",
+      "status": "done"
+    },
+    {
+      "at": "2026-11-21T22:24:43Z",
+      "event": "step",
+      "agent": "claude-code",
+      "step": "S5",
+      "status": "done"
+    },
+    {
+      "at": "2026-11-21T22:24:49Z",
+      "event": "step",
+      "agent": "claude-code",
+      "step": "S5",
+      "status": "in-progress"
+    },
+    {
+      "at": "2026-11-21T22:24:55Z",
+      "event": "step",
+      "agent": "claude-code",
+      "step": "S5",
+      "status": "done"
+    },
+    {
+      "at": "2026-11-21T22:24:55Z",
+      "event": "stage",
+      "agent": "claude-code",
+      "from": "IMPLEMENTATION",
+      "to": "TESTING"
+    },
+    {
+      "at": "2026-11-21T22:25:52Z",
+      "event": "check",
+      "agent": "claude-code",
+      "check": "unit",
+      "status": "passed"
+    },
+    {
+      "at": "2026-11-21T22:25:52Z",
+      "event": "check",
+      "agent": "claude-code",
+      "check": "privacy",
+      "status": "passed"
+    },
+    {
+      "at": "2026-11-21T22:25:53Z",
+      "event": "check",
+      "agent": "claude-code",
+      "check": "ruff",
+      "status": "passed"
+    },
+    {
+      "at": "2026-11-21T22:25:54Z",
+      "event": "check",
+      "agent": "claude-code",
+      "check": "mypy",
+      "status": "passed"
+    },
+    {
+      "at": "2026-11-21T22:26:28Z",
+      "event": "check",
+      "agent": "claude-code",
+      "check": "unit-py39",
+      "status": "passed"
+    },
+    {
+      "at": "2026-11-21T22:26:52Z",
+      "event": "check",
+      "agent": "claude-code",
+      "check": "golden-ac5-ac6",
+      "status": "passed"
+    },
+    {
+      "at": "2026-11-21T22:27:23Z",
+      "event": "stage",
+      "agent": "claude-code",
+      "from": "TESTING",
+      "to": "FIXING",
+      "reason": "EC-5 not exercised: the init --discover golden scenario suggests no checks, so tool_found never appears"
+    },
+    {
+      "at": "2026-11-21T22:27:23Z",
+      "event": "preflight",
+      "agent": "claude-code",
+      "valid": true
+    },
+    {
+      "at": "2026-11-21T22:27:28Z",
+      "event": "step",
+      "agent": "claude-code",
+      "step": "S1",
+      "status": "done"
+    },
+    {
+      "at": "2026-11-21T22:27:36Z",
+      "event": "stage",
+      "agent": "claude-code",
+      "from": "FIXING",
+      "to": "TESTING",
+      "reason": "EC-5 fix done; re-run all checks on the new code"
+    },
+    {
+      "at": "2026-11-21T22:28:22Z",
+      "event": "check",
+      "agent": "claude-code",
+      "check": "unit",
+      "status": "passed"
+    },
+    {
+      "at": "2026-11-21T22:28:22Z",
+      "event": "check",
+      "agent": "claude-code",
+      "check": "privacy",
+      "status": "passed"
+    },
+    {
+      "at": "2026-11-21T22:28:22Z",
+      "event": "check",
+      "agent": "claude-code",
+      "check": "ruff",
+      "status": "passed"
+    },
+    {
+      "at": "2026-11-21T22:28:23Z",
+      "event": "check",
+      "agent": "claude-code",
+      "check": "mypy",
+      "status": "passed"
+    },
+    {
+      "at": "2026-11-21T22:28:57Z",
+      "event": "check",
+      "agent": "claude-code",
+      "check": "unit-py39",
+      "status": "passed"
+    },
+    {
+      "at": "2026-11-21T22:29:02Z",
+      "event": "check",
+      "agent": "claude-code",
+      "check": "golden-ac5-ac6",
+      "status": "passed"
+    },
+    {
+      "at": "2026-11-21T22:29:03Z",
+      "event": "check",
+      "agent": "claude-code",
+      "check": "golden-narrow-terminal",
+      "status": "passed"
+    },
+    {
+      "at": "2026-11-21T22:29:04Z",
+      "event": "check",
+      "agent": "claude-code",
+      "check": "ec6-missing-tool",
+      "status": "blocked"
+    },
+    {
+      "at": "2026-11-21T22:29:24Z",
+      "event": "stage",
+      "agent": "claude-code",
+      "from": "TESTING",
+      "to": "AUDIT"
+    },
+    {
+      "at": "2026-11-21T22:35:49Z",
+      "event": "stage",
+      "agent": "claude-code",
+      "from": "AUDIT",
+      "to": "FIXING",
+      "reason": "Audit F-4..F-8 (Minor): remove misleading noqa, subTest per golden, pin --help exit codes, script-entry smoke test before F1.0.3, Windows venv paths in README"
+    },
+    {
+      "at": "2026-11-21T22:35:49Z",
+      "event": "preflight",
+      "agent": "claude-code",
+      "valid": true
+    },
+    {
+      "at": "2026-11-21T22:36:20Z",
+      "event": "step",
+      "agent": "claude-code",
+      "step": "S1",
+      "status": "done"
+    },
+    {
+      "at": "2026-11-21T22:36:20Z",
+      "event": "step",
+      "agent": "claude-code",
+      "step": "S5",
+      "status": "done"
+    },
+    {
+      "at": "2026-11-21T22:36:20Z",
+      "event": "stage",
+      "agent": "claude-code",
+      "from": "FIXING",
+      "to": "TESTING",
+      "reason": "Audit fixes done; re-run all checks"
+    },
+    {
+      "at": "2026-11-21T22:37:06Z",
+      "event": "check",
+      "agent": "claude-code",
+      "check": "unit",
+      "status": "passed"
+    },
+    {
+      "at": "2026-11-21T22:37:06Z",
+      "event": "check",
+      "agent": "claude-code",
+      "check": "privacy",
+      "status": "passed"
+    },
+    {
+      "at": "2026-11-21T22:37:07Z",
+      "event": "check",
+      "agent": "claude-code",
+      "check": "ruff",
+      "status": "passed"
+    },
+    {
+      "at": "2026-11-21T22:37:07Z",
+      "event": "check",
+      "agent": "claude-code",
+      "check": "mypy",
+      "status": "passed"
+    },
+    {
+      "at": "2026-11-21T22:37:41Z",
+      "event": "check",
+      "agent": "claude-code",
+      "check": "unit-py39",
+      "status": "passed"
+    },
+    {
+      "at": "2026-11-21T22:37:47Z",
+      "event": "check",
+      "agent": "claude-code",
+      "check": "golden-ac5-ac6",
+      "status": "passed"
+    },
+    {
+      "at": "2026-11-21T22:37:50Z",
+      "event": "check",
+      "agent": "claude-code",
+      "check": "golden-narrow-terminal",
+      "status": "passed"
+    },
+    {
+      "at": "2026-11-21T22:37:50Z",
+      "event": "check",
+      "agent": "claude-code",
+      "check": "ec6-missing-tool",
+      "status": "blocked"
+    },
+    {
+      "at": "2026-11-21T22:38:21Z",
+      "event": "stage",
+      "agent": "claude-code",
+      "from": "TESTING",
+      "to": "AUDIT"
+    },
+    {
+      "at": "2026-11-21T22:38:21Z",
+      "event": "stage",
+      "agent": "claude-code",
+      "from": "AUDIT",
+      "to": "FINAL_REPORT"
+    },
+    {
+      "at": "2026-11-21T22:38:39Z",
+      "event": "closed",
+      "agent": "claude-code",
+      "outcome": "Completed with Limitations"
+    }
+  ],
+  "baseline": {
+    "start": {
+      "head": "6849eca082af7d2f11909dfd4d060bb8a04de78a",
+      "dirty": {
+        "docs/roadmap/CURRENT_ARCHITECTURE.md": "6b2490541420fc59d4f6103c18173aecadaaba6c",
+        "docs/roadmap/DECISIONS.md": "93a525bae2fd23c672b278b454771860b709c989",
+        "docs/roadmap/GAP_ANALYSIS.md": "6cdacf041e9cc5f1b06ce1ebaed41c130b6d8768",
+        "docs/roadmap/MASTER_ROADMAP.md": "d2a7486988c7be38b1d54c5771b883d61933e875",
+        "docs/roadmap/PROGRESS.md": "6c14468f3bac3fd51e62383be9ac670202d3104d",
+        "docs/roadmap/RISK_REGISTER.md": "74098d7a892d4b477f3e7d1f31fef6dcbca57e9a",
+        "docs/roadmap/TARGET_ARCHITECTURE.md": "a4c8c4e5a21b492124f3101bade2b5bdae565d9b",
+        "docs/roadmap/TECHNICAL_DEBT.md": "14c4d38d078c9a468dd99c8e548ca63e77b9af3e",
+        "docs/roadmap/phases/PHASE_00.md": "d6fc8733bfec1926e838b3165a7ce5b46731bcca",
+        "docs/roadmap/phases/PHASE_01.md": "dec6228343cca9128f0f4705b2cf5bb71e03f243",
+        "docs/roadmap/phases/PHASE_02.md": "a06f6cf6fa4341e5036cefcb1a078efa90676026",
+        "docs/roadmap/phases/PHASE_03.md": "3e2c7db5474d09818b89d7734d074c95a607e225",
+        "docs/roadmap/phases/PHASE_04.md": "62ae80cf2a4b54dc508489ad82b0b07caf7d60e9",
+        "docs/roadmap/phases/PHASE_05.md": "28f9c6712afd6c5e108ccf8645fd9a0de32bd2c1",
+        "docs/roadmap/phases/PHASE_06.md": "40306466cdd0c8e842ead096c021e63e9ed9e0e3",
+        "docs/roadmap/phases/PHASE_07.md": "9e7d97c0fb7bf3b0e5a7daee624b35cdc1fe3f12",
+        "docs/roadmap/phases/PHASE_08.md": "d90773cbf833556762ec9ba5da47e26706af2546",
+        "docs/roadmap/phases/PHASE_09.md": "585b3f073f9cf0b772069f711c0141937b18574d",
+        "docs/roadmap/phases/PHASE_10.md": "aae3ee2988d655bbc7af4f88f0667c08be354e33",
+        "docs/roadmap/roadmap-data.js": "5e57be4d721f79e3bc87eda05c4c89fe1d9bd056",
+        "docs/roadmap/roadmap.html": "ebe656022985ecb312f114f0b936d22636d9c852"
+      },
+      "captured_at": "2026-11-21T22:09:11Z"
+    },
+    "implementation": {
+      "head": "6849eca082af7d2f11909dfd4d060bb8a04de78a",
+      "dirty": {
+        "docs/roadmap/CURRENT_ARCHITECTURE.md": "6b2490541420fc59d4f6103c18173aecadaaba6c",
+        "docs/roadmap/DECISIONS.md": "93a525bae2fd23c672b278b454771860b709c989",
+        "docs/roadmap/GAP_ANALYSIS.md": "6cdacf041e9cc5f1b06ce1ebaed41c130b6d8768",
+        "docs/roadmap/MASTER_ROADMAP.md": "d2a7486988c7be38b1d54c5771b883d61933e875",
+        "docs/roadmap/PROGRESS.md": "6c14468f3bac3fd51e62383be9ac670202d3104d",
+        "docs/roadmap/RISK_REGISTER.md": "74098d7a892d4b477f3e7d1f31fef6dcbca57e9a",
+        "docs/roadmap/TARGET_ARCHITECTURE.md": "a4c8c4e5a21b492124f3101bade2b5bdae565d9b",
+        "docs/roadmap/TECHNICAL_DEBT.md": "14c4d38d078c9a468dd99c8e548ca63e77b9af3e",
+        "docs/roadmap/phases/PHASE_00.md": "d6fc8733bfec1926e838b3165a7ce5b46731bcca",
+        "docs/roadmap/phases/PHASE_01.md": "dec6228343cca9128f0f4705b2cf5bb71e03f243",
+        "docs/roadmap/phases/PHASE_02.md": "a06f6cf6fa4341e5036cefcb1a078efa90676026",
+        "docs/roadmap/phases/PHASE_03.md": "3e2c7db5474d09818b89d7734d074c95a607e225",
+        "docs/roadmap/phases/PHASE_04.md": "62ae80cf2a4b54dc508489ad82b0b07caf7d60e9",
+        "docs/roadmap/phases/PHASE_05.md": "28f9c6712afd6c5e108ccf8645fd9a0de32bd2c1",
+        "docs/roadmap/phases/PHASE_06.md": "40306466cdd0c8e842ead096c021e63e9ed9e0e3",
+        "docs/roadmap/phases/PHASE_07.md": "9e7d97c0fb7bf3b0e5a7daee624b35cdc1fe3f12",
+        "docs/roadmap/phases/PHASE_08.md": "d90773cbf833556762ec9ba5da47e26706af2546",
+        "docs/roadmap/phases/PHASE_09.md": "585b3f073f9cf0b772069f711c0141937b18574d",
+        "docs/roadmap/phases/PHASE_10.md": "aae3ee2988d655bbc7af4f88f0667c08be354e33",
+        "docs/roadmap/roadmap-data.js": "5e57be4d721f79e3bc87eda05c4c89fe1d9bd056",
+        "docs/roadmap/roadmap.html": "ebe656022985ecb312f114f0b936d22636d9c852"
+      },
+      "captured_at": "2026-11-21T22:19:39Z"
+    }
+  },
+  "updated_at": "2026-11-21T22:38:39Z",
+  "last_checkpoint": {
+    "at": "2026-11-21T22:36:20Z",
+    "fingerprint": "1705ed3d78b3d558110a04a2dcc274afef35119bc949fa47757b4f66fc5392dc",
+    "changes": {
+      ".github/workflows/tests.yml": "5489e07e1195f003eecc54a78d34816f21feeb91",
+      "README.md": "57b8a831341086665c9d59f285f39b8b8594dc62",
+      "docs/roadmap/ENGINEERING_INTELLIGENCE.md": "c034b69a97583b784cf40f581317b57658004998",
+      "pyproject.toml": "5270a553e256a59a2942bab1e31fd19f4e8d2e8a",
+      "requirements-dev.txt": "e94c5b40cd2ec961200b162e47c3e92db0636c39",
+      "skills/ai-dev-workflow/scripts/workflow.py": "8af528002e10fcb8992b193ee7a85074c6a62048",
+      "tests/golden/init-discover.json": "34d178e20c66f02f1dea534cd5ec8522700b7c0a",
+      "tests/golden/install-help.txt": "1c73c650a0141c30164f4f84ca111cd3bc1328c2",
+      "tests/golden/outcome.txt": "ccf58fcf5309f7611be926bda65587a2c321fc58",
+      "tests/golden/plan-check.txt": "69037d877d7800c797be2b302b0022572602f961",
+      "tests/golden/spec-check.txt": "ab45891d1137eeba4bfd472fb7799509c54a70dc",
+      "tests/golden/status-list.txt": "21c7ae4a75a3dbb4273006298041aedcc3b4abea",
+      "tests/golden/status-task.txt": "fc95e3e188aabc4c51421c3c1740437fd57b2606",
+      "tests/golden/workflow-help.txt": "0918796e37983d2b2df891a0adec8905645a4cdc",
+      "tests/test_golden.py": "0ee8775052ff6947f8a132a53a7e9de3511afb72",
+      "tests/test_scenarios.py": "acf082eaffd5b5d4fda0db0d6e9fd4baf4c50b56",
+      "tools/prepublish_check.py": "fe5406988e4287b2f1c8fa90c464757224eb552b"
+    }
+  },
+  "closed_at": "2026-11-21T22:38:39Z"
+}

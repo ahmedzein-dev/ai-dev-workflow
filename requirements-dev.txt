@@ -1,0 +1,4 @@
+# Developer tools for AIDevWorkflow (not needed to use the skill). Exact pins; update deliberately.
+ruff==0.17.6
+# mypy 2.x no longer accepts python_version = 3.9 (the skill's minimum, D-012); 1.20.2 is the newest that does.
+mypy==1.20.2

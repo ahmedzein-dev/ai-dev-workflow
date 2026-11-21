@@ -1,0 +1,86 @@
+=== install.py --help ===
+usage: install.py [-h] {install,update,doctor,uninstall,add-template,default-template,list-templates} ...
+
+Install, update, check and remove the ai-dev-workflow skill (AIDevWorkflow) for each supported
+agent.
+
+positional arguments:
+  {install,update,doctor,uninstall,add-template,default-template,list-templates}
+    install             Install the skill (default).
+    update              Refresh existing installs from this package.
+    doctor              Check every installed copy.
+    uninstall           Remove installs made by this script.
+    add-template        Add a specification template to your private library.
+    default-template    Show, set or clear your default template.
+    list-templates      List your private templates.
+
+options:
+  -h, --help            show this help message and exit
+
+=== install.py install --help ===
+usage: install.py install [-h] [--project REPO] [--agents AGENTS] [--copy] [--link-source] [--symlinks] [--dry-run]
+
+options:
+  -h, --help       show this help message and exit
+  --project REPO   Install into a repository instead of your home folder.
+  --agents AGENTS  claude,codex,gemini,antigravity, auto (default) or all.
+  --copy           Copy instead of symlinking for Claude Code and Antigravity.
+  --link-source    Point the canonical copy at this folder (for development).
+  --symlinks       Project install: link .claude/skills to .agents/skills.
+  --dry-run
+
+=== install.py update --help ===
+usage: install.py update [-h] [--project REPO] [--agents AGENTS] [--copy] [--link-source] [--symlinks] [--dry-run]
+
+options:
+  -h, --help       show this help message and exit
+  --project REPO   Install into a repository instead of your home folder.
+  --agents AGENTS  claude,codex,gemini,antigravity, auto (default) or all.
+  --copy           Copy instead of symlinking for Claude Code and Antigravity.
+  --link-source    Point the canonical copy at this folder (for development).
+  --symlinks       Project install: link .claude/skills to .agents/skills.
+  --dry-run
+
+=== install.py doctor --help ===
+usage: install.py doctor [-h] [--project REPO]
+
+options:
+  -h, --help      show this help message and exit
+  --project REPO  Install into a repository instead of your home folder.
+
+=== install.py uninstall --help ===
+usage: install.py uninstall [-h] [--project REPO] [--yes]
+
+options:
+  -h, --help      show this help message and exit
+  --project REPO  Install into a repository instead of your home folder.
+  --yes
+
+=== install.py add-template --help ===
+usage: install.py add-template [-h] [--rules RULES] [--force] [--default] name template
+
+positional arguments:
+  name
+  template
+
+options:
+  -h, --help     show this help message and exit
+  --rules RULES
+  --force
+  --default      Offer this template first to every new project.
+
+=== install.py default-template --help ===
+usage: install.py default-template [-h] [--clear] [name]
+
+positional arguments:
+  name
+
+options:
+  -h, --help  show this help message and exit
+  --clear
+
+=== install.py list-templates --help ===
+usage: install.py list-templates [-h]
+
+options:
+  -h, --help  show this help message and exit

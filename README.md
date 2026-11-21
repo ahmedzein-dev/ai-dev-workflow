@@ -132,6 +132,19 @@ cd tests && python3 -m unittest
 python3 tools/prepublish_check.py
 ```
 
+Lint and type checks use pinned dev tools (never needed to use the skill):
+
+```bash
+python3 -m venv .venv && .venv/bin/pip install -r requirements-dev.txt
+.venv/bin/ruff check .
+.venv/bin/mypy
+```
+
+On Windows the tools are in `.venv\Scripts\` (for example `.venv\Scripts\ruff check .`).
+
+`tests/test_golden.py` compares CLI output with `tests/golden/`. After an intended output change, regenerate the
+files from the `tests` folder and review the diff: `AIDW_UPDATE_GOLDEN=1 python3 -m unittest test_golden`.
+
 The engine and installer use only the Python standard library.
 
 ## License

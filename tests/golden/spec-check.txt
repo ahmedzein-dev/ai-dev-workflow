@@ -1,0 +1,20 @@
+Spec check for 'favorites' — spec 92d62b20, template .ai-dev-workflow/templates/example-spec-template.md, rules .ai-dev-workflow/templates/example-spec-template.rules.json
+Mandatory (block approval): 0
+Review flags (block approval until fixed or dismissed with a reason): 0
+Judgment rules (reviewed by the agent, confirmed by the user's approval):
+  - J1 [pass] Every requirement is specific and testable
+  - J2 [pass] Every edge case has a specific expected behavior
+  - J3 [pass] Proposed structures are based on the inspected project and cite the existing code they follow — No new structures; extends the existing app.py module.
+  - J4 [pass] Every requirement can be verified by an acceptance criterion, edge case, done item or named test
+Advisory warnings (do not block): 8
+  - [A1] Not yet considered: The user submits twice. Record `review <task> --question double-submit=EC-n` or `--question double-submit=n/a:<reason>`.
+  - [A1] Not yet considered: No network connection. Record `review <task> --question offline=EC-n` or `--question offline=n/a:<reason>`.
+  - [A1] Not yet considered: Server error or timeout. Record `review <task> --question server-error=EC-n` or `--question server-error=n/a:<reason>`.
+  - [A1] Not yet considered: Empty result. Record `review <task> --question empty=EC-n` or `--question empty=n/a:<reason>`.
+  - [A1] Not yet considered: The app or page closes mid-operation. Record `review <task> --question interrupted=EC-n` or `--question interrupted=n/a:<reason>`.
+  - [A1] Not yet considered: Someone else changes the same data at the same time. Record `review <task> --question concurrent=EC-n` or `--question concurrent=n/a:<reason>`.
+  - [A1] Not yet considered: Data changed since the user loaded it. Record `review <task> --question stale=EC-n` or `--question stale=n/a:<reason>`.
+  - [A1] Not yet considered: The request succeeded but the response was lost. Record `review <task> --question lost-response=EC-n` or `--question lost-response=n/a:<reason>`.
+  ? Who computes each value: the server or the client?
+  ? Which existing behavior must stay unchanged?
+Ready for approval: yes

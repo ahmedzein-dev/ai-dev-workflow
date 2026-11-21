@@ -25,7 +25,7 @@ import subprocess
 import sys
 import time
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Sequence, Set, Tuple
+from typing import Any, Dict, List, Optional, Sequence, Set, Tuple, cast
 
 __version__ = "1.0.0"
 
@@ -354,11 +354,11 @@ def code_fingerprint(repo: Path) -> str:
             blobs.pop(rel, None)
         else:
             blobs[rel] = digest
-    digest = hashlib.sha256()
+    hasher = hashlib.sha256()
     for rel in sorted(blobs):
         if not is_tooling_path(rel):
-            digest.update(f"{rel}\t{blobs[rel]}\n".encode("utf-8", "surrogateescape"))
-    return digest.hexdigest()
+            hasher.update(f"{rel}\t{blobs[rel]}\n".encode("utf-8", "surrogateescape"))
+    return hasher.hexdigest()
 
 
 def git_baseline(repo: Path) -> Dict[str, Any]:
@@ -704,9 +704,9 @@ def check_placeholders(doc: Doc, tpl: TemplateInfo, rule: str = "M-placeholder")
                 problems.append(issue(rule, "Empty table cell '[ ]' left from the template.", i))
             flagged.add(i)
     for items in doc.items.values():
-        for ident, _, line, text in items:
-            if line not in flagged and not LETTER_RE.search(clean_tokens(text, tpl.tokens)):
-                problems.append(issue(rule, f"{ident} has no content.", line))
+        for ident, _, lineno, text in items:
+            if lineno not in flagged and not LETTER_RE.search(clean_tokens(text, tpl.tokens)):
+                problems.append(issue(rule, f"{ident} has no content.", lineno))
     return problems
 
 
@@ -1304,7 +1304,7 @@ def check_freshness(repo: Path, state: Dict[str, Any], cfg: Dict[str, Any],
     """(check, latest result, state) for each required check; state is fresh, stale or missing."""
     fingerprint = fingerprint or code_fingerprint(repo)
     latest = latest_results(state)
-    rows = []
+    rows: List[Tuple[Dict[str, Any], Optional[Dict[str, Any]], str]] = []
     for check in cfg.get("checks", []):
         if not check.get("required"):
             continue
@@ -1343,10 +1343,10 @@ def forward_problems(repo: Path, state: Dict[str, Any], cfg: Dict[str, Any], tar
                             "'No dependencies identified — <reason>'.")
         problems += deps["problems"]
     elif target == "SPEC_APPROVAL":
-        result = spec_check(repo, state, cfg)
-        problems += [f"[{p['rule']}] {p['message']}" for p in result["mandatory"]]
-        problems += [f"[flag] {f['message']}" for f in result["flags"]]
-        pending = [k for k, v in result["judgment"].items() if v["status"] != "pass"]
+        spec_result = spec_check(repo, state, cfg)
+        problems += [f"[{p['rule']}] {p['message']}" for p in spec_result["mandatory"]]
+        problems += [f"[flag] {f['message']}" for f in spec_result["flags"]]
+        pending = [k for k, v in spec_result["judgment"].items() if v["status"] != "pass"]
         if pending:
             problems.append(f"Review not recorded for this spec version: {', '.join(pending)} (`review <task> --pass …`).")
     elif target == "PLANNING":
@@ -1579,7 +1579,9 @@ def builtin_check(repo: Path, state: Dict[str, Any], cfg: Dict[str, Any], check:
     if kind == "rule-scan":
         rules = cfg.get("rules") or []
         changes = change_set(repo, base, state.get("excluded", []))["task"] if base else {}
-        new_errors, preexisting, warnings = [], [], []
+        new_errors: List[str] = []
+        preexisting: List[str] = []
+        warnings: List[str] = []
         for rel, digest in changes.items():
             if digest == "deleted":
                 continue
@@ -1697,16 +1699,17 @@ def compute_outcome(repo: Path, state: Dict[str, Any], cfg: Dict[str, Any]) -> D
                 cap(1, f"{item} is {row['status']}: {row['evidence']}")
     fingerprint = code_fingerprint(repo)
     for check, result, freshness in check_freshness(repo, state, cfg, fingerprint):
+        res = cast(Dict[str, Any], result)  # None only when freshness is "missing"; not read in that branch
         if freshness == "missing":
             cap(2, f"Required check '{check['id']}' was never run.")
         elif freshness == "stale":
             cap(2, f"Required check '{check['id']}' ran on older code; re-run it.")
-        elif result["status"] == "failed":
-            cap(2, f"Required check '{check['id']}' failed: {result.get('summary', '')}")
-        elif result["status"] == "preexisting":
-            cap(1, f"Check '{check['id']}': only problems that existed before the task remain ({result.get('summary', '')}).")
-        elif result["status"] == "blocked":
-            cap(1, f"Check '{check['id']}' could not run: {result.get('reason') or result.get('summary', '')}")
+        elif res["status"] == "failed":
+            cap(2, f"Required check '{check['id']}' failed: {res.get('summary', '')}")
+        elif res["status"] == "preexisting":
+            cap(1, f"Check '{check['id']}': only problems that existed before the task remain ({res.get('summary', '')}).")
+        elif res["status"] == "blocked":
+            cap(1, f"Check '{check['id']}' could not run: {res.get('reason') or res.get('summary', '')}")
     audit = parse_audit(repo, slug) if (task_dir(repo, slug) / "audit.md").exists() else None
     if not audit or audit["problems"]:
         cap(2, "The audit is not complete.")

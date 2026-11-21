@@ -6,7 +6,7 @@ from __future__ import annotations
 import json
 import unittest
 
-from helpers import FILLED_AUDIT, FILLED_PLAN, FILLED_REPORT, FILLED_SPEC, PY, WorkflowTestCase
+from helpers import FILLED_AUDIT, FILLED_PLAN, FILLED_SPEC, PY, WorkflowTestCase
 
 DEPS_HEADER = "| ID | Type | Class | Gate | Owner | Summary |\n|---|---|---|---|---|---|\n"
 

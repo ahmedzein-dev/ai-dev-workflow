@@ -1,0 +1,28 @@
+{
+  "schema": 1,
+  "project": "ai-dev-workflow",
+  "standards": [],
+  "spec_template": ".ai-dev-workflow/templates/spec-kit.md",
+  "spec_rules": ".ai-dev-workflow/templates/spec-kit.rules.json",
+  "template_source": "user:spec-kit",
+  "records": {
+    "commit": "all"
+  },
+  "checks": [
+    {
+      "id": "unit",
+      "name": "Unit, scenario and doc tests",
+      "command": "python3 -m unittest discover -s tests",
+      "required": true,
+      "accepts_args": true,
+      "timeout_s": 900
+    },
+    {
+      "id": "privacy",
+      "name": "Pre-publish secret and privacy scan",
+      "command": "python3 tools/prepublish_check.py",
+      "required": true
+    }
+  ],
+  "rules": []
+}

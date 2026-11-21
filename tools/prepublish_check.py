@@ -20,7 +20,7 @@ import re
 import subprocess
 import sys
 from pathlib import Path
-from typing import Dict, List, Set, Tuple
+from typing import List, Optional, Set, Tuple
 
 ROOT = Path(__file__).resolve().parent.parent
 ENGINE = ROOT / "skills" / "ai-dev-workflow" / "scripts" / "workflow.py"
@@ -122,7 +122,7 @@ def scan(root: Path, terms: List[str], prints: List[Tuple[str, str, Set[str]]]) 
     return findings
 
 
-def main(argv: List[str] = None) -> int:
+def main(argv: Optional[List[str]] = None) -> int:
     parser = argparse.ArgumentParser(description="Scan for secrets and private information before publishing.")
     parser.add_argument("--root", default=str(ROOT))
     parser.add_argument("--private-terms", help="File outside the repository with one private term per line.")

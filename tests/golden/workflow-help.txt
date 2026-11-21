@@ -1,0 +1,324 @@
+=== workflow.py --help ===
+usage: workflow.py [-h] [--version] {init,new,status,discover,spec-check,review,plan-check,approve,stage,resume,pause,preflight,step,run,scope,decision,check,outcome,close,hook} ...
+
+AIDevWorkflow engine for the ai-dev-workflow skill.
+
+positional arguments:
+  {init,new,status,discover,spec-check,review,plan-check,approve,stage,resume,pause,preflight,step,run,scope,decision,check,outcome,close,hook}
+    init                Set up AIDevWorkflow in a project (after asking the user).
+    new                 Create a task (only after an explicit invocation).
+    status              List tasks, or show one task with its next step.
+    discover            Record inspected files and the discovery summary.
+    spec-check          Validate the spec against the template and its rules.
+    review              Record the spec review (judgment rules, flags, coverage).
+    plan-check          Validate plan.md against the plan template.
+    approve             Record the user's explicit approval of the spec or plan.
+    stage               Move the task to another stage (prerequisites are checked).
+    resume              Make a task active again for this session.
+    pause               Pause a task; its gates stop applying.
+    preflight           Revalidate state and approvals before editing code.
+    step                Record progress on an approved plan step.
+    run                 Run a configured check and record the evidence.
+    scope               Show the task's changes vs. pre-existing work.
+    decision            Record a user decision with their words.
+    check               Validate records (all tasks, or one).
+    outcome             Highest final status the evidence allows, and why.
+    close               Close the task with the status written in report.md.
+    hook                Agent hook entry points (used by the skill's Claude Code hooks).
+
+options:
+  -h, --help            show this help message and exit
+  --version             show program's version number and exit
+
+Stages: DISCOVERY → DEPENDENCIES → SPECIFICATION → SPEC_APPROVAL → PLANNING → PLAN_APPROVAL →
+IMPLEMENTATION → TESTING → FIXING → AUDIT → FINAL_REPORT
+
+=== workflow.py init --help ===
+usage: workflow.py init [-h] [--repo REPO] [--agent AGENT] [--json] [--discover] [--template TEMPLATE] [--rules RULES] [--no-rules] [--commit {all,config-only,none}] [--standards STANDARDS] [--config CONFIG] [--project-notes PROJECT_NOTES] [--project PROJECT] [--without-check ID] [--add-check ID=COMMAND] [--update]
+
+options:
+  -h, --help            show this help message and exit
+  --repo REPO           Path inside the project's git repository (default: current directory).
+  --agent AGENT         Your agent name: claude-code, codex, gemini-cli, antigravity or other.
+  --json                Machine-readable output where supported.
+  --discover            Show the setup proposal (or the existing setup) without changing anything.
+  --template TEMPLATE   Template file path, or user:<name> from your private library.
+  --rules RULES         Template rules file (default: <template>.rules.json next to the template).
+  --no-rules            Use structural checks only.
+  --commit {all,config-only,none}
+                        How task records are committed to git.
+  --standards STANDARDS
+                        Comma-separated engineering instruction files, e.g. CLAUDE.md,AGENTS.md.
+  --config CONFIG       JSON file with checks and rules to start from.
+  --project-notes PROJECT_NOTES
+                        Markdown file to use as .ai-dev-workflow/PROJECT.md.
+  --project PROJECT     Project name.
+  --without-check ID    Leave out a recommended check (repeatable).
+  --add-check ID=COMMAND
+                        Add a check (repeatable).
+  --update              Change an existing setup: --commit, --standards, --template, --add-check,
+                        --without-check.
+
+=== workflow.py new --help ===
+usage: workflow.py new [-h] [--repo REPO] [--agent AGENT] [--json] --title TITLE [--type {feature,bugfix,enhancement,refactor}] --invocation INVOCATION [--session SESSION] task
+
+positional arguments:
+  task
+
+options:
+  -h, --help            show this help message and exit
+  --repo REPO           Path inside the project's git repository (default: current directory).
+  --agent AGENT         Your agent name: claude-code, codex, gemini-cli, antigravity or other.
+  --json                Machine-readable output where supported.
+  --title TITLE
+  --type {feature,bugfix,enhancement,refactor}
+  --invocation INVOCATION
+                        The user's starting message; it must name ai-dev-workflow.
+  --session SESSION     Agent session id (Claude Code: ${CLAUDE_SESSION_ID}).
+
+=== workflow.py status --help ===
+usage: workflow.py status [-h] [--repo REPO] [--agent AGENT] [--json] [task]
+
+positional arguments:
+  task
+
+options:
+  -h, --help     show this help message and exit
+  --repo REPO    Path inside the project's git repository (default: current directory).
+  --agent AGENT  Your agent name: claude-code, codex, gemini-cli, antigravity or other.
+  --json         Machine-readable output where supported.
+
+=== workflow.py discover --help ===
+usage: workflow.py discover [-h] [--repo REPO] [--agent AGENT] [--json] [--inspected [INSPECTED ...]] [--summary SUMMARY] task
+
+positional arguments:
+  task
+
+options:
+  -h, --help            show this help message and exit
+  --repo REPO           Path inside the project's git repository (default: current directory).
+  --agent AGENT         Your agent name: claude-code, codex, gemini-cli, antigravity or other.
+  --json                Machine-readable output where supported.
+  --inspected [INSPECTED ...]
+                        Paths you inspected (code, standards, related features).
+  --summary SUMMARY     Goal, scope, exclusions and affected areas, in a few sentences.
+
+=== workflow.py spec-check --help ===
+usage: workflow.py spec-check [-h] [--repo REPO] [--agent AGENT] [--json] task
+
+positional arguments:
+  task
+
+options:
+  -h, --help     show this help message and exit
+  --repo REPO    Path inside the project's git repository (default: current directory).
+  --agent AGENT  Your agent name: claude-code, codex, gemini-cli, antigravity or other.
+  --json         Machine-readable output where supported.
+
+=== workflow.py review --help ===
+usage: workflow.py review [-h] [--repo REPO] [--agent AGENT] [--json] [--pass RULE] [--note RULE=TEXT] [--dismiss FLAG REASON] [--map REQ=TARGETS] [--question KEY=VALUE] task
+
+positional arguments:
+  task
+
+options:
+  -h, --help            show this help message and exit
+  --repo REPO           Path inside the project's git repository (default: current directory).
+  --agent AGENT         Your agent name: claude-code, codex, gemini-cli, antigravity or other.
+  --json                Machine-readable output where supported.
+  --pass RULE           Mark a judgment rule reviewed and satisfied.
+  --note RULE=TEXT      Basis for a rule, e.g. J3="follows lib/x".
+  --dismiss FLAG REASON
+                        Dismiss a flag with a reason.
+  --map REQ=TARGETS     Coverage, e.g. FR-1=AC-1,DW-2 or FR-2=test:<name>.
+  --question KEY=VALUE  Edge-case question: KEY=EC-n or KEY=n/a:<reason>.
+
+=== workflow.py plan-check --help ===
+usage: workflow.py plan-check [-h] [--repo REPO] [--agent AGENT] [--json] task
+
+positional arguments:
+  task
+
+options:
+  -h, --help     show this help message and exit
+  --repo REPO    Path inside the project's git repository (default: current directory).
+  --agent AGENT  Your agent name: claude-code, codex, gemini-cli, antigravity or other.
+  --json         Machine-readable output where supported.
+
+=== workflow.py approve --help ===
+usage: workflow.py approve [-h] [--repo REPO] [--agent AGENT] [--json] --evidence EVIDENCE [--by BY] task {spec,plan}
+
+positional arguments:
+  task
+  {spec,plan}
+
+options:
+  -h, --help           show this help message and exit
+  --repo REPO          Path inside the project's git repository (default: current directory).
+  --agent AGENT        Your agent name: claude-code, codex, gemini-cli, antigravity or other.
+  --json               Machine-readable output where supported.
+  --evidence EVIDENCE  The user's own words approving this version.
+  --by BY              Who approved, only if the user said so (default: user).
+
+=== workflow.py stage --help ===
+usage: workflow.py stage [-h] [--repo REPO] [--agent AGENT] [--json] [--reason REASON] task stage
+
+positional arguments:
+  task
+  stage
+
+options:
+  -h, --help       show this help message and exit
+  --repo REPO      Path inside the project's git repository (default: current directory).
+  --agent AGENT    Your agent name: claude-code, codex, gemini-cli, antigravity or other.
+  --json           Machine-readable output where supported.
+  --reason REASON
+
+=== workflow.py resume --help ===
+usage: workflow.py resume [-h] [--repo REPO] [--agent AGENT] [--json] [--session SESSION] task
+
+positional arguments:
+  task
+
+options:
+  -h, --help         show this help message and exit
+  --repo REPO        Path inside the project's git repository (default: current directory).
+  --agent AGENT      Your agent name: claude-code, codex, gemini-cli, antigravity or other.
+  --json             Machine-readable output where supported.
+  --session SESSION
+
+=== workflow.py pause --help ===
+usage: workflow.py pause [-h] [--repo REPO] [--agent AGENT] [--json] [--reason REASON] task
+
+positional arguments:
+  task
+
+options:
+  -h, --help       show this help message and exit
+  --repo REPO      Path inside the project's git repository (default: current directory).
+  --agent AGENT    Your agent name: claude-code, codex, gemini-cli, antigravity or other.
+  --json           Machine-readable output where supported.
+  --reason REASON
+
+=== workflow.py preflight --help ===
+usage: workflow.py preflight [-h] [--repo REPO] [--agent AGENT] [--json] [--session SESSION] task
+
+positional arguments:
+  task
+
+options:
+  -h, --help         show this help message and exit
+  --repo REPO        Path inside the project's git repository (default: current directory).
+  --agent AGENT      Your agent name: claude-code, codex, gemini-cli, antigravity or other.
+  --json             Machine-readable output where supported.
+  --session SESSION
+
+=== workflow.py step --help ===
+usage: workflow.py step [-h] [--repo REPO] [--agent AGENT] [--json] [--files FILES] [--note NOTE] task step {done,in-progress,todo}
+
+positional arguments:
+  task
+  step
+  {done,in-progress,todo}
+
+options:
+  -h, --help            show this help message and exit
+  --repo REPO           Path inside the project's git repository (default: current directory).
+  --agent AGENT         Your agent name: claude-code, codex, gemini-cli, antigravity or other.
+  --json                Machine-readable output where supported.
+  --files FILES         Comma-separated files (default: files changed since the last checkpoint).
+  --note NOTE
+
+=== workflow.py run --help ===
+usage: workflow.py run [-h] [--repo REPO] [--agent AGENT] [--json] [--baseline] [--force] [--blocked REASON] [--not-applicable REASON] task check [extra ...]
+
+positional arguments:
+  task
+  check
+  extra                 After --: extra arguments, or a command for an ad-hoc check.
+
+options:
+  -h, --help            show this help message and exit
+  --repo REPO           Path inside the project's git repository (default: current directory).
+  --agent AGENT         Your agent name: claude-code, codex, gemini-cli, antigravity or other.
+  --json                Machine-readable output where supported.
+  --baseline            Record analyzer issues that exist before the task's changes.
+  --force
+  --blocked REASON      Record that the check cannot run here, and why.
+  --not-applicable REASON
+                        Record that a conditional check does not apply, and why.
+
+=== workflow.py scope --help ===
+usage: workflow.py scope [-h] [--repo REPO] [--agent AGENT] [--json] [--exclude [EXCLUDE ...]] [--reason REASON] task
+
+positional arguments:
+  task
+
+options:
+  -h, --help            show this help message and exit
+  --repo REPO           Path inside the project's git repository (default: current directory).
+  --agent AGENT         Your agent name: claude-code, codex, gemini-cli, antigravity or other.
+  --json                Machine-readable output where supported.
+  --exclude [EXCLUDE ...]
+                        Files the user confirmed are unrelated to the task.
+  --reason REASON
+
+=== workflow.py decision --help ===
+usage: workflow.py decision [-h] [--repo REPO] [--agent AGENT] [--json] --text TEXT --evidence EVIDENCE [--by BY] task
+
+positional arguments:
+  task
+
+options:
+  -h, --help           show this help message and exit
+  --repo REPO          Path inside the project's git repository (default: current directory).
+  --agent AGENT        Your agent name: claude-code, codex, gemini-cli, antigravity or other.
+  --json               Machine-readable output where supported.
+  --text TEXT
+  --evidence EVIDENCE
+  --by BY
+
+=== workflow.py check --help ===
+usage: workflow.py check [-h] [--repo REPO] [--agent AGENT] [--json] [task]
+
+positional arguments:
+  task
+
+options:
+  -h, --help     show this help message and exit
+  --repo REPO    Path inside the project's git repository (default: current directory).
+  --agent AGENT  Your agent name: claude-code, codex, gemini-cli, antigravity or other.
+  --json         Machine-readable output where supported.
+
+=== workflow.py outcome --help ===
+usage: workflow.py outcome [-h] [--repo REPO] [--agent AGENT] [--json] task
+
+positional arguments:
+  task
+
+options:
+  -h, --help     show this help message and exit
+  --repo REPO    Path inside the project's git repository (default: current directory).
+  --agent AGENT  Your agent name: claude-code, codex, gemini-cli, antigravity or other.
+  --json         Machine-readable output where supported.
+
+=== workflow.py close --help ===
+usage: workflow.py close [-h] [--repo REPO] [--agent AGENT] [--json] task
+
+positional arguments:
+  task
+
+options:
+  -h, --help     show this help message and exit
+  --repo REPO    Path inside the project's git repository (default: current directory).
+  --agent AGENT  Your agent name: claude-code, codex, gemini-cli, antigravity or other.
+  --json         Machine-readable output where supported.
+
+=== workflow.py hook --help ===
+usage: workflow.py hook [-h] {claude-pre-edit,claude-prompt}
+
+positional arguments:
+  {claude-pre-edit,claude-prompt}
+
+options:
+  -h, --help            show this help message and exit
