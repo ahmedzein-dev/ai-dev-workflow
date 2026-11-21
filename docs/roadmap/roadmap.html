@@ -1,0 +1,342 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AIDevWorkflow Roadmap</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: one reading column — status strip, phase track, phase cards (expand for epics and features), then decisions,
+   open issues, tests and releases. Tokens follow the project's guide (index.html) so both pages read as one product. */
+:root{
+  --bg:#f6f7f9;--surface:#ffffff;--surface-2:#eef1f4;--text:#1a1e24;--muted:#56606c;--border:#dde1e7;--border-strong:#c2c8d0;
+  --accent:#3550c8;--accent-soft:#e9edfb;
+  --done:#16713b;--done-soft:#e4f4e9;
+  --wait:#a35400;--wait-soft:#fcf1e2;
+  --review:#1b5ccc;--review-soft:#e9f1fd;
+  --block:#b42318;--block-soft:#fdecea;
+  --planned:#56606c;--planned-soft:#eef1f4;
+  --font-en:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --font-ar:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Naskh Arabic","Noto Sans Arabic","Geeza Pro",Tahoma,Arial,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0f1216;--surface:#171b21;--surface-2:#1f242c;--text:#e8ebf0;--muted:#a6aeb9;--border:#2b313a;--border-strong:#3d4550;
+    --accent:#8ea2ff;--accent-soft:#222a46;
+    --done:#6fd39a;--done-soft:#15281d;--wait:#f2b56b;--wait-soft:#2d2316;--review:#84b3ff;--review-soft:#18243a;
+    --block:#ff8a80;--block-soft:#3a1715;--planned:#a6aeb9;--planned-soft:#1f242c;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0f1216;--surface:#171b21;--surface-2:#1f242c;--text:#e8ebf0;--muted:#a6aeb9;--border:#2b313a;--border-strong:#3d4550;
+  --accent:#8ea2ff;--accent-soft:#222a46;
+  --done:#6fd39a;--done-soft:#15281d;--wait:#f2b56b;--wait-soft:#2d2316;--review:#84b3ff;--review-soft:#18243a;
+  --block:#ff8a80;--block-soft:#3a1715;--planned:#a6aeb9;--planned-soft:#1f242c;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font-en);font-size:1rem;line-height:1.6;-webkit-text-size-adjust:100%}
+:root[data-lang="ar"] body{font-family:var(--font-ar);font-size:1.0625rem;line-height:1.8}
+a{color:var(--accent)}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+code,.id,.mono{font-family:var(--mono);font-size:.86em;direction:ltr;unicode-bidi:isolate}
+/* grid children default to min-width:auto, so a wide table would widen the page; keep every column shrinkable */
+.wrap>*,.pbody>*,.phases>*,.grid2>*,.epic,.now,header.top>div{min-width:0;max-width:100%}
+.tablewrap{max-width:100%}
+html,body{overflow-x:hidden}
+.wrap{max-width:1040px;margin:0 auto;padding-block:24px 64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:28px}
+header.top{display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:16px}
+header.top h1{margin:0;font-size:1.65rem;line-height:1.25;text-wrap:balance}
+header.top p{margin:4px 0 0;color:var(--muted);max-width:62ch}
+.tools{display:flex;gap:8px;flex-wrap:wrap}
+button{font:inherit;color:inherit}
+.tbtn{background:var(--surface);border:1px solid var(--border-strong);border-radius:8px;padding:6px 12px;cursor:pointer;font-size:.9rem}
+.tbtn:hover{border-color:var(--accent)}
+.now{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 18px;display:grid;gap:10px}
+.now .row{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:baseline}
+.label{font-size:.75rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600}
+:root[data-lang="ar"] .label{letter-spacing:0;text-transform:none;font-size:.85rem}
+.now .next{margin:0;max-width:75ch}
+h2{margin:0 0 12px;font-size:1.2rem;text-wrap:balance}
+section>p.lead{margin:-6px 0 14px;color:var(--muted);max-width:70ch}
+/* phase track */
+.track{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.track li{min-width:0}
+.track a{display:grid;gap:4px;text-decoration:none;color:inherit;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 12px;height:100%}
+.track a:hover{border-color:var(--accent)}
+.track .pn{display:flex;justify-content:space-between;align-items:center;gap:6px}
+.track .pnum{font-family:var(--mono);font-weight:700;font-size:.85rem;color:var(--muted)}
+.track .pname{font-size:.88rem;line-height:1.35}
+.bar{height:5px;border-radius:3px;background:var(--surface-2);overflow:hidden}
+.bar span{display:block;height:100%;background:var(--done)}
+.count{font-size:.78rem;color:var(--muted);font-variant-numeric:tabular-nums}
+/* pills */
+.pill{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:1px 9px;font-size:.76rem;font-weight:600;white-space:nowrap;border:1px solid transparent}
+.pill::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+.st-done{color:var(--done);background:var(--done-soft)}
+.st-waiting{color:var(--wait);background:var(--wait-soft)}
+.st-review{color:var(--review);background:var(--review-soft)}
+.st-in-progress{color:var(--review);background:var(--review-soft)}
+.st-blocked{color:var(--block);background:var(--block-soft)}
+.st-planned,.st-proposed{color:var(--planned);background:var(--planned-soft)}
+.st-accepted{color:var(--done);background:var(--done-soft)}
+.st-rejected{color:var(--block);background:var(--block-soft)}
+.tag{font-family:var(--mono);font-size:.74rem;border:1px solid var(--border-strong);border-radius:5px;padding:0 5px;color:var(--muted);white-space:nowrap}
+.tag.p0{color:var(--text);border-color:var(--text)}
+.tag.mvp{color:var(--review);border-color:var(--review);margin-inline-start:6px}
+.note{display:block;color:var(--muted);font-size:.8rem;margin-top:2px}
+/* filters */
+.filters{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.chip{background:var(--surface);border:1px solid var(--border-strong);border-radius:999px;padding:3px 12px;font-size:.84rem;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--bg)}
+/* phase cards */
+.phases{display:grid;gap:10px}
+details.phase{background:var(--surface);border:1px solid var(--border);border-radius:12px}
+details.phase[open]{border-color:var(--border-strong)}
+details.phase>summary{list-style:none;cursor:pointer;padding:14px 16px;display:grid;grid-template-columns:auto 1fr auto;gap:4px 14px;align-items:start}
+details.phase>summary::-webkit-details-marker{display:none}
+.pbig{font-family:var(--mono);font-size:1.35rem;font-weight:700;line-height:1.2;color:var(--accent);min-width:2ch}
+.ptitle{min-width:0}
+.ptitle strong{display:block;font-size:1.02rem;line-height:1.35}
+.ptitle span{display:block;color:var(--muted);font-size:.9rem}
+.pmeta{display:flex;flex-direction:column;align-items:flex-end;gap:4px;text-align:end}
+.pmeta .count{white-space:nowrap}
+.pbody{padding:0 16px 16px;display:grid;gap:14px}
+.facts{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:.86rem;color:var(--muted)}
+.facts b{color:var(--text);font-weight:600}
+.epic h3{margin:0 0 6px;font-size:.92rem;display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+.tablewrap{overflow-x:auto;border:1px solid var(--border);border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:.88rem}
+th,td{padding:7px 10px;text-align:start;vertical-align:top;border-bottom:1px solid var(--border)}
+tr:last-child td{border-bottom:0}
+th{font-size:.74rem;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);font-weight:600;background:var(--surface-2);white-space:nowrap}
+:root[data-lang="ar"] th{letter-spacing:0;text-transform:none;font-size:.82rem}
+td.id,td .id{white-space:nowrap}
+td.dep{font-family:var(--mono);font-size:.78rem;color:var(--muted);direction:ltr;unicode-bidi:isolate}
+td.tt{min-width:220px}
+.empty{color:var(--muted);font-size:.88rem;margin:0}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:28px}
+.grid2>section{min-width:0}
+.sev{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+.sev-high{color:var(--block)}.sev-medium{color:var(--wait)}
+.ok{color:var(--done);font-weight:600}.no{color:var(--wait);font-weight:600}
+footer{color:var(--muted);font-size:.84rem;border-top:1px solid var(--border);padding-top:14px}
+footer p{margin:4px 0}
+@media (max-width:560px){
+  details.phase>summary{grid-template-columns:auto 1fr}
+  .pmeta{grid-column:1 / -1;flex-direction:row;align-items:center;justify-content:space-between}
+}
+@media (prefers-reduced-motion:no-preference){.bar span{transition:width .4s ease}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <h1 data-i18n="title">AIDevWorkflow Roadmap</h1>
+      <p data-i18n="subtitle">From an Agent Skill to a technology-agnostic platform for AI-assisted software engineering. Progress counts finished features with recorded evidence, never estimates.</p>
+    </div>
+    <div class="tools">
+      <button class="tbtn" id="lang-btn" type="button">العربية</button>
+      <button class="tbtn" id="theme-btn" type="button">Dark</button>
+    </div>
+  </header>
+
+  <section class="now" aria-labelledby="now-h">
+    <div class="row">
+      <span class="label" id="now-h" data-i18n="where">Where we are</span>
+      <span id="now-phase"></span>
+      <span class="count" id="now-updated"></span>
+    </div>
+    <div class="row"><span class="label" data-i18n="next">Next action</span></div>
+    <p class="next" id="now-next"></p>
+  </section>
+
+  <section aria-labelledby="track-h">
+    <h2 id="track-h" data-i18n="phases">Phases</h2>
+    <ol class="track" id="track"></ol>
+  </section>
+
+  <section aria-labelledby="detail-h">
+    <h2 id="detail-h" data-i18n="detail">Epics and features</h2>
+    <p class="lead" data-i18n="detailLead">Open a phase to see its features, priorities (P0 must, P1 should, P2 could), rough effort (S ≤ 1 day, M 2–4 days, L 1–2 weeks, XL more) and dependencies.</p>
+    <div class="filters" id="filters" role="group" aria-label="Filter"></div>
+    <div class="phases" id="phases"></div>
+  </section>
+
+  <div class="grid2">
+    <section aria-labelledby="dec-h">
+      <h2 id="dec-h" data-i18n="decisions">Decisions</h2>
+      <p class="lead" data-i18n="decLead">Proposed until the owner approves them in their own words.</p>
+      <div class="tablewrap"><table><thead><tr><th>ID</th><th data-i18n="decision">Decision</th><th data-i18n="when">When</th><th data-i18n="status">Status</th></tr></thead><tbody id="decisions"></tbody></table></div>
+    </section>
+    <section aria-labelledby="iss-h">
+      <h2 id="iss-h" data-i18n="issues">Open issues</h2>
+      <p class="lead" data-i18n="issLead">Highest-severity debt, risks and security items from Phase 0.</p>
+      <div class="tablewrap"><table><thead><tr><th>ID</th><th data-i18n="issue">Issue</th><th data-i18n="severity">Severity</th></tr></thead><tbody id="issues"></tbody></table></div>
+    </section>
+  </div>
+
+  <section aria-labelledby="rtm-h">
+    <h2 id="rtm-h" data-i18n="rtm">Requirements coverage</h2>
+    <p class="lead" data-i18n="rtmLead">Every requirement of the three briefs is mapped to a phase and feature (REQUIREMENTS_TRACEABILITY.md). Counts by status.</p>
+    <div class="tablewrap"><table><thead><tr><th data-i18n="source">Source</th><th data-i18n="status">Status</th><th data-i18n="count">Count</th></tr></thead><tbody id="rtm"></tbody></table></div>
+  </section>
+
+  <div class="grid2">
+    <section aria-labelledby="test-h">
+      <h2 id="test-h" data-i18n="tests">Test results</h2>
+      <div class="tablewrap"><table><thead><tr><th data-i18n="date">Date</th><th data-i18n="check">Check</th><th data-i18n="result">Result</th></tr></thead><tbody id="tests"></tbody></table></div>
+    </section>
+    <section aria-labelledby="rel-h">
+      <h2 id="rel-h" data-i18n="releases">Releases</h2>
+      <div class="tablewrap"><table><thead><tr><th data-i18n="version">Version</th><th data-i18n="date">Date</th><th data-i18n="notes">Notes</th></tr></thead><tbody id="releases"></tbody></table></div>
+    </section>
+  </div>
+
+  <footer>
+    <p data-i18n="foot1">Data: roadmap-data.js (the single source of statuses). Details: MASTER_ROADMAP.md, PROGRESS.md and phases/PHASE_nn.md.</p>
+    <p data-i18n="foot2">Statuses change only from recorded evidence: a closed AIDevWorkflow task, a test run or CI.</p>
+  </footer>
+</div>
+
+<script src="roadmap-data.js"></script>
+<script>
+(function () {
+  var D = window.ROADMAP;
+  var root = document.documentElement;
+  var T = {
+    en: { title: "AIDevWorkflow Roadmap", subtitle: "From an Agent Skill to a technology-agnostic platform for AI-assisted software engineering. Progress counts finished features with recorded evidence, never estimates.",
+      where: "Where we are", next: "Next action", phases: "Phases", detail: "Epics and features",
+      detailLead: "Open a phase to see its features, priorities (P0 must, P1 should, P2 could), rough effort (S ≤ 1 day, M 2–4 days, L 1–2 weeks, XL more) and dependencies.",
+      decisions: "Decisions", decLead: "Proposed until the owner approves them in their own words.", decision: "Decision", when: "When", status: "Status",
+      issues: "Open issues", issLead: "Highest-severity debt, risks and security items from Phase 0.", issue: "Issue", severity: "Severity",
+      tests: "Test results", date: "Date", check: "Check", result: "Result", releases: "Releases", version: "Version", notes: "Notes",
+      foot1: "Data: roadmap-data.js (the single source of statuses). Details: MASTER_ROADMAP.md, PROGRESS.md and phases/PHASE_nn.md.",
+      foot2: "Statuses change only from recorded evidence: a closed AIDevWorkflow task, a test run or CI.",
+      rtm: "Requirements coverage", rtmLead: "Every requirement of the three briefs is mapped to a phase and feature (REQUIREMENTS_TRACEABILITY.md). Counts by status.", source: "Source", count: "Count", b1: "Brief 1 — product evolution", b2: "Brief 2 — engineering intelligence", b3: "Brief 3 — optimization engine (ORE)", mvpOnly: "MVP (v1.5)",
+      phase: "Phase", updated: "Updated", features: "features", target: "Target", effort: "Effort", dependsOn: "Depends on", plan: "Plan",
+      feature: "Feature", pri: "Priority", eff: "Effort", deps: "Needs", none: "—", noMatch: "No features match these filters.",
+      all: "All", lang: "العربية", dark: "Dark", light: "Light", high: "High", medium: "Medium",
+      st: { done: "Done", review: "In review", waiting: "Waiting", planned: "Planned", "in-progress": "In progress", blocked: "Blocked", proposed: "Proposed", accepted: "Accepted", rejected: "Rejected" } },
+    ar: { title: "خريطة تطوير AIDevWorkflow", subtitle: "من مهارة لمساعدين الـ AI لمنصة كاملة لهندسة البرمجيات بالـ AI، شغّالة مع أي تقنية. التقدّم بيتحسب بالخصائص اللي خلصت وليها دليل مسجّل، مش بتقديرات.",
+      where: "إحنا فين دلوقتي", next: "الخطوة الجاية", phases: "المراحل", detail: "الأجزاء والخصائص",
+      detailLead: "افتح أي مرحلة تشوف خصائصها، وأولويتها (P0 لازم، P1 مهم، P2 لو فيه وقت)، والمجهود التقريبي (S يوم أو أقل، M من 2 لـ 4 أيام، L أسبوع لاتنين، XL أكتر)، وبتعتمد على إيه.",
+      decisions: "القرارات", decLead: "كلها مقترحة لحد ما صاحب المشروع يوافق عليها بكلامه.", decision: "القرار", when: "إمتى", status: "الحالة",
+      issues: "مشاكل مفتوحة", issLead: "أخطر الديون التقنية والمخاطر ونقاط الأمان من المرحلة 0.", issue: "المشكلة", severity: "الخطورة",
+      tests: "نتايج الاختبارات", date: "التاريخ", check: "الفحص", result: "النتيجة", releases: "الإصدارات", version: "الإصدار", notes: "ملاحظات",
+      foot1: "البيانات: roadmap-data.js (المصدر الوحيد للحالات). التفاصيل: MASTER_ROADMAP.md وPROGRESS.md وphases/PHASE_nn.md.",
+      foot2: "الحالة مابتتغيّرش غير بدليل مسجّل: مهمة AIDevWorkflow اتقفلت، أو اختبار اتشغّل، أو CI.",
+      rtm: "تغطية المتطلبات", rtmLead: "كل متطلب في البرومبتات التلاتة ليه مكان في مرحلة وخاصية (REQUIREMENTS_TRACEABILITY.md). العدد حسب الحالة.", source: "المصدر", count: "العدد", b1: "البرومبت الأول — تطوير المنتج", b2: "البرومبت التاني — الذكاء الهندسي", b3: "البرومبت التالت — محرك بحوث العمليات", mvpOnly: "النسخة الأولى (v1.5)",
+      phase: "المرحلة", updated: "آخر تحديث", features: "خصائص", target: "الإصدار", effort: "المجهود", dependsOn: "بتعتمد على", plan: "الخطة",
+      feature: "الخاصية", pri: "الأولوية", eff: "المجهود", deps: "محتاجة", none: "—", noMatch: "مافيش خصائص بالفلاتر دي.",
+      all: "الكل", lang: "English", dark: "داكن", light: "فاتح", high: "عالية", medium: "متوسطة",
+      st: { done: "خلصت", review: "بتتراجع", waiting: "مستنية", planned: "متخططة", "in-progress": "شغّالين فيها", blocked: "واقفة", proposed: "مقترح", accepted: "متوافق عليه", rejected: "مرفوض" } }
+  };
+  function read(k) { try { return window.localStorage.getItem(k); } catch (e) { return null; } }
+  function write(k, v) { try { window.localStorage.setItem(k, v); } catch (e) { /* storage unavailable */ } }
+  var lang = read("aidw-roadmap-lang") === "ar" ? "ar" : "en";
+  var filter = { st: "all", pri: "all", mvp: false };
+  var openPhases = {};
+
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;" }[c]; }); }
+  function pill(st) { return '<span class="pill st-' + esc(st) + '">' + esc(T[lang].st[st] || st) + "</span>"; }
+  function feats(p) { var out = []; p.epics.forEach(function (e) { out = out.concat(e.features); }); return out; }
+  function counts(p) { var f = feats(p); return { done: f.filter(function (x) { return x.st === "done"; }).length, total: f.length }; }
+
+  function renderStatic() {
+    var t = T[lang];
+    /* direction goes on the content wrapper, not the root: an RTL root shifts the whole page inside some app viewers */
+    root.setAttribute("lang", lang); root.setAttribute("data-lang", lang);
+    document.querySelector(".wrap").setAttribute("dir", lang === "ar" ? "rtl" : "ltr");
+    document.querySelectorAll("[data-i18n]").forEach(function (el) { var k = el.getAttribute("data-i18n"); if (t[k]) { el.textContent = t[k]; } });
+    document.getElementById("lang-btn").textContent = t.lang;
+    var dark = root.getAttribute("data-theme") === "dark" || (!root.getAttribute("data-theme") && window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches);
+    document.getElementById("theme-btn").textContent = dark ? t.light : t.dark;
+    var cur = D.phases[D.current.phase];
+    document.getElementById("now-phase").innerHTML = "<strong>" + esc(t.phase) + " " + cur.id + " — " + esc(cur.name[lang]) + "</strong> " + pill(cur.status);
+    document.getElementById("now-updated").textContent = t.updated + ": " + D.updated;
+    document.getElementById("now-next").textContent = D.current.next[lang];
+  }
+
+  function renderTrack() {
+    var t = T[lang];
+    document.getElementById("track").innerHTML = D.phases.map(function (p) {
+      var c = counts(p), pct = c.total ? Math.round(100 * c.done / c.total) : 0;
+      return '<li><a href="#phase-' + p.id + '" data-open="' + p.id + '"><span class="pn"><span class="pnum">' + t.phase + " " + p.id + "</span>" + pill(p.status) +
+        '</span><span class="pname">' + esc(p.name[lang]) + '</span><span class="bar" aria-hidden="true"><span style="width:' + pct + '%"></span></span>' +
+        '<span class="count">' + c.done + " / " + c.total + " " + t.features + "</span></a></li>";
+    }).join("");
+  }
+
+  function renderFilters() {
+    var t = T[lang];
+    var sts = ["all", "done", "waiting", "review", "in-progress", "planned", "blocked"], pris = ["all", "P0", "P1", "P2"];
+    var html = sts.map(function (s) { return '<button type="button" class="chip" data-f="st" data-v="' + s + '" aria-pressed="' + (filter.st === s) + '">' + esc(s === "all" ? t.all : t.st[s]) + "</button>"; }).join("");
+    html += pris.slice(1).map(function (p) { return '<button type="button" class="chip" data-f="pri" data-v="' + p + '" aria-pressed="' + (filter.pri === p) + '">' + p + "</button>"; }).join("");
+    html += '<button type="button" class="chip" data-f="mvp" data-v="1" aria-pressed="' + filter.mvp + '">' + esc(t.mvpOnly) + "</button>";
+    document.getElementById("filters").innerHTML = html;
+  }
+
+  function match(f) { return (filter.st === "all" || f.st === filter.st) && (filter.pri === "all" || f.pri === filter.pri) && (!filter.mvp || f.mvp); }
+
+  function renderPhases() {
+    var t = T[lang];
+    document.getElementById("phases").innerHTML = D.phases.map(function (p) {
+      var c = counts(p), any = false;
+      var epics = p.epics.map(function (e) {
+        var rows = e.features.filter(match);
+        if (!rows.length) { return ""; }
+        any = true;
+        return '<div class="epic"><h3><span class="id">' + esc(e.id) + "</span> " + esc(e.name) + '</h3><div class="tablewrap"><table><thead><tr><th>ID</th><th>' + t.feature + "</th><th>" + t.pri + "</th><th>" + t.eff + "</th><th>" + t.deps + "</th><th>" + t.status + "</th></tr></thead><tbody>" +
+          rows.map(function (f) {
+            return '<tr><td class="id">' + esc(f.id) + '</td><td class="tt">' + esc(f.t) + (f.mvp ? '<span class="tag mvp">MVP</span>' : "") + (f.note ? '<span class="note">' + esc(f.note) + "</span>" : "") + '</td><td><span class="tag' + (f.pri === "P0" ? " p0" : "") + '">' + esc(f.pri) + '</span></td><td><span class="tag">' + esc(f.eff) + '</span></td><td class="dep">' + esc((f.dep || []).join(", ") || t.none) + "</td><td>" + pill(f.st) + "</td></tr>";
+          }).join("") + "</tbody></table></div></div>";
+      }).join("");
+      var deps = p.deps.length ? p.deps.map(function (d) { return t.phase + " " + d; }).join(", ") : t.none;
+      var isOpen = openPhases[p.id] || (filter.st !== "all" || filter.pri !== "all" || filter.mvp) && any;
+      return '<details class="phase" id="phase-' + p.id + '"' + (isOpen ? " open" : "") + ' data-id="' + p.id + '"><summary><span class="pbig">' + p.id + '</span><span class="ptitle"><strong>' + esc(p.name[lang]) + "</strong><span>" + esc(p.goal[lang]) + '</span></span><span class="pmeta">' + pill(p.status) + '<span class="count">' + c.done + " / " + c.total + " " + t.features + "</span></span></summary>" +
+        '<div class="pbody"><div class="facts"><span>' + t.target + ': <b class="mono">' + esc(p.target) + "</b></span><span>" + t.effort + ": <b>" + esc(p.effort) + "</b></span><span>" + t.dependsOn + ": <b>" + esc(deps) + "</b></span><span>" + t.plan + ': <code>' + esc(p.file) + "</code></span></div>" +
+        (any ? epics : '<p class="empty">' + t.noMatch + "</p>") + "</div></details>";
+    }).join("");
+  }
+
+  function renderTables() {
+    var t = T[lang];
+    document.getElementById("decisions").innerHTML = D.decisions.map(function (d) { return '<tr><td class="id">' + esc(d.id) + "</td><td>" + esc(d.t) + '</td><td class="mono">' + esc(d.when) + "</td><td>" + pill(d.st) + "</td></tr>"; }).join("");
+    document.getElementById("issues").innerHTML = D.issues.map(function (i) { return '<tr><td class="id">' + esc(i.id) + "</td><td>" + esc(i.t) + '</td><td><span class="sev sev-' + esc(i.sev) + '">' + esc(t[i.sev] || i.sev) + "</span></td></tr>"; }).join("");
+    document.getElementById("tests").innerHTML = D.tests.map(function (x) { return '<tr><td class="mono">' + esc(x.date) + "</td><td>" + esc(x.what) + '</td><td class="' + (x.ok ? "ok" : "no") + '">' + esc(x.result) + "</td></tr>"; }).join("");
+    var rows = [];
+    ["B1", "B2", "B3"].forEach(function (k) { var c = (D.rtm || {})[k] || {}; Object.keys(c).forEach(function (s) { rows.push('<tr><td>' + esc(t[k.toLowerCase()]) + "</td><td>" + esc(s) + '</td><td class="mono">' + c[s] + "</td></tr>"); }); });
+    document.getElementById("rtm").innerHTML = rows.join("");
+    document.getElementById("releases").innerHTML = D.releases.map(function (r) { return '<tr><td class="id">' + esc(r.v) + '</td><td class="mono">' + esc(r.date) + "</td><td>" + esc(r.notes) + "</td></tr>"; }).join("");
+  }
+
+  function renderAll() { renderStatic(); renderTrack(); renderFilters(); renderPhases(); renderTables(); }
+
+  document.addEventListener("click", function (ev) {
+    var chip = ev.target.closest(".chip");
+    if (chip) {
+      var key = chip.getAttribute("data-f"), pressed = chip.getAttribute("aria-pressed") === "true";
+      if (key === "mvp") { filter.mvp = !pressed; } else { filter[key] = pressed && key === "pri" ? "all" : chip.getAttribute("data-v"); }
+      renderFilters(); renderPhases(); return;
+    }
+    var link = ev.target.closest("[data-open]");
+    if (link) { openPhases[link.getAttribute("data-open")] = true; var el = document.getElementById("phase-" + link.getAttribute("data-open")); if (el) { el.open = true; } }
+  });
+  document.addEventListener("toggle", function (ev) { var d = ev.target; if (d.classList && d.classList.contains("phase")) { openPhases[d.getAttribute("data-id")] = d.open; } }, true);
+  document.getElementById("lang-btn").addEventListener("click", function () { lang = lang === "ar" ? "en" : "ar"; write("aidw-roadmap-lang", lang); renderAll(); });
+  document.getElementById("theme-btn").addEventListener("click", function () {
+    var dark = root.getAttribute("data-theme") === "dark" || (!root.getAttribute("data-theme") && window.matchMedia("(prefers-color-scheme: dark)").matches);
+    root.setAttribute("data-theme", dark ? "light" : "dark"); write("aidw-roadmap-theme", dark ? "light" : "dark"); renderStatic();
+  });
+  var savedTheme = read("aidw-roadmap-theme");
+  if (savedTheme === "light" || savedTheme === "dark") { root.setAttribute("data-theme", savedTheme); }
+  openPhases[D.current.phase] = true;
+  renderAll();
+})();
+</script>
+</body>
+</html>
