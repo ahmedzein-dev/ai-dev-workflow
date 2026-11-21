@@ -1,0 +1,427 @@
+{
+  "schema": 1,
+  "id": "engine-package-f1-0-3",
+  "title": "F1.0.3 Split workflow.py into the aidw package (no behaviour change)",
+  "type": "refactor",
+  "created_at": "2026-11-21T23:18:19Z",
+  "created_by": "claude-code",
+  "invocation": "عايزين نستخدم AIDevWorkflow نفسه لتطوير AIDevWorkflow بصورة تدريجية، باستخدام النسخة المستقرة المثبتة منه. — Approved",
+  "stage": "IMPLEMENTATION",
+  "status": "active",
+  "outcome": null,
+  "template": {
+    "path": ".ai-dev-workflow/templates/spec-kit.md",
+    "sha256": "574d3677a6a4f773352e6ffadf959e794bd9c985e25dea0556c53f37b5296ffc",
+    "rules": ".ai-dev-workflow/templates/spec-kit.rules.json"
+  },
+  "discovery": {
+    "inspected": [
+      "skills/ai-dev-workflow/scripts/workflow.py",
+      "skills/ai-dev-workflow/scripts/install.py",
+      "skills/ai-dev-workflow/SKILL.md",
+      "tests/helpers.py",
+      "tests/test_golden.py",
+      "tests/test_evidence_and_outcomes.py",
+      "tests/test_setup.py",
+      "tests/test_records_safety.py",
+      "tests/test_lifecycle.py",
+      "tools/prepublish_check.py",
+      "pyproject.toml",
+      "docs/roadmap/TARGET_ARCHITECTURE.md",
+      "docs/roadmap/phases/PHASE_01.md"
+    ],
+    "summary": "Goal: move the 3,458-line workflow.py into a standard-library package skills/ai-dev-workflow/scripts/aidw/ (layout from TARGET_ARCHITECTURE §3) with no behaviour change, keeping workflow.py as the entry point. Must keep: every CLI command, option, message, exit code and record format (golden + 147 tests); 'import workflow' and the names tests and tools use (main, build_parser, STAGES, find_secrets, decode_command_output, parse_analyzer, PY_CMD, REFERENCE, COMMIT_MODES, __version__, plus module attributes shutil and locale patched by two tests); prepublish_check.py loading workflow.py by file path; SKILL.md hooks running scripts/workflow.py; install.py copying the whole skill folder (aidw included). Pitfalls found: SKILL_DIR/TEMPLATES_DIR are computed from __file__ and change when code moves; section cross-references must form an acyclic import graph (hooks use status_line from the command helpers). Exclusions: no logic change, no renames of public names, no new features (engine API is F1.0.4, migrations/locking F1.0.5, version source F1.0.6). Affected: workflow.py, new aidw/ package, possibly pyproject.toml (mypy files)."
+  },
+  "approvals": {
+    "spec": {
+      "version": 1,
+      "sha256": "e4243a945bd48022e99c3b3c973a974b9e1ca3b3e125e5b7769db5f084b160ec",
+      "snapshot": "approved/spec.v1.md",
+      "approved_by": "user",
+      "evidence": "Approved all and you do the commit",
+      "recorded_by": "claude-code",
+      "recorded_at": "2026-11-21T23:30:40Z"
+    },
+    "plan": {
+      "version": 1,
+      "sha256": "963f000b73d9e1c1587998aac06bc6feab6a7155662e801730ba4d72e35c92cd",
+      "snapshot": "approved/plan.v1.md",
+      "approved_by": "user",
+      "evidence": "Approved all and you do the commit",
+      "recorded_by": "claude-code",
+      "recorded_at": "2026-11-21T23:30:40Z",
+      "spec_sha256": "e4243a945bd48022e99c3b3c973a974b9e1ca3b3e125e5b7769db5f084b160ec",
+      "spec_version": 1
+    }
+  },
+  "spec_review": {
+    "spec_sha256": "e4243a945bd48022e99c3b3c973a974b9e1ca3b3e125e5b7769db5f084b160ec",
+    "rules": {
+      "J1": {
+        "status": "pass",
+        "note": "",
+        "agent": "claude-code",
+        "at": "2026-11-21T23:19:33Z"
+      },
+      "J2": {
+        "status": "pass",
+        "note": "",
+        "agent": "claude-code",
+        "at": "2026-11-21T23:19:33Z"
+      },
+      "J3": {
+        "status": "pass",
+        "note": "Module layout follows docs/roadmap/TARGET_ARCHITECTURE.md §3 (approved D-002) and the existing section boundaries of workflow.py (basics, secrets, git, markdown, config, state, spec checks, other records, gates, checks, outcome, discovery, command helpers, commands, hooks, CLI); no new classes or abstractions are introduced.",
+        "agent": "claude-code",
+        "at": "2026-11-21T23:19:33Z"
+      },
+      "J4": {
+        "status": "pass",
+        "note": "",
+        "agent": "claude-code",
+        "at": "2026-11-21T23:19:33Z"
+      }
+    },
+    "map": {
+      "FR-1": [
+        "AC-5",
+        "AC-6"
+      ],
+      "FR-2": [
+        "AC-6",
+        "EC-1",
+        "EC-5"
+      ],
+      "FR-3": [
+        "AC-6",
+        "EC-7"
+      ],
+      "FR-4": [
+        "AC-1"
+      ],
+      "FR-5": [
+        "EC-3",
+        "AC-1"
+      ],
+      "FR-6": [
+        "AC-5"
+      ],
+      "FR-7": [
+        "AC-3",
+        "AC-4",
+        "EC-2",
+        "EC-4"
+      ],
+      "FR-8": [
+        "AC-2"
+      ]
+    },
+    "questions": {
+      "double-tap": "n/a:a refactor of a command-line engine has no interactive input",
+      "offline": "n/a:the engine never uses the network; tests run offline",
+      "server-error": "n/a:no server involved",
+      "empty-result": "n/a:outputs are pinned by the golden tests, including empty task lists",
+      "app-killed": "n/a:no state is written by the refactor itself; record writes keep the existing atomic write",
+      "concurrent-change": "n/a:no change to concurrency behaviour (locking is F1.0.5)",
+      "stale-data": "n/a:hashes and fingerprints are unchanged by moving code (AC-1)",
+      "lost-response": "n/a:no network request"
+    },
+    "dismissed": {}
+  },
+  "progress": {},
+  "checks": [],
+  "checkpoints": [
+    {
+      "at": "2026-11-21T23:30:40Z",
+      "kind": "implementation-start",
+      "agent": "claude-code",
+      "fingerprint": "79d974de92e6ca6b03bcf8685e1158972574cef801eaa52152e74b05ac444109",
+      "valid": true,
+      "changed_files": 0
+    }
+  ],
+  "decisions": [],
+  "excluded": [
+    "docs/roadmap/CURRENT_ARCHITECTURE.md",
+    "docs/roadmap/DECISIONS.md",
+    "docs/roadmap/ENGINEERING_INTELLIGENCE.md",
+    "docs/roadmap/GAP_ANALYSIS.md",
+    "docs/roadmap/MASTER_ROADMAP.md",
+    "docs/roadmap/PROGRESS.md",
+    "docs/roadmap/REQUIREMENTS_TRACEABILITY.md",
+    "docs/roadmap/RISK_REGISTER.md",
+    "docs/roadmap/TARGET_ARCHITECTURE.md",
+    "docs/roadmap/TECHNICAL_DEBT.md",
+    "docs/roadmap/ore/MATHEMATICAL_MODEL_SCHEMA.md",
+    "docs/roadmap/ore/ORE_DESIGN.md",
+    "docs/roadmap/ore/SECURITY_AND_THREAT_MODEL.md",
+    "docs/roadmap/ore/STRICT_OPTIMALITY_POLICY.md",
+    "docs/roadmap/ore/VALIDATION_STRATEGY.md",
+    "docs/roadmap/phases/PHASE_00.md",
+    "docs/roadmap/phases/PHASE_01.md",
+    "docs/roadmap/phases/PHASE_02.md",
+    "docs/roadmap/phases/PHASE_03.md",
+    "docs/roadmap/phases/PHASE_04.md",
+    "docs/roadmap/phases/PHASE_05.md",
+    "docs/roadmap/phases/PHASE_06.md",
+    "docs/roadmap/phases/PHASE_07.md",
+    "docs/roadmap/phases/PHASE_08.md",
+    "docs/roadmap/phases/PHASE_09.md",
+    "docs/roadmap/phases/PHASE_10.md",
+    "docs/roadmap/phases/PHASE_11.md",
+    "docs/roadmap/phases/PHASE_12.md",
+    "docs/roadmap/phases/PHASE_13.md",
+    "docs/roadmap/phases/PHASE_14.md",
+    "docs/roadmap/phases/PHASE_15.md",
+    "docs/roadmap/phases/PHASE_16.md",
+    "docs/roadmap/phases/PHASE_17.md",
+    "docs/roadmap/phases/PHASE_18.md",
+    "docs/roadmap/phases/PHASE_19.md",
+    "docs/roadmap/roadmap-data.js",
+    "docs/roadmap/roadmap.html"
+  ],
+  "history": [
+    {
+      "at": "2026-11-21T23:18:19Z",
+      "event": "created",
+      "agent": "claude-code",
+      "invocation": "عايزين نستخدم AIDevWorkflow نفسه لتطوير AIDevWorkflow بصورة تدريجية، باستخدام النسخة المستقرة المثبتة منه. — Approved"
+    },
+    {
+      "at": "2026-11-21T23:18:19Z",
+      "event": "discovery",
+      "agent": "claude-code",
+      "inspected": 13
+    },
+    {
+      "at": "2026-11-21T23:18:19Z",
+      "event": "stage",
+      "agent": "claude-code",
+      "from": "DISCOVERY",
+      "to": "DEPENDENCIES"
+    },
+    {
+      "at": "2026-11-21T23:18:31Z",
+      "event": "stage",
+      "agent": "claude-code",
+      "from": "DEPENDENCIES",
+      "to": "SPECIFICATION"
+    },
+    {
+      "at": "2026-11-21T23:19:33Z",
+      "event": "spec-review",
+      "agent": "claude-code",
+      "spec_sha256": "e4243a94"
+    },
+    {
+      "at": "2026-11-21T23:19:33Z",
+      "event": "stage",
+      "agent": "claude-code",
+      "from": "SPECIFICATION",
+      "to": "SPEC_APPROVAL"
+    },
+    {
+      "at": "2026-11-21T23:30:40Z",
+      "event": "approved",
+      "agent": "claude-code",
+      "document": "spec",
+      "version": 1,
+      "sha256": "e4243a94"
+    },
+    {
+      "at": "2026-11-21T23:30:40Z",
+      "event": "stage",
+      "agent": "claude-code",
+      "from": "SPEC_APPROVAL",
+      "to": "PLANNING",
+      "reason": "spec approved"
+    },
+    {
+      "at": "2026-11-21T23:30:40Z",
+      "event": "stage",
+      "agent": "claude-code",
+      "from": "PLANNING",
+      "to": "PLAN_APPROVAL"
+    },
+    {
+      "at": "2026-11-21T23:30:40Z",
+      "event": "approved",
+      "agent": "claude-code",
+      "document": "plan",
+      "version": 1,
+      "sha256": "963f000b"
+    },
+    {
+      "at": "2026-11-21T23:30:40Z",
+      "event": "stage",
+      "agent": "claude-code",
+      "from": "PLAN_APPROVAL",
+      "to": "IMPLEMENTATION",
+      "reason": "plan approved"
+    },
+    {
+      "at": "2026-11-21T23:30:40Z",
+      "event": "scope-exclude",
+      "agent": "claude-code",
+      "files": [
+        "docs/roadmap/CURRENT_ARCHITECTURE.md",
+        "docs/roadmap/DECISIONS.md",
+        "docs/roadmap/ENGINEERING_INTELLIGENCE.md",
+        "docs/roadmap/GAP_ANALYSIS.md",
+        "docs/roadmap/MASTER_ROADMAP.md",
+        "docs/roadmap/PROGRESS.md",
+        "docs/roadmap/REQUIREMENTS_TRACEABILITY.md",
+        "docs/roadmap/RISK_REGISTER.md",
+        "docs/roadmap/TARGET_ARCHITECTURE.md",
+        "docs/roadmap/TECHNICAL_DEBT.md",
+        "docs/roadmap/ore/MATHEMATICAL_MODEL_SCHEMA.md",
+        "docs/roadmap/ore/ORE_DESIGN.md",
+        "docs/roadmap/ore/SECURITY_AND_THREAT_MODEL.md",
+        "docs/roadmap/ore/STRICT_OPTIMALITY_POLICY.md",
+        "docs/roadmap/ore/VALIDATION_STRATEGY.md",
+        "docs/roadmap/phases/PHASE_00.md",
+        "docs/roadmap/phases/PHASE_01.md",
+        "docs/roadmap/phases/PHASE_02.md",
+        "docs/roadmap/phases/PHASE_03.md",
+        "docs/roadmap/phases/PHASE_04.md",
+        "docs/roadmap/phases/PHASE_05.md",
+        "docs/roadmap/phases/PHASE_06.md",
+        "docs/roadmap/phases/PHASE_07.md",
+        "docs/roadmap/phases/PHASE_08.md",
+        "docs/roadmap/phases/PHASE_09.md",
+        "docs/roadmap/phases/PHASE_10.md",
+        "docs/roadmap/phases/PHASE_11.md",
+        "docs/roadmap/phases/PHASE_12.md",
+        "docs/roadmap/phases/PHASE_13.md",
+        "docs/roadmap/phases/PHASE_14.md",
+        "docs/roadmap/phases/PHASE_15.md",
+        "docs/roadmap/phases/PHASE_16.md",
+        "docs/roadmap/phases/PHASE_17.md",
+        "docs/roadmap/phases/PHASE_18.md",
+        "docs/roadmap/phases/PHASE_19.md",
+        "docs/roadmap/roadmap-data.js",
+        "docs/roadmap/roadmap.html"
+      ],
+      "reason": "Standing rule in .ai-dev-workflow/PROJECT.md (owner, 2026-11-22)"
+    }
+  ],
+  "baseline": {
+    "start": {
+      "head": "6849eca082af7d2f11909dfd4d060bb8a04de78a",
+      "dirty": {
+        ".github/workflows/tests.yml": "5489e07e1195f003eecc54a78d34816f21feeb91",
+        "README.md": "57b8a831341086665c9d59f285f39b8b8594dc62",
+        "skills/ai-dev-workflow/scripts/workflow.py": "8af528002e10fcb8992b193ee7a85074c6a62048",
+        "tests/test_scenarios.py": "acf082eaffd5b5d4fda0db0d6e9fd4baf4c50b56",
+        "tools/prepublish_check.py": "fe5406988e4287b2f1c8fa90c464757224eb552b",
+        "docs/roadmap/CURRENT_ARCHITECTURE.md": "6b2490541420fc59d4f6103c18173aecadaaba6c",
+        "docs/roadmap/DECISIONS.md": "0a4c31cd603f46de89288a21be49fc91b0786c5c",
+        "docs/roadmap/ENGINEERING_INTELLIGENCE.md": "c034b69a97583b784cf40f581317b57658004998",
+        "docs/roadmap/GAP_ANALYSIS.md": "6cdacf041e9cc5f1b06ce1ebaed41c130b6d8768",
+        "docs/roadmap/MASTER_ROADMAP.md": "4034bd638457b3e816efc2b1e0c89ed1d7cc9490",
+        "docs/roadmap/PROGRESS.md": "83cb1e2eec7d1b21bf872a8cf9f67bd590ff8ea2",
+        "docs/roadmap/REQUIREMENTS_TRACEABILITY.md": "c668fb6e8ea32b1a4a6db165d68b98cb56bdbbc7",
+        "docs/roadmap/RISK_REGISTER.md": "fe7b475fb020ab0fde7929b44f5be46feb4531f9",
+        "docs/roadmap/TARGET_ARCHITECTURE.md": "a4c8c4e5a21b492124f3101bade2b5bdae565d9b",
+        "docs/roadmap/TECHNICAL_DEBT.md": "14c4d38d078c9a468dd99c8e548ca63e77b9af3e",
+        "docs/roadmap/phases/PHASE_00.md": "3c5196f2c4ebfa78fcd543e860919c685272d00d",
+        "docs/roadmap/phases/PHASE_01.md": "e4338bc81a7eacb6277f14c9c8d59c036196be30",
+        "docs/roadmap/phases/PHASE_02.md": "aa0f07042d844c452a94f561dbac2f1b94d47218",
+        "docs/roadmap/phases/PHASE_03.md": "05d15ba0216f46910e1a8f0b3fbdabd7fa43141e",
+        "docs/roadmap/phases/PHASE_04.md": "c20c995c5504ea4212390a28cce92be07f9754e1",
+        "docs/roadmap/phases/PHASE_05.md": "81b01516f363cff3de70def4bf7bcc9b4fb3b33e",
+        "docs/roadmap/phases/PHASE_06.md": "417708aa9ac00423ae94abefd1aeef70cf1e8ea9",
+        "docs/roadmap/phases/PHASE_07.md": "01027a932c2d5cb4bc6c216684b8fb6bd46fd75a",
+        "docs/roadmap/phases/PHASE_08.md": "4cd5dc7ebbe0b7d5c9ac7302ff365ce5e729e3dd",
+        "docs/roadmap/phases/PHASE_09.md": "1b24fe9b0c31a26884a6c298570e5d419c953db9",
+        "docs/roadmap/phases/PHASE_10.md": "893eb5e3d0ce7faac757275730c7bdf6e0651e82",
+        "docs/roadmap/phases/PHASE_11.md": "449c0a998a4ef9ba35f89cda26aa4cab36c24e54",
+        "docs/roadmap/phases/PHASE_12.md": "70cddaa0df1d07d82a8eec10efd1b9867e4bf1d3",
+        "docs/roadmap/phases/PHASE_13.md": "18da53f5a4578cdfaa2bae91b86e63fe311fb10b",
+        "docs/roadmap/phases/PHASE_14.md": "fa34b02899fb4c8828401f454051c33aff85d1cf",
+        "docs/roadmap/phases/PHASE_15.md": "e5fb47d834a402e7c0b1735d9d37c4c76ce91dd7",
+        "docs/roadmap/phases/PHASE_16.md": "12967bdb368f180baf331b0e3404848ef9af28cc",
+        "docs/roadmap/phases/PHASE_17.md": "aed696868dab2237725832bbc053598252bb9ba5",
+        "docs/roadmap/roadmap-data.js": "569f3ef73597879821aa3c1671c95a2ee6444c5c",
+        "docs/roadmap/roadmap.html": "40f9128db03ab84da658a8b258dac7dcd8f4575d",
+        "pyproject.toml": "5270a553e256a59a2942bab1e31fd19f4e8d2e8a",
+        "requirements-dev.txt": "e94c5b40cd2ec961200b162e47c3e92db0636c39",
+        "tests/golden/init-discover.json": "34d178e20c66f02f1dea534cd5ec8522700b7c0a",
+        "tests/golden/install-help.txt": "1c73c650a0141c30164f4f84ca111cd3bc1328c2",
+        "tests/golden/outcome.txt": "ccf58fcf5309f7611be926bda65587a2c321fc58",
+        "tests/golden/plan-check.txt": "69037d877d7800c797be2b302b0022572602f961",
+        "tests/golden/spec-check.txt": "ab45891d1137eeba4bfd472fb7799509c54a70dc",
+        "tests/golden/status-list.txt": "21c7ae4a75a3dbb4273006298041aedcc3b4abea",
+        "tests/golden/status-task.txt": "fc95e3e188aabc4c51421c3c1740437fd57b2606",
+        "tests/golden/workflow-help.txt": "0918796e37983d2b2df891a0adec8905645a4cdc",
+        "tests/test_golden.py": "0ee8775052ff6947f8a132a53a7e9de3511afb72"
+      },
+      "captured_at": "2026-11-21T23:18:19Z"
+    },
+    "implementation": {
+      "head": "6849eca082af7d2f11909dfd4d060bb8a04de78a",
+      "dirty": {
+        ".github/workflows/tests.yml": "5489e07e1195f003eecc54a78d34816f21feeb91",
+        "README.md": "57b8a831341086665c9d59f285f39b8b8594dc62",
+        "skills/ai-dev-workflow/scripts/workflow.py": "8af528002e10fcb8992b193ee7a85074c6a62048",
+        "tests/test_scenarios.py": "acf082eaffd5b5d4fda0db0d6e9fd4baf4c50b56",
+        "tools/prepublish_check.py": "fe5406988e4287b2f1c8fa90c464757224eb552b",
+        "docs/roadmap/CURRENT_ARCHITECTURE.md": "6b2490541420fc59d4f6103c18173aecadaaba6c",
+        "docs/roadmap/DECISIONS.md": "0a4c31cd603f46de89288a21be49fc91b0786c5c",
+        "docs/roadmap/ENGINEERING_INTELLIGENCE.md": "c034b69a97583b784cf40f581317b57658004998",
+        "docs/roadmap/GAP_ANALYSIS.md": "6cdacf041e9cc5f1b06ce1ebaed41c130b6d8768",
+        "docs/roadmap/MASTER_ROADMAP.md": "5efea6f0995cf71b377e9bfe451a378713dbdb1b",
+        "docs/roadmap/PROGRESS.md": "357d7fc475b1331247581246d0764ba25dfeb06d",
+        "docs/roadmap/REQUIREMENTS_TRACEABILITY.md": "eb760b3672c3b0d1019da8b0fa6b2f0175526251",
+        "docs/roadmap/RISK_REGISTER.md": "0eb1b6dc3bd6077f1973dfac6f48e4a10458869c",
+        "docs/roadmap/TARGET_ARCHITECTURE.md": "6254508ff80b7518d64bed536f7078e22a9f4fd7",
+        "docs/roadmap/TECHNICAL_DEBT.md": "5834333947d67c51bc3bcb2322e422f904ad46ff",
+        "docs/roadmap/ore/MATHEMATICAL_MODEL_SCHEMA.md": "e32c1aac8dbb5614ee93101256f1d4ce493c3b56",
+        "docs/roadmap/ore/ORE_DESIGN.md": "3abd1849d8b084d4bf99aa26e284e021ac6457a7",
+        "docs/roadmap/ore/SECURITY_AND_THREAT_MODEL.md": "96143b9941f91d8c1fe00f757d8139b030a9e647",
+        "docs/roadmap/ore/STRICT_OPTIMALITY_POLICY.md": "0476ea1c9b0aa545508bc81e2cce0d8016f0195e",
+        "docs/roadmap/ore/VALIDATION_STRATEGY.md": "873980ee25c731d399eb88cdaa7a62bc286d0943",
+        "docs/roadmap/phases/PHASE_00.md": "5bf744fde8e58158a269dfde28ab1dcd12efbd4b",
+        "docs/roadmap/phases/PHASE_01.md": "2e0cec0443ff7857bb6398d877206cd5c30a5e37",
+        "docs/roadmap/phases/PHASE_02.md": "4333b67ba48146117b313235fec08aa7c6ca3800",
+        "docs/roadmap/phases/PHASE_03.md": "a063fafecdf8924e8f62a11d601eadafb02d7d49",
+        "docs/roadmap/phases/PHASE_04.md": "0dc5194a1159eb4e82660bfa44fb192a2535f1ba",
+        "docs/roadmap/phases/PHASE_05.md": "c3b7920de099bbc25690d0f53caa23968d6c2977",
+        "docs/roadmap/phases/PHASE_06.md": "2a2f2ad2f40b129f422e0b64c6eb61db4163ae7f",
+        "docs/roadmap/phases/PHASE_07.md": "79c4b5b6cbacde595277b553b66b3e2f4c02c793",
+        "docs/roadmap/phases/PHASE_08.md": "20286ea1a3cb7703b436dd879d6b288398ca3acb",
+        "docs/roadmap/phases/PHASE_09.md": "2e475c5c875a0ff96fc85a24eff2f06029550b9c",
+        "docs/roadmap/phases/PHASE_10.md": "a24d06697e6e34633bfe54c75b48a6502087778d",
+        "docs/roadmap/phases/PHASE_11.md": "af1401f9d0e41ebe2462c8ca482875973fe95378",
+        "docs/roadmap/phases/PHASE_12.md": "254c483c0915d32698cf83d3ac6ae6dd3dde5d43",
+        "docs/roadmap/phases/PHASE_13.md": "6988abf030e0294682f73d30bc0e489b2b20d41d",
+        "docs/roadmap/phases/PHASE_14.md": "6114ae199b6fb6e83f029e931cb786837ec72b9a",
+        "docs/roadmap/phases/PHASE_15.md": "27abbaab5a2f79d45b993f4a3535e404d409bb06",
+        "docs/roadmap/phases/PHASE_16.md": "5877a83cbe1f88781d2b060fc9e09caab703a5b0",
+        "docs/roadmap/phases/PHASE_17.md": "c3ae05ff706952e47374c6324caa75b2929a0637",
+        "docs/roadmap/phases/PHASE_18.md": "2e7108bcc21140f73303948a967f8ba9b1b19e69",
+        "docs/roadmap/phases/PHASE_19.md": "98a65b807918fb35cd1b6fadbb1a0687a9a04e3b",
+        "docs/roadmap/roadmap-data.js": "2d357e66464da1816ad0dcedc0e30f4ddc6f6f8f",
+        "docs/roadmap/roadmap.html": "5537737b298db2cd3182babe2195d0f8508871b1",
+        "pyproject.toml": "5270a553e256a59a2942bab1e31fd19f4e8d2e8a",
+        "requirements-dev.txt": "e94c5b40cd2ec961200b162e47c3e92db0636c39",
+        "tests/golden/init-discover.json": "34d178e20c66f02f1dea534cd5ec8522700b7c0a",
+        "tests/golden/install-help.txt": "1c73c650a0141c30164f4f84ca111cd3bc1328c2",
+        "tests/golden/outcome.txt": "ccf58fcf5309f7611be926bda65587a2c321fc58",
+        "tests/golden/plan-check.txt": "69037d877d7800c797be2b302b0022572602f961",
+        "tests/golden/spec-check.txt": "ab45891d1137eeba4bfd472fb7799509c54a70dc",
+        "tests/golden/status-list.txt": "21c7ae4a75a3dbb4273006298041aedcc3b4abea",
+        "tests/golden/status-task.txt": "fc95e3e188aabc4c51421c3c1740437fd57b2606",
+        "tests/golden/workflow-help.txt": "0918796e37983d2b2df891a0adec8905645a4cdc",
+        "tests/test_golden.py": "0ee8775052ff6947f8a132a53a7e9de3511afb72"
+      },
+      "captured_at": "2026-11-21T23:30:40Z"
+    }
+  },
+  "updated_at": "2026-11-21T23:30:40Z",
+  "last_checkpoint": {
+    "at": "2026-11-21T23:30:40Z",
+    "fingerprint": "79d974de92e6ca6b03bcf8685e1158972574cef801eaa52152e74b05ac444109",
+    "changes": {}
+  }
+}
