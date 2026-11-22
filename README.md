@@ -145,7 +145,11 @@ On Windows the tools are in `.venv\Scripts\` (for example `.venv\Scripts\ruff ch
 `tests/test_golden.py` compares CLI output with `tests/golden/`. After an intended output change, regenerate the
 files from the `tests` folder and review the diff: `AIDW_UPDATE_GOLDEN=1 python3 -m unittest test_golden`.
 
-The engine and installer use only the Python standard library.
+The engine and installer use only the Python standard library. `scripts/workflow.py` is the entry point; the engine
+lives in the `scripts/aidw/` package next to it, in layers where a module imports only from its own layer or lower
+ones: `infra` (text, secrets, git) →
+`records` and `store` (Markdown model, parsers, config, task state) → `core` and `adapters` (checks, gates, outcome,
+setup, technology detection) → `agents` and `cli` (hooks, commands, parser). `tests/test_package.py` enforces the layers.
 
 ## License
 
