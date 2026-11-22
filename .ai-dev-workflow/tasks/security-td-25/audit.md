@@ -7,7 +7,7 @@ implementer's conclusions.
 **Rounds:**
 - Round 1 on the working tree, byte-identical to commit `a346300`, plus the backport `056ac73`/`7f3a2ae`. Verdict
   NO-GO, one Important finding.
-- Round 2 on the fixes: see the remediation log.
+- Round 2 on the fixes (`49ba40a`, backport `d8efe25`). Code and tests: GO; records: NO-GO (F-8), fixed.
 
 **Reviewed scope:**
 - `aidw/api.py`, `aidw/agents/claude_hooks.py`, `tests/test_secret_identity.py`;
@@ -65,6 +65,11 @@ No standards files are configured (`standards: []`). Spec constraints:
 | F-5 | Minor | I | The secret regex ran before the 256-character bound and is quadratic on inputs such as `"a." * n` (about 0.9 s at 40,000 characters), a possible hook timeout | `session_problem` (both branches) | Fixed | Values over 4,096 characters are refused with the format message before scanning. `test_huge_session_is_refused_quickly` (400,000 characters, under 2 s) fails on `a346300` and passes after the fix |
 | F-6 | Minor | I | The CHANGELOG said `new` "no longer leaves a half-created task folder", which is absolute. A crash, a locked file or a foreign file can still leave it, and an empty `tasks/` folder can remain after a failed first `new` | CHANGELOG (both branches) | Fixed | Reworded to best effort; the residual cases are under TD-29 |
 | F-7 | Minor | A | TD-29 omitted that `pause` and `close` delete ACTIVE, and `approve` writes the snapshot, before `save_state` | TECHNICAL_DEBT TD-29 | Fixed | Added to TD-29 (pre-existing, no value leak; not fixed here) |
+| F-8 | Important | A | verification.md marked AC-11, AC-14, EC-10 and DW-9 as Passed citing report.md, which was still the empty template; the matrix was also stale (tested commit, fingerprints, counts) | verification.md, audit.md F-2 note | Fixed | report.md written (status, implementation, compliance, tests, audit, limits incl. the centralised-check assessment and the trust boundary, release proposal); the matrix refreshed with final commits, fingerprints and counts |
+| F-9 | Minor | D | A value split by U+0085 or U+2028 passes every check and reaches state.json, ACTIVE and verification.md, and `run --` executes; the `state.json` check misses it too, so it predates TD-25 (a detection limit, FR-10) | `find_secrets` line splitting | Deferred | Documented in TD-25 limits, the CHANGELOG (both branches), verification.md Limitations and report.md §6. Not fixed: the spec excludes changes to the scanner, and normalising separators would be a detection change for a separate decision |
+| F-10 | Minor | G | A test comment wrongly said the hook does not log after a pause, and the test passed `expect_log=False`, weakening the assertion | `tests/test_secret_identity.py` (both branches) | Fixed | Comment corrected; the log line is now asserted |
+| F-11 | Minor | C | Scanning the value and its JSON form as one string reported a plain token twice and gave line numbers inside the internal combined string | `_assert_clean_value` / backport `assert_clean_value` | Fixed | The two forms are scanned separately: a token is reported once, as "(line 1)" |
+| F-12 | Minor | A | Stale numbers in verification.md (DW-7 28/24, AC-12 counts); DW-7 marked Passed despite the noted Windows failures | verification.md | Fixed | Counts recomputed from the final test file; DW-7 status reads "Passed (with 2 pre-existing Windows failures noted)" |
 
 ## Remediation log
 
@@ -78,4 +83,13 @@ No standards files are configured (`standards: []`). Spec constraints:
   - development branch: 36 of 36 TD-25 tests;
   - backport: 32 of 32 adapted tests;
   - pristine v1.0.0: 27 failures and 1 error out of 32 adapted tests, with 4 legitimate-value tests passing.
-- **Re-run checks and CI:** recorded in verification.md after this round.
+- **Round 2:**
+  - The auditor's own separator matrix confirmed F-1 closed on both branches for LF, CR, VT, FF, FS, GS and RS on
+    resume, preflight, and run with and without `--`.
+  - Legitimate values are unchanged, and the goldens are unchanged.
+- **Round-2 fixes:**
+  - F-8: report.md written and the verification matrix refreshed;
+  - F-10 and F-11 in the tests and the code (both branches);
+  - F-9 documented and deferred;
+  - F-12: numbers refreshed.
+- **Re-run checks and CI:** recorded in verification.md.

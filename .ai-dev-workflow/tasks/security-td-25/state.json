@@ -237,6 +237,23 @@
       "note": "CHANGELOG security entry incl. hooks; TECHNICAL_DEBT TD-25 status and TD-30 (roadmap file, standing rule)",
       "agent": "claude-code",
       "at": "2026-11-22T12:17:20Z"
+    },
+    "S8": {
+      "status": "done",
+      "files": [
+        "skills/ai-dev-workflow/scripts/aidw/api.py",
+        "tests/test_secret_identity.py"
+      ],
+      "note": "Commits a346300, 49ba40a and the round-2 commit pushed; CI 7/7 on a346300 and 49ba40a; security audit round 1 NO-GO (F-1 fixed), round 2 code GO / records NO-GO (F-8 fixed); checks at 081041ee0e",
+      "agent": "claude-code",
+      "at": "2026-11-22T12:56:03Z"
+    },
+    "S9": {
+      "status": "done",
+      "files": [],
+      "note": "release/1.0.x from v1.0.0 in a worktree: 056ac73, 7f3a2ae, d8efe25 and round-2 commit; adapted tests 32/32, pristine v1.0.0 27 fail + 1 error; full v1.0.0 suite 3.13/3.9; CI Linux+macOS green, Windows 2 pre-existing v1.0.0 failures; no tag",
+      "agent": "claude-code",
+      "at": "2026-11-22T12:56:03Z"
     }
   },
   "checks": [
@@ -449,6 +466,96 @@
       "status": "passed",
       "summary": "14 golden files; changed: ['run-output-before-late-refusal.txt']; unexpected: none",
       "fingerprint": "5c340c9124668639f7ce5a9bfc7ef85122895dae9ea6e6c3bdbedc18135ed8cd"
+    },
+    {
+      "id": "privacy",
+      "name": "Pre-publish secret and privacy scan",
+      "kind": "result",
+      "agent": "claude-code",
+      "at": "2026-11-22T12:51:49Z",
+      "counts": null,
+      "reason": null,
+      "command": "python3 tools/prepublish_check.py",
+      "duration_s": 0.4,
+      "exit_code": 0,
+      "status": "passed",
+      "summary": "Scanned 212 files: no findings.",
+      "fingerprint": "081041ee0e41cf7202dfe3a5d7798c4564154f87d547397509ebd31d12abf909"
+    },
+    {
+      "id": "unit",
+      "name": "Unit, scenario and doc tests",
+      "kind": "result",
+      "agent": "claude-code",
+      "at": "2026-11-22T12:51:50Z",
+      "counts": null,
+      "reason": null,
+      "command": "python3 -m unittest discover -s tests",
+      "duration_s": 79.1,
+      "exit_code": 0,
+      "status": "passed",
+      "summary": "OK",
+      "fingerprint": "081041ee0e41cf7202dfe3a5d7798c4564154f87d547397509ebd31d12abf909"
+    },
+    {
+      "id": "unit-py39",
+      "name": "unit-py39",
+      "kind": "result",
+      "agent": "claude-code",
+      "at": "2026-11-22T12:53:09Z",
+      "counts": null,
+      "reason": null,
+      "command": "/usr/bin/python3 -m unittest discover -s tests",
+      "duration_s": 61.0,
+      "exit_code": 0,
+      "status": "passed",
+      "summary": "OK",
+      "fingerprint": "081041ee0e41cf7202dfe3a5d7798c4564154f87d547397509ebd31d12abf909"
+    },
+    {
+      "id": "ruff",
+      "name": "ruff",
+      "kind": "result",
+      "agent": "claude-code",
+      "at": "2026-11-22T12:54:10Z",
+      "counts": null,
+      "reason": null,
+      "command": ".venv/bin/ruff check .",
+      "duration_s": 0.0,
+      "exit_code": 0,
+      "status": "passed",
+      "summary": "All checks passed!",
+      "fingerprint": "081041ee0e41cf7202dfe3a5d7798c4564154f87d547397509ebd31d12abf909"
+    },
+    {
+      "id": "mypy",
+      "name": "mypy",
+      "kind": "result",
+      "agent": "claude-code",
+      "at": "2026-11-22T12:54:10Z",
+      "counts": null,
+      "reason": null,
+      "command": ".venv/bin/mypy",
+      "duration_s": 0.2,
+      "exit_code": 0,
+      "status": "passed",
+      "summary": "Success: no issues found in 31 source files",
+      "fingerprint": "081041ee0e41cf7202dfe3a5d7798c4564154f87d547397509ebd31d12abf909"
+    },
+    {
+      "id": "golden-byte-compare",
+      "name": "golden-byte-compare",
+      "kind": "result",
+      "agent": "claude-code",
+      "at": "2026-11-22T12:54:11Z",
+      "counts": null,
+      "reason": null,
+      "command": "python3 /private/tmp/claude-501/-Users-ahmedalhosani-Desktop-Ahmed-Zein-downloads-ZEIN-ORIGINALS/78554fc3-22ec-4f7b-b324-d53654d9842d/scratchpad/golden_compare.py tests/golden /private/tmp/claude-501/-Users-ahmedalhosani-Desktop-Ahmed-Zein-downloads-ZEIN-ORIGINALS/78554fc3-22ec-4f7b-b324-d53654d9842d/scratchpad/golden-before-td25 run-output-before-late-refusal.txt",
+      "duration_s": 0.0,
+      "exit_code": 0,
+      "status": "passed",
+      "summary": "14 golden files; changed: ['run-output-before-late-refusal.txt']; unexpected: none",
+      "fingerprint": "081041ee0e41cf7202dfe3a5d7798c4564154f87d547397509ebd31d12abf909"
     }
   ],
   "checkpoints": [
@@ -546,6 +653,24 @@
       "valid": true,
       "changed_files": 7,
       "step": "S7"
+    },
+    {
+      "at": "2026-11-22T12:56:03Z",
+      "kind": "step",
+      "agent": "claude-code",
+      "fingerprint": "081041ee0e41cf7202dfe3a5d7798c4564154f87d547397509ebd31d12abf909",
+      "valid": true,
+      "changed_files": 7,
+      "step": "S8"
+    },
+    {
+      "at": "2026-11-22T12:56:03Z",
+      "kind": "step",
+      "agent": "claude-code",
+      "fingerprint": "081041ee0e41cf7202dfe3a5d7798c4564154f87d547397509ebd31d12abf909",
+      "valid": true,
+      "changed_files": 7,
+      "step": "S9"
     }
   ],
   "decisions": [
@@ -943,6 +1068,62 @@
       "agent": "claude-code",
       "check": "golden-byte-compare",
       "status": "passed"
+    },
+    {
+      "at": "2026-11-22T12:51:50Z",
+      "event": "check",
+      "agent": "claude-code",
+      "check": "privacy",
+      "status": "passed"
+    },
+    {
+      "at": "2026-11-22T12:53:09Z",
+      "event": "check",
+      "agent": "claude-code",
+      "check": "unit",
+      "status": "passed"
+    },
+    {
+      "at": "2026-11-22T12:54:10Z",
+      "event": "check",
+      "agent": "claude-code",
+      "check": "unit-py39",
+      "status": "passed"
+    },
+    {
+      "at": "2026-11-22T12:54:10Z",
+      "event": "check",
+      "agent": "claude-code",
+      "check": "ruff",
+      "status": "passed"
+    },
+    {
+      "at": "2026-11-22T12:54:10Z",
+      "event": "check",
+      "agent": "claude-code",
+      "check": "mypy",
+      "status": "passed"
+    },
+    {
+      "at": "2026-11-22T12:54:11Z",
+      "event": "check",
+      "agent": "claude-code",
+      "check": "golden-byte-compare",
+      "status": "passed"
+    },
+    {
+      "at": "2026-11-22T12:56:03Z",
+      "event": "step",
+      "agent": "claude-code",
+      "step": "S8",
+      "status": "done"
+    },
+    {
+      "at": "2026-11-22T12:56:03Z",
+      "event": "step",
+      "agent": "claude-code",
+      "step": "S9",
+      "status": "done"
     }
   ],
   "baseline": {
@@ -982,18 +1163,18 @@
       "captured_at": "2026-11-22T12:05:43Z"
     }
   },
-  "updated_at": "2026-11-22T12:38:10Z",
+  "updated_at": "2026-11-22T12:56:03Z",
   "last_checkpoint": {
-    "at": "2026-11-22T12:17:20Z",
-    "fingerprint": "4e22081a9811c374f04ec5ca147b7e9b61fa388c4a68a9911b9c70f706957d29",
+    "at": "2026-11-22T12:56:03Z",
+    "fingerprint": "081041ee0e41cf7202dfe3a5d7798c4564154f87d547397509ebd31d12abf909",
     "changes": {
-      "CHANGELOG.md": "4ff58f45fbce23acb339a4e2dc53bb5004d1269b",
-      "docs/roadmap/TECHNICAL_DEBT.md": "1dee906f3d401334fa44f6a9e8a6d0c743c7d914",
+      "CHANGELOG.md": "b0b4a3911bc74776adc675aeea890424fbec753d",
+      "docs/roadmap/TECHNICAL_DEBT.md": "3441fadca35038d48c7b559608fa7e16407974d1",
       "skills/ai-dev-workflow/scripts/aidw/agents/claude_hooks.py": "bd31f9dc3f3fe7b4321948aa0dc38ca87adb739f",
-      "skills/ai-dev-workflow/scripts/aidw/api.py": "dd7e144ca75a42286b824eac4ba30d46360251fb",
+      "skills/ai-dev-workflow/scripts/aidw/api.py": "58a6ca4ba9de2117ee5a05fe4547be68321f5245",
       "tests/golden/run-output-before-late-refusal.txt": "0e24ccbc11c0815822325d7f4c323b67c090e95f",
       "tests/test_behaviour_pins.py": "e4ff48cfe20d85a499a905c66bc408fa0f6c0311",
-      "tests/test_secret_identity.py": "2e36f2eab1151389111b44e3eceb6c84392ec48f"
+      "tests/test_secret_identity.py": "2118f9a4edb96fad553d8714d4793724ce2cdb71"
     }
   }
 }

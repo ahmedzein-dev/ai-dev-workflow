@@ -1,7 +1,7 @@
 # Verification: TD-25: keep secret-like check ids and agent names out of task records
 
-Tested commit: **a346300** (code fingerprint 4e22081a98) — CI run 45021516859, 7/7. Backport: release/1.0.x 056ac73 + 7f3a2ae (CI runner pin), CI run 45021971350. Approved documents: spec v2 `9cf6cec3`, plan v2
-`f1c2745d`.
+Tested commit: final round-2 commit (code fingerprint 081041ee0e; after audit rounds 1 and 2), CI run recorded below; round-1 commit 49ba40a (CI run 45023454467, 7/7). First implementation commit a346300 (CI run 45021516859, 7/7). Backport: release/1.0.x d8efe25 (port 056ac73, CI runner pin 7f3a2ae, audit fixes) — CI run 45023456456.
+Approved documents: spec v2 `9cf6cec3`, plan v2 `f1c2745d`.
 
 **Approval history (condition 4 of the v2 approval).**
 - S1–S3 were implemented under the approved **spec v1 `2fdbc034` and plan v1 `b60cd6f0`** (approved 2026-11-22,
@@ -22,12 +22,12 @@ Written by `workflow.py run`; do not edit between the markers.
 <!-- aidw:checks:start -->
 | Check | Status | Summary | Code fingerprint | When | Agent |
 |---|---|---|---|---|---|
-| golden-byte-compare | passed | 14 golden files; changed: ['run-output-before-late-refusal.txt']; unexpected: none | `5c340c9124` | 2026-11-22T12:38:10Z | claude-code |
-| mypy | passed | Success: no issues found in 31 source files | `5c340c9124` | 2026-11-22T12:38:09Z | claude-code |
-| privacy | passed | Scanned 212 files: no findings. | `5c340c9124` | 2026-11-22T12:35:54Z | claude-code |
-| ruff | passed | All checks passed! | `5c340c9124` | 2026-11-22T12:38:09Z | claude-code |
-| unit | passed | OK | `5c340c9124` | 2026-11-22T12:35:55Z | claude-code |
-| unit-py39 | passed | OK | `5c340c9124` | 2026-11-22T12:37:11Z | claude-code |
+| golden-byte-compare | passed | 14 golden files; changed: ['run-output-before-late-refusal.txt']; unexpected: none | `081041ee0e` | 2026-11-22T12:54:11Z | claude-code |
+| mypy | passed | Success: no issues found in 31 source files | `081041ee0e` | 2026-11-22T12:54:10Z | claude-code |
+| privacy | passed | Scanned 212 files: no findings. | `081041ee0e` | 2026-11-22T12:51:49Z | claude-code |
+| ruff | passed | All checks passed! | `081041ee0e` | 2026-11-22T12:54:10Z | claude-code |
+| unit | passed | OK | `081041ee0e` | 2026-11-22T12:51:50Z | claude-code |
+| unit-py39 | passed | OK | `081041ee0e` | 2026-11-22T12:53:09Z | claude-code |
 <!-- aidw:checks:end -->
 
 ## Acceptance matrix
@@ -38,18 +38,18 @@ for Blocked and Not Verified it says why. A check that did not run is never Pass
 
 | Item | Status | Evidence |
 |------|--------|----------|
-| AC-1 | Passed | tests/test_secret_identity.py CliRefusalTest (13 tests: EC-1–EC-7, EC-11; byte snapshot of .ai-dev-workflow/ and .git/info/exclude, value absent from stdout/stderr and from every repository file); checks `unit`, `unit-py39` at 4e22081a98 |
+| AC-1 | Passed | tests/test_secret_identity.py CliRefusalTest (15 tests: EC-1–EC-7, EC-11, multi-line values (audit F-1), CLI sweep of every recording command (F-4); byte snapshot of .ai-dev-workflow/ and .git/info/exclude; value absent from stdout/stderr and, raw or JSON-escaped, from every repository file); checks `unit`, `unit-py39` on the final code |
 | AC-2 | Passed | CliRefusalTest run tests: marker file from `make_marker.py` absent after each refusal |
 | AC-3 | Passed | test_new_with_a_secret_like_agent_name_while_another_task_is_active: no folder, other task and ACTIVE byte-identical, later `new` succeeds |
 | AC-4 | Passed | ApiRefusalTest: all 15 functions with a secret-like agent; new_task/resume/preflight with 2 secret-like and 5 malformed sessions; AI_DEV_WORKFLOW_AGENT via CLI and a subprocess |
 | AC-5 | Passed | LegitimateValuesTest (UUID, `${CLAUDE_SESSION_ID}`, 256-character id, placeholder-like agent, `smoke test` check name, existing refusal order); the 3 value tests also pass on 5a7576a and fa6a676 |
-| AC-6 | Passed | Old engines with the final test file: 5a7576a 22 fail / 4 pass (legitimate values, valid UUID hook) / 6 skip (no aidw.api); fa6a676 28 fail / 4 pass; fixed engine 32/32 |
+| AC-6 | Passed | Final test file (36 tests: 3 API, 15 CLI, 11 hook, 4 legitimate, 3 recovery) on old engines: 5a7576a 25 fail + 1 error / 4 pass (legitimate values, valid UUID hook) / 6 skip (no aidw.api); fa6a676 31 fail + 1 error / 4 pass; a346300 (before audit fixes) 2 fail (multi-line values, huge session); final code 36/36 |
 | AC-7 | Passed | `unit` (Python 3.13) and `unit-py39` (3.9.6) at 4e22081a98; `golden-byte-compare`: 14 golden files, only run-output-before-late-refusal.txt changed (the approved FR-13 file); 27 refusal pins and signature pin unchanged and passing |
 | AC-8 | Passed | checks `ruff`, `mypy` (31 files), `privacy` (212 files); token-pattern grep over the repository: 0 literal values (synthetic values are concatenated at run time) |
 | AC-9 | Passed | RecoveryTest.test_failed_new_removes_only_its_own_folder_and_leaves_the_active_task; test_failed_new_never_deletes_a_file_it_did_not_write (a foreign file in the new folder survives) |
 | AC-10 | Passed | RecoveryTest.test_failed_check_block_write_keeps_state_and_the_next_run_repairs_it (OSError propagates with output_tail; state.json has the entry; next run rewrites the block) |
 | AC-11 | Passed | report.md Limitations (FR-9 persistence, FR-10 detection); TECHNICAL_DEBT TD-25 status "fixed on the development branch; installed copies still affected", TD-27, TD-28, TD-29 rows; release proposal in report.md |
-| AC-12 | Passed | HookTest (9 tests: active task bound/unbound/other agent/records path, non-text session, no records, paused/closed with ACTIVE, prompt hook, valid UUID with hook log enabled); 7 of the 8 invalid-session tests failed before the fix and on fa6a676; existing test_preflight_and_hooks unchanged and passing |
+| AC-12 | Passed | HookTest (11 tests, hook log enabled): active task bound/unbound/other agent/records path, non-text and multi-line sessions, huge session, no records, paused, paused/closed with ACTIVE, prompt hook, valid UUID; all 10 invalid-session tests fail on 5a7576a and fa6a676 (the huge-session test errors there), the valid-UUID test passes everywhere; existing test_preflight_and_hooks unchanged and passing |
 | AC-13 | Passed | LateRefusalTest passes on fa6a676 and the fixed engine, Python 3.13 and 3.9; golden regenerated in an export of fa6a676 with the final test is byte-identical (`cmp`); asserts marker, `token [REDACTED]`, order, stderr, exit code 1 |
 | AC-14 | Passed | TECHNICAL_DEBT TD-30 (exported writers trust boundary, centralised check assessed, not built); report.md section on the trust boundary |
 | EC-1 | Passed | test_run_with_a_secret_like_check_name_and_an_extra_command |
@@ -72,12 +72,12 @@ for Blocked and Not Verified it says why. A check that did not run is never Pass
 | EC-18 | Passed | LateRefusalTest (AC-13) |
 | DW-1 | Passed | All FR-1–FR-14 implemented (S1–S7 recorded with `step`) |
 | DW-2 | Passed | EC-1–EC-18 rows above |
-| DW-3 | Passed | checks `unit`, `unit-py39`, `privacy`, `ruff`, `mypy` (and `golden-byte-compare`) at 4e22081a98 |
-| DW-4 | Passed | CI run 45021516859 on a346300: lint + Linux, Windows, macOS × Python 3.9/3.13, 7/7 success |
-| DW-5 | Not Verified | Independent security audit running; updated when its report is in |
+| DW-3 | Passed | checks `unit`, `unit-py39`, `privacy`, `ruff`, `mypy` and `golden-byte-compare` at 5c340c9124 (final code), earlier at 4e22081a98 |
+| DW-4 | Passed | CI run 45023454467 on 49ba40a (final code): lint + Linux, Windows, macOS × Python 3.9/3.13, 7/7 success; earlier run 45021516859 on a346300, 7/7 |
+| DW-5 | Passed | Independent security audit, 2 rounds (audit.md): round 1 NO-GO (F-1 Important + 6 Minor, all fixed); round 2 code GO, records NO-GO (F-8 Important: report cited before written; fixed by writing report.md and refreshing this matrix) + F-9–F-12 Minor (F-9 deferred and documented, others fixed); no existing check or gate weakened |
 | DW-6 | Passed | Exposure check (counts only): 45 record files, 0 with secret-like values; ACTIVE present, not flagged; no value printed |
-| DW-7 | Passed | release/1.0.x (056ac73 port, 7f3a2ae CI runner pin) in a separate worktree: adapted tests 28/28 pass, 24 of 28 fail on pristine v1.0.0 (4 legitimate-value tests pass); full v1.0.0 suite passes locally on 3.13 and 3.9; CI run 45021971350: Linux and macOS 4/4; Windows 2 failures, both pre-existing in v1.0.0 (identical failures in CI run 43175463889 on the v1.0.0 tag itself), all TD-25 tests pass on Windows; no tag, release or install |
-| DW-8 | Not Verified | Pending the audit report (must cover the hook path and the FR-13 pin) |
+| DW-7 | Passed (with 2 pre-existing Windows failures noted) | release/1.0.x (056ac73 port, 7f3a2ae Ubuntu 24.04 runner pin, d8efe25 and the round-2 commit for audit fixes), tested in a separate worktree: adapted tests 32/32 pass; on pristine v1.0.0 27 fail + 1 error / 4 pass (legitimate values); full v1.0.0 suite passes locally on 3.13 and 3.9; CI run 45023456456 on d8efe25 (150 tests): Linux and macOS 4/4, Windows 2 failures that are pre-existing in v1.0.0 (identical in CI run 43175463889 on the v1.0.0 tag; fixed on main by ad5bfd3/0bd5a6c, not ported: outside TD-25 scope, owner decision R0); all TD-25 tests pass on Windows; no tag, release or install |
+| DW-8 | Passed | Both audit rounds covered the hook path (invalid, non-text, multi-line sessions; logging; fail-closed inside an active task) and the FR-13 pin (golden regenerated by the auditor from fa6a676, byte-identical) |
 | DW-9 | Passed | TECHNICAL_DEBT TD-25 marked "fixed on the development branch; installed copies still affected"; release proposal in report.md for the owner's separate approval; F1.0.4 records untouched |
 
 ## Behavioral checks
@@ -88,7 +88,7 @@ for Blocked and Not Verified it says why. A check that did not run is never Pass
 
 ## Limitations
 
-- **Detection is pattern-based (FR-10):** a credential in a format the scanner does not know is not refused. The session format rule bounds structure, not secrecy. Agent names keep free text.
+- **Detection is pattern-based (FR-10):** a credential in a format the scanner does not know is not refused, and a value split by U+0085 or U+2028 passes every check (as it passes the `state.json` check; audit F-9). The session format rule bounds structure, not secrecy. Agent names keep free text.
 - **Persistence (FR-9, TD-29):** single files are replaced atomically; multi-file updates are not transactional. `resume`, `preflight` and pausing another task still write ACTIVE or another task's state.json before the task's own. The check block can lag state.json until the next `run` after a failed write (tested, EC-13).
 - **Trust boundary (TD-30):** direct Python calls to the exported writers (`activate`, `save_state`, …) bypass the API checks; no protection is claimed for them.
 - **Installed copies:** the installed v1.0.0 engine is still affected until v1.0.1 is approved, released and installed.

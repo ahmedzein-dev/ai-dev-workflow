@@ -244,7 +244,8 @@ def _assert_clean_value(value: str, where: str) -> None:
     """The secret check for one identity value, over the value itself and its JSON form. `state.json` is scanned as
     JSON, where a line break becomes `\\n`; scanning both forms means a value the later `state.json` check would refuse
     is refused here, before anything runs or is written (audit F-1). The message never contains the value."""
-    assert_no_secrets(value + "\n" + json.dumps(value, ensure_ascii=False), where)
+    assert_no_secrets(value, where)
+    assert_no_secrets(json.dumps(value, ensure_ascii=False), where)
 
 
 def _check_agent(agent: str) -> None:
