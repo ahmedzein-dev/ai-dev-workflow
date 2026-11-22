@@ -8,7 +8,7 @@ import re
 import sys
 from pathlib import Path
 from typing import Any, Dict, Optional
-from aidw.cli.helpers import status_line
+from aidw.api import status_line
 from aidw.constants import CODE_STAGES, NEXT, RECORDS, REFERENCE, STAGES
 from aidw.core.gates import approval_status
 from aidw.errors import WorkflowError

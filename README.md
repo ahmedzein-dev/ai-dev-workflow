@@ -149,7 +149,9 @@ The engine and installer use only the Python standard library. `scripts/workflow
 lives in the `scripts/aidw/` package next to it, in layers where a module imports only from its own layer or lower
 ones: `infra` (text, secrets, git) →
 `records` and `store` (Markdown model, parsers, config, task state) → `core` and `adapters` (checks, gates, outcome,
-setup, technology detection) → `agents` and `cli` (hooks, commands, parser). `tests/test_package.py` enforces the layers.
+setup, technology detection) → `api` (every command as a function that writes the records and returns data) →
+`agents` and `cli` (hooks, commands, parser). The CLI only prints what `aidw.api` returns and never writes records;
+the API is internal and unversioned. `tests/test_package.py` and `tests/test_api.py` enforce this.
 
 ## License
 

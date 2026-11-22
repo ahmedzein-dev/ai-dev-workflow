@@ -45,7 +45,7 @@ SCRIPTS = SKILL / "scripts"
 PKG = SCRIPTS / "aidw"
 # Layer of each top-level part of the package; a module may import only from its own layer or lower ones.
 LAYER = {"__init__": 0, "errors": 0, "constants": 0, "infra": 1, "records": 2, "store": 2, "core": 3, "adapters": 3,
-         "agents": 4, "cli": 4}
+         "api": 4, "agents": 5, "cli": 5}
 
 
 def module_names() -> list:

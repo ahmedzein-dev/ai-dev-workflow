@@ -36,15 +36,18 @@ from aidw.agents.claude_hooks import (  # noqa: E402,F401
     _deny, _find_records, _hook_log, cmd_hook, gate_decision, hook_claude_pre_edit,
     hook_claude_prompt,
 )
+from aidw.api import (  # noqa: E402,F401
+    change_checks, install_template, open_tasks, scan_records, status_line, task_summary,
+    validate_task,
+)
 from aidw.cli.commands import (  # noqa: E402,F401
-    change_checks, cmd_approve, cmd_check, cmd_close, cmd_decision, cmd_discover,
-    cmd_init, cmd_new, cmd_outcome, cmd_pause, cmd_plan_check, cmd_preflight,
-    cmd_resume, cmd_review, cmd_run, cmd_scope, cmd_spec_check, cmd_stage,
-    cmd_status, cmd_step, install_template, open_tasks, print_discovery, print_spec_check,
-    resolve_template, scan_records, update_setup, validate_task,
+    cmd_approve, cmd_check, cmd_close, cmd_decision, cmd_discover, cmd_init,
+    cmd_new, cmd_outcome, cmd_pause, cmd_plan_check, cmd_preflight, cmd_resume,
+    cmd_review, cmd_run, cmd_scope, cmd_spec_check, cmd_stage, cmd_status,
+    cmd_step, ensure_commit_mode, print_discovery, print_spec_check, resolve_template, update_setup,
 )
 from aidw.cli.helpers import (  # noqa: E402,F401
-    print_summary, require_task, status_line, task_summary,
+    print_summary, require_task,
 )
 from aidw.cli.main import (  # noqa: E402,F401
     build_parser, main,
@@ -69,7 +72,7 @@ from aidw.core.outcome import (  # noqa: E402,F401
 )
 from aidw.core.setup import (  # noqa: E402,F401
     DISCOVERY_ONLY_KEYS, OSS_LICENSE_RE, RECORDS_README, RECORD_NOTES, RECORD_OPTIONS, apply_commit_mode,
-    commit_mode_applied, default_template_info, discover_project, ensure_commit_mode, existing_setup, library_settings,
+    commit_mode_applied, default_template_info, discover_project, existing_setup, library_settings,
     recommend_commit, template_proposal,
 )
 from aidw.core.spec import (  # noqa: E402,F401

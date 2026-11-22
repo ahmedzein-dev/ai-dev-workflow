@@ -1,0 +1,104 @@
+{
+ "init-twice": {
+  "exit_code": 1,
+  "stdout": "",
+  "stderr": "AIDevWorkflow: AIDevWorkflow is already set up here; reuse its settings. To change them, use --update with --commit, --standards, --template, --add-check or --without-check.\n",
+  "records_identical": true
+ },
+ "new-without-skill-name": {
+  "exit_code": 1,
+  "stdout": "",
+  "stderr": "AIDevWorkflow: Task files are created only when the user explicitly starts AIDevWorkflow. Pass the user's starting message with --invocation; it must name the skill (for example '/ai-dev-workflow …'). If the user did not ask for AIDevWorkflow, stop and work normally.\n",
+  "records_identical": true
+ },
+ "new-bad-task-name": {
+  "exit_code": 1,
+  "stdout": "",
+  "stderr": "AIDevWorkflow: Task names use lowercase letters, digits and single hyphens (e.g. saved-places), at most 60 characters.\n",
+  "records_identical": true
+ },
+ "new-existing-task": {
+  "exit_code": 1,
+  "stdout": "",
+  "stderr": "AIDevWorkflow: Task 'favorites' already exists; resume it with `workflow.py resume favorites`.\n",
+  "records_identical": true
+ },
+ "stage-gate-template-spec": {
+  "exit_code": 1,
+  "stdout": "",
+  "stderr": "AIDevWorkflow: Cannot move to SPEC_APPROVAL:\n  - [M-placeholder] Template placeholder left: [Feature name]\n  - [M-placeholder] Template placeholder left: [The problem this solves, and for whom.]\n  - [M-placeholder] Template placeholder left: [What a user can do once this ships.]\n  - [M-placeholder] Template placeholder left: [A specific, testable behavior]\n  - [M-placeholder] Template placeholder left: [Another behavior]\n  - [M-placeholder] Template placeholder left: [Something a reader might assume is part of this, but is not]\n  - [M-placeholder] Template placeholder left: [e.g. The network drops during the request]\n  - [M-placeholder] Template placeholder left: [e.g. Show \"No connection\" with a Retry button; nothing is saved]\n  - [M-placeholder] Template placeholder left: [Modules, public APIs or behavior that stay as they are]\n  - [M-placeholder] Template placeholder left: [Classes, components or modules to add or change, and the existing code each one follows]\n  - [M-placeholder] Template placeholder left: [Libraries or services to add, or \"None\"]\n  - [M-placeholder] Template placeholder left: [situation]\n  - [M-placeholder] Template placeholder left: [action]\n  - [M-placeholder] Template placeholder left: [result]\n  - [M-ac-form] AC-1: write acceptance criteria as: Given …, when …, then ….\n  - [M-edge-cases] EC-1: every edge case needs a situation and a specific expected behavior.\n  - [M-content] 'Problem' has no content.\n  - [M-content] 'Outcome' has no content.\n  - [M-content] 'REQ-n items' has no content.\n  - [M-content] 'Not included' has no content. Write the entries, or 'None — <reason>'.\n  - [M-content] 'Edge Cases' has no content. Write the entries, or 'None — <reason>'.\n  - [M-content] 'Structures' has no content. Write the entries, or 'None — <reason>'.\n  - [flag] REQ-1 is not mapped to an acceptance criterion, edge case, checklist item or named test. Record it with `review <task> --map REQ-1=AC-1`.\n  - [flag] REQ-2 is not mapped to an acceptance criterion, edge case, checklist item or named test. Record it with `review <task> --map REQ-2=AC-1`.\n  - Review not recorded for this spec version: J1, J2, J3, J4 (`review <task> --pass …`).\n",
+  "records_identical": true
+ },
+ "approve-spec-wrong-stage": {
+  "exit_code": 1,
+  "stdout": "",
+  "stderr": "AIDevWorkflow: The spec can be approved only in SPEC_APPROVAL (current stage SPECIFICATION).\n",
+  "records_identical": true
+ },
+ "approve-short-evidence": {
+  "exit_code": 1,
+  "stdout": "",
+  "stderr": "AIDevWorkflow: --evidence must quote the user's explicit approval (their own words).\n",
+  "records_identical": true
+ },
+ "approve-secret-in-evidence": {
+  "exit_code": 1,
+  "stdout": "",
+  "stderr": "AIDevWorkflow: Refusing to save the approval evidence: it looks like it contains a secret — GitHub token (line 1). Task records must never hold credentials, tokens, keys or passwords; refer to them by name instead.\n",
+  "records_identical": true
+ },
+ "approve-plan-wrong-stage": {
+  "exit_code": 1,
+  "stdout": "",
+  "stderr": "AIDevWorkflow: The plan can be approved only in PLAN_APPROVAL (current stage SPEC_APPROVAL).\n",
+  "records_identical": true
+ },
+ "review-unknown-map-target": {
+  "exit_code": 1,
+  "stdout": "",
+  "stderr": "AIDevWorkflow: --map REQ-1=AC-9: AC-9 is not an ID in the spec (use AC-n, EC-n, DW-n or test:<name>).\n",
+  "records_identical": true
+ },
+ "step-outside-code-stage": {
+  "exit_code": 1,
+  "stdout": "",
+  "stderr": "AIDevWorkflow: Steps are recorded during IMPLEMENTATION or FIXING on an active task.\n",
+  "records_identical": true
+ },
+ "run-unknown-check": {
+  "exit_code": 1,
+  "stdout": "",
+  "stderr": "AIDevWorkflow: Unknown check 'nosuch'. Configured: unit. For an extra command use: run <task> <name> -- <command …>.\n",
+  "records_identical": true
+ },
+ "run-baseline-non-analyzer": {
+  "exit_code": 1,
+  "stdout": "",
+  "stderr": "AIDevWorkflow: --baseline is only for analyzer checks (parser dart-analyzer).\n",
+  "records_identical": true
+ },
+ "scope-exclude-without-reason": {
+  "exit_code": 1,
+  "stdout": "",
+  "stderr": "AIDevWorkflow: Excluding a file from the task scope needs --reason (e.g. the user confirmed it is unrelated).\n",
+  "records_identical": true
+ },
+ "decision-without-evidence": {
+  "exit_code": 1,
+  "stdout": "",
+  "stderr": "AIDevWorkflow: A decision needs --text and --evidence (the user's own words).\n",
+  "records_identical": true
+ },
+ "close-outside-final-report": {
+  "exit_code": 1,
+  "stdout": "",
+  "stderr": "AIDevWorkflow: Close the task from FINAL_REPORT (current stage IMPLEMENTATION).\n",
+  "records_identical": true
+ },
+ "stage-secret-in-reason": {
+  "exit_code": 1,
+  "stdout": "",
+  "stderr": "AIDevWorkflow: Refusing to save the reason: it looks like it contains a secret — password value (line 1). Task records must never hold credentials, tokens, keys or passwords; refer to them by name instead.\n",
+  "records_identical": true
+ }
+}

@@ -20,7 +20,7 @@ OSS_LICENSE_RE = re.compile(
     r"The Unlicense|ISC License|Redistribution and use in source and binary forms", re.I)
 
 
-# What each records.commit mode really does (see apply_commit_mode and ensure_commit_mode).
+# What each records.commit mode really does (see apply_commit_mode and apply_commit_mode_in_clone).
 RECORD_OPTIONS = (
     {"mode": "all", "label": "Save everything in git",
      "what": "Nothing is excluded: config.json, PROJECT.md, the template and every task folder (spec, plan, approved "
@@ -210,9 +210,13 @@ def commit_mode_applied(repo: Path, mode: str) -> bool:
     return exclude.exists() and f"records.commit={mode})" in read_text(exclude)
 
 
-def ensure_commit_mode(repo: Path, cfg: Dict[str, Any]) -> None:
-    """Apply the project's records.commit choice in this clone (the exclude file is local to each clone)."""
+def apply_commit_mode_in_clone(repo: Path, cfg: Dict[str, Any]) -> Optional[str]:
+    """Apply the project's records.commit choice in this clone (the exclude file is local to each clone).
+
+    Returns the message for the user when something was applied, otherwise None; it prints nothing.
+    """
     mode = (cfg.get("records") or {}).get("commit")
     if mode in ("config-only", "none") and not commit_mode_applied(repo, mode):
         apply_commit_mode(repo, mode)
-        print(f"Applied records.commit={mode} in this clone (local git exclude only).")
+        return f"Applied records.commit={mode} in this clone (local git exclude only)."
+    return None

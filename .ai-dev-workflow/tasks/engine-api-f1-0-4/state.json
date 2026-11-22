@@ -6,7 +6,7 @@
   "created_at": "2026-11-22T07:52:10Z",
   "created_by": "claude-code",
   "invocation": "عايزين نستخدم AIDevWorkflow نفسه لتطوير AIDevWorkflow بصورة تدريجية، باستخدام النسخة المستقرة المثبتة منه. — continue implementing the approved roadmap in the agreed phase order",
-  "stage": "SPEC_APPROVAL",
+  "stage": "TESTING",
   "status": "active",
   "outcome": null,
   "template": {
@@ -32,7 +32,28 @@
     ],
     "summary": "TD-15: all 26 cmd_* functions in aidw/cli/commands.py (937 lines) mix validation, record writes (save_state, save_json, write_text, activate, clear_active) and printing; helpers.py holds data builders (status_line, task_summary) next to print_summary; claude_hooks imports status_line from the CLI layer. Tests drive the engine through workflow.main() and golden outputs; tests reference only main, build_parser, __version__, PY_CMD, TEMPLATES_DIR, SKILL_DIR, REFERENCE, COMMIT_MODES, shutil and locale on workflow. Target (TARGET_ARCHITECTURE §2-3): aidw/api.py, functions taking a repo and arguments, returning data or raising WorkflowError; front ends never write records. No external dependency: owner decisions D-001/D-002 already cover the structure."
   },
-  "approvals": {},
+  "approvals": {
+    "spec": {
+      "version": 1,
+      "sha256": "303f07fe5a5e8db25b28509533d0e6ec54aca104313424de057889082c48afa3",
+      "snapshot": "approved/spec.v1.md",
+      "approved_by": "user",
+      "evidence": "approve the spec and plan — Final approval for F1.0.4: Specification: 303f07fe, Implementation Plan: 4e4b2a66. All seven review points have been satisfactorily addressed. The three proposed technical decisions are also approved. Proceed with implementation according to the approved plan.",
+      "recorded_by": "claude-code",
+      "recorded_at": "2026-11-22T08:06:23Z"
+    },
+    "plan": {
+      "version": 1,
+      "sha256": "4e4b2a66b5e824810518d204f10f8ce140ff1c6a426d5b6a603c77afa55d3ee6",
+      "snapshot": "approved/plan.v1.md",
+      "approved_by": "user",
+      "evidence": "approve the spec and plan — Final approval for F1.0.4: Specification: 303f07fe, Implementation Plan: 4e4b2a66. All seven review points have been satisfactorily addressed. The three proposed technical decisions are also approved. Proceed with implementation according to the approved plan.",
+      "recorded_by": "claude-code",
+      "recorded_at": "2026-11-22T08:06:23Z",
+      "spec_sha256": "303f07fe5a5e8db25b28509533d0e6ec54aca104313424de057889082c48afa3",
+      "spec_version": 1
+    }
+  },
   "spec_review": {
     "spec_sha256": "303f07fe5a5e8db25b28509533d0e6ec54aca104313424de057889082c48afa3",
     "rules": {
@@ -124,9 +145,274 @@
     },
     "dismissed": {}
   },
-  "progress": {},
-  "checks": [],
-  "checkpoints": [],
+  "progress": {
+    "S1": {
+      "status": "done",
+      "files": [
+        "tests/golden/preflight-json-analyzer-hint.txt",
+        "tests/golden/preflight-json-unattributed.txt",
+        "tests/golden/refusals.json",
+        "tests/golden/workflow-public-signatures.txt",
+        "tests/test_behaviour_pins.py"
+      ],
+      "note": "Pinned with the unchanged engine: tests/test_behaviour_pins.py with golden workflow-public-signatures.txt, refusals.json (17 scenarios, records byte-identical in-test), preflight-json-unattributed.txt and preflight-json-analyzer-hint.txt; golden copy saved outside the repo; baseline timing --version 61.2 ms, hook 60.9 ms (median of 15).",
+      "agent": "claude-code",
+      "at": "2026-11-22T08:09:37Z"
+    },
+    "S2": {
+      "status": "done",
+      "files": [
+        "skills/ai-dev-workflow/scripts/aidw/agents/claude_hooks.py",
+        "skills/ai-dev-workflow/scripts/aidw/api.py",
+        "skills/ai-dev-workflow/scripts/aidw/cli/commands.py",
+        "skills/ai-dev-workflow/scripts/aidw/cli/helpers.py",
+        "skills/ai-dev-workflow/scripts/aidw/core/setup.py",
+        "skills/ai-dev-workflow/scripts/workflow.py",
+        "tests/test_package.py"
+      ],
+      "note": "aidw/api.py with status_line, task_summary, resolve_template (keyword parameters), install_template, change_checks, open_tasks, scan_records, validate_task; core.setup.ensure_commit_mode -> apply_commit_mode_in_clone returns its message; compatibility wrappers resolve_template(args) and ensure_commit_mode(repo, cfg) in cli/commands; hooks import status_line from aidw.api; workflow re-exports updated; layer table api=4, agents/cli=5. Full suite 160 OK, ruff, mypy clean.",
+      "agent": "claude-code",
+      "at": "2026-11-22T08:13:02Z"
+    },
+    "S3": {
+      "status": "done",
+      "files": [
+        "skills/ai-dev-workflow/scripts/aidw/api.py",
+        "skills/ai-dev-workflow/scripts/aidw/cli/commands.py"
+      ],
+      "note": "API: discover_setup, init_project, update_setup, new_task (commit-mode notice carried on refusals as exc.notices), status, record_discovery; cmd_init/update_setup/cmd_new/cmd_status/cmd_discover are renderers; CLI keeps the --repo default (repo_arg) and agent resolution. Full suite 160 OK, ruff, mypy clean.",
+      "agent": "claude-code",
+      "at": "2026-11-22T08:15:46Z"
+    },
+    "S4": {
+      "status": "done",
+      "files": [
+        "skills/ai-dev-workflow/scripts/aidw/api.py",
+        "skills/ai-dev-workflow/scripts/aidw/cli/commands.py"
+      ],
+      "note": "API: spec_check, plan_check, review, approve, stage, resume, pause; cmd_* renderers; plan-check text reads the recorded task id read-only (task_id) so output stays byte-identical. Full suite 160 OK, ruff, mypy clean.",
+      "agent": "claude-code",
+      "at": "2026-11-22T08:18:06Z"
+    },
+    "S5": {
+      "status": "done",
+      "files": [
+        "skills/ai-dev-workflow/scripts/aidw/api.py",
+        "skills/ai-dev-workflow/scripts/aidw/cli/commands.py"
+      ],
+      "note": "API: preflight (also returns task, stage, analyzer_hint; CLI keeps the TD-24 trailing lines), step, run_check (returns output_tail), scope (exactly the seven keys), decision, check_records, outcome, close; all cmd_* are renderers; ensure_commit_mode wrapper reaches the write through the API. Full suite 160 OK; pre-existing golden files byte-identical to the S1 copy; ruff, mypy clean.",
+      "agent": "claude-code",
+      "at": "2026-11-22T08:21:34Z"
+    },
+    "S6": {
+      "status": "done",
+      "files": [
+        "skills/ai-dev-workflow/scripts/aidw/api.py",
+        "tests/test_api.py"
+      ],
+      "note": "tests/test_api.py: CLI writes no records (AST; proven to flag the pre-refactor commands.py), lower layers never print/exit/chdir/read argv and the API never reads the agent from the environment or the cwd, hooks import nothing from the CLI, API not re-exported, two repositories alternating with cwd and fd-level output checks (proven to catch a child-process leak), empty repo path refused, JSON parity for the eight --json commands (scope exactly seven keys; preflight three keys), API-only lifecycle matching the CLI's records, EC-10 commit-mode notice before Created task and kept on a refusal.",
+      "agent": "claude-code",
+      "at": "2026-11-22T08:24:22Z"
+    },
+    "S7": {
+      "status": "done",
+      "files": [
+        "README.md",
+        "skills/ai-dev-workflow/scripts/aidw/api.py"
+      ],
+      "note": "Docstrings with return keys on all 29 public API functions, full type annotations, module docstring 'internal and unversioned'; README Development note; timing after: --version 63.0 ms (+1.8), hook 62.2 ms (+1.3), median of 15.",
+      "agent": "claude-code",
+      "at": "2026-11-22T08:24:41Z"
+    }
+  },
+  "checks": [
+    {
+      "id": "unit",
+      "name": "Unit, scenario and doc tests",
+      "kind": "result",
+      "agent": "claude-code",
+      "at": "2026-11-22T08:24:52Z",
+      "counts": null,
+      "reason": null,
+      "command": "python3 -m unittest discover -s tests",
+      "duration_s": 58.4,
+      "exit_code": 0,
+      "status": "passed",
+      "summary": "OK",
+      "fingerprint": "fd8d5e06a3b8c68d7cb09ed88e0507a495659b167a039befb1e3bc5ed1fdc427"
+    },
+    {
+      "id": "privacy",
+      "name": "Pre-publish secret and privacy scan",
+      "kind": "result",
+      "agent": "claude-code",
+      "at": "2026-11-22T08:25:51Z",
+      "counts": null,
+      "reason": null,
+      "command": "python3 tools/prepublish_check.py",
+      "duration_s": 0.3,
+      "exit_code": 0,
+      "status": "passed",
+      "summary": "Scanned 198 files: no findings.",
+      "fingerprint": "fd8d5e06a3b8c68d7cb09ed88e0507a495659b167a039befb1e3bc5ed1fdc427"
+    },
+    {
+      "id": "unit-py39",
+      "name": "unit-py39",
+      "kind": "result",
+      "agent": "claude-code",
+      "at": "2026-11-22T08:25:51Z",
+      "counts": null,
+      "reason": null,
+      "command": "/usr/bin/python3 -m unittest discover -s tests",
+      "duration_s": 44.2,
+      "exit_code": 0,
+      "status": "passed",
+      "summary": "OK",
+      "fingerprint": "fd8d5e06a3b8c68d7cb09ed88e0507a495659b167a039befb1e3bc5ed1fdc427"
+    },
+    {
+      "id": "ruff",
+      "name": "ruff",
+      "kind": "result",
+      "agent": "claude-code",
+      "at": "2026-11-22T08:26:35Z",
+      "counts": null,
+      "reason": null,
+      "command": ".venv/bin/ruff check .",
+      "duration_s": 0.0,
+      "exit_code": 0,
+      "status": "passed",
+      "summary": "All checks passed!",
+      "fingerprint": "fd8d5e06a3b8c68d7cb09ed88e0507a495659b167a039befb1e3bc5ed1fdc427"
+    },
+    {
+      "id": "mypy",
+      "name": "mypy",
+      "kind": "result",
+      "agent": "claude-code",
+      "at": "2026-11-22T08:26:36Z",
+      "counts": null,
+      "reason": null,
+      "command": ".venv/bin/mypy",
+      "duration_s": 0.2,
+      "exit_code": 0,
+      "status": "passed",
+      "summary": "Success: no issues found in 31 source files",
+      "fingerprint": "fd8d5e06a3b8c68d7cb09ed88e0507a495659b167a039befb1e3bc5ed1fdc427"
+    },
+    {
+      "id": "golden-byte-compare",
+      "name": "golden-byte-compare",
+      "kind": "result",
+      "agent": "claude-code",
+      "at": "2026-11-22T08:26:36Z",
+      "counts": null,
+      "reason": null,
+      "command": "python3 -c 'import filecmp,sys; d=filecmp.dircmp('\"'\"'/private/tmp/claude-501/-Users-ahmedalhosani-Desktop-Ahmed-Zein-downloads-ZEIN-ORIGINALS/78554fc3-22ec-4f7b-b324-d53654d9842d/scratchpad/golden-before-f104'\"'\"','\"'\"'tests/golden'\"'\"'); bad=d.left_only+d.diff_files+[f for f in d.common_files if not filecmp.cmp('\"'\"'/private/tmp/claude-501/-Users-ahmedalhosani-Desktop-Ahmed-Zein-downloads-ZEIN-ORIGINALS/78554fc3-22ec-4f7b-b324-d53654d9842d/scratchpad/golden-before-f104/'\"'\"'+f,'\"'\"'tests/golden/'\"'\"'+f,shallow=False)]; print('\"'\"'pre-existing golden files:'\"'\"', len(d.common_files), '\"'\"'differences:'\"'\"', bad, '\"'\"'new:'\"'\"', d.right_only); sys.exit(1 if bad else 0)'",
+      "duration_s": 0.0,
+      "exit_code": 0,
+      "status": "passed",
+      "summary": "pre-existing golden files: 9 differences: [] new: ['preflight-json-analyzer-hint.txt', 'preflight-json-unattributed.txt', 'refusals.json', 'workflow-public-signatures.txt']",
+      "fingerprint": "fd8d5e06a3b8c68d7cb09ed88e0507a495659b167a039befb1e3bc5ed1fdc427"
+    },
+    {
+      "id": "startup-timing",
+      "name": "startup-timing",
+      "kind": "result",
+      "agent": "claude-code",
+      "at": "2026-11-22T08:26:45Z",
+      "counts": null,
+      "reason": null,
+      "command": "python3 -c '\nimport subprocess,sys,time,statistics,json\ns='\"'\"'skills/ai-dev-workflow/scripts/workflow.py'\"'\"'\ndef med(cmd, inp=None):\n    ts=[]\n    for _ in range(15):\n        t=time.perf_counter(); subprocess.run(cmd, input=inp, capture_output=True, text=True); ts.append((time.perf_counter()-t)*1000)\n    return round(statistics.median(ts),1)\nv=med([sys.executable, s, '\"'\"'--version'\"'\"']); h=med([sys.executable, s, '\"'\"'hook'\"'\"', '\"'\"'claude-pre-edit'\"'\"'], json.dumps({'\"'\"'tool_name'\"'\"':'\"'\"'Edit'\"'\"','\"'\"'tool_input'\"'\"':{'\"'\"'file_path'\"'\"':'\"'\"'/tmp/x'\"'\"'},'\"'\"'cwd'\"'\"':'\"'\"'/tmp'\"'\"'}))\nprint(f'\"'\"'after: --version {v} ms (before 61.2), hook {h} ms (before 60.9)'\"'\"'); sys.exit(0 if v-61.2<50 and h-60.9<50 else 1)'",
+      "duration_s": 1.9,
+      "exit_code": 0,
+      "status": "passed",
+      "summary": "after: --version 62.7 ms (before 61.2), hook 61.8 ms (before 60.9)",
+      "fingerprint": "fd8d5e06a3b8c68d7cb09ed88e0507a495659b167a039befb1e3bc5ed1fdc427"
+    }
+  ],
+  "checkpoints": [
+    {
+      "at": "2026-11-22T08:06:23Z",
+      "kind": "implementation-start",
+      "agent": "claude-code",
+      "fingerprint": "3fb4171ec97f258ea0715d00331ed89165820523d9f6f6b0fb0f38a492c9c0a2",
+      "valid": true,
+      "changed_files": 0
+    },
+    {
+      "at": "2026-11-22T08:06:23Z",
+      "kind": "preflight",
+      "agent": "claude-code",
+      "fingerprint": "3fb4171ec97f258ea0715d00331ed89165820523d9f6f6b0fb0f38a492c9c0a2",
+      "valid": true,
+      "changed_files": 0
+    },
+    {
+      "at": "2026-11-22T08:09:37Z",
+      "kind": "step",
+      "agent": "claude-code",
+      "fingerprint": "002b80d49e1531b7eb4576181488fefcd61269e9654e458ebdcceecd066f0189",
+      "valid": true,
+      "changed_files": 5,
+      "step": "S1"
+    },
+    {
+      "at": "2026-11-22T08:13:02Z",
+      "kind": "step",
+      "agent": "claude-code",
+      "fingerprint": "34a841fe174eefa8219119daf17af2146747f086087def1c19f9a4a61a40e61d",
+      "valid": true,
+      "changed_files": 12,
+      "step": "S2"
+    },
+    {
+      "at": "2026-11-22T08:15:46Z",
+      "kind": "step",
+      "agent": "claude-code",
+      "fingerprint": "e7dc9442ec121b4027b802cef7a3652a598397ef5dbb0dfa227d424db18e5dd5",
+      "valid": true,
+      "changed_files": 12,
+      "step": "S3"
+    },
+    {
+      "at": "2026-11-22T08:18:06Z",
+      "kind": "step",
+      "agent": "claude-code",
+      "fingerprint": "09f6a6b3aaf407598c8ef83fbaeba25b6ae2011717eab175cfa9dc55c5ede6b4",
+      "valid": true,
+      "changed_files": 12,
+      "step": "S4"
+    },
+    {
+      "at": "2026-11-22T08:21:34Z",
+      "kind": "step",
+      "agent": "claude-code",
+      "fingerprint": "d889a803d10b3075040ad4429bd2afea277389845512d3c0b663b2fc137616d8",
+      "valid": true,
+      "changed_files": 12,
+      "step": "S5"
+    },
+    {
+      "at": "2026-11-22T08:24:22Z",
+      "kind": "step",
+      "agent": "claude-code",
+      "fingerprint": "89ceb8d814757818e73c6c3e3d073dff99eb3ea6623fe2eb0a237c937db2d1b0",
+      "valid": true,
+      "changed_files": 13,
+      "step": "S6"
+    },
+    {
+      "at": "2026-11-22T08:24:41Z",
+      "kind": "step",
+      "agent": "claude-code",
+      "fingerprint": "fd8d5e06a3b8c68d7cb09ed88e0507a495659b167a039befb1e3bc5ed1fdc427",
+      "valid": true,
+      "changed_files": 14,
+      "step": "S7"
+    }
+  ],
   "decisions": [],
   "excluded": [],
   "history": [
@@ -210,6 +496,156 @@
       "agent": "claude-code",
       "from": "SPECIFICATION",
       "to": "SPEC_APPROVAL"
+    },
+    {
+      "at": "2026-11-22T08:06:23Z",
+      "event": "approved",
+      "agent": "claude-code",
+      "document": "spec",
+      "version": 1,
+      "sha256": "303f07fe"
+    },
+    {
+      "at": "2026-11-22T08:06:23Z",
+      "event": "stage",
+      "agent": "claude-code",
+      "from": "SPEC_APPROVAL",
+      "to": "PLANNING",
+      "reason": "spec approved"
+    },
+    {
+      "at": "2026-11-22T08:06:23Z",
+      "event": "stage",
+      "agent": "claude-code",
+      "from": "PLANNING",
+      "to": "PLAN_APPROVAL"
+    },
+    {
+      "at": "2026-11-22T08:06:23Z",
+      "event": "approved",
+      "agent": "claude-code",
+      "document": "plan",
+      "version": 1,
+      "sha256": "4e4b2a66"
+    },
+    {
+      "at": "2026-11-22T08:06:23Z",
+      "event": "stage",
+      "agent": "claude-code",
+      "from": "PLAN_APPROVAL",
+      "to": "IMPLEMENTATION",
+      "reason": "plan approved"
+    },
+    {
+      "at": "2026-11-22T08:06:23Z",
+      "event": "preflight",
+      "agent": "claude-code",
+      "valid": true
+    },
+    {
+      "at": "2026-11-22T08:09:37Z",
+      "event": "step",
+      "agent": "claude-code",
+      "step": "S1",
+      "status": "done"
+    },
+    {
+      "at": "2026-11-22T08:13:02Z",
+      "event": "step",
+      "agent": "claude-code",
+      "step": "S2",
+      "status": "done"
+    },
+    {
+      "at": "2026-11-22T08:15:46Z",
+      "event": "step",
+      "agent": "claude-code",
+      "step": "S3",
+      "status": "done"
+    },
+    {
+      "at": "2026-11-22T08:18:06Z",
+      "event": "step",
+      "agent": "claude-code",
+      "step": "S4",
+      "status": "done"
+    },
+    {
+      "at": "2026-11-22T08:21:34Z",
+      "event": "step",
+      "agent": "claude-code",
+      "step": "S5",
+      "status": "done"
+    },
+    {
+      "at": "2026-11-22T08:24:22Z",
+      "event": "step",
+      "agent": "claude-code",
+      "step": "S6",
+      "status": "done"
+    },
+    {
+      "at": "2026-11-22T08:24:41Z",
+      "event": "step",
+      "agent": "claude-code",
+      "step": "S7",
+      "status": "done"
+    },
+    {
+      "at": "2026-11-22T08:24:41Z",
+      "event": "stage",
+      "agent": "claude-code",
+      "from": "IMPLEMENTATION",
+      "to": "TESTING"
+    },
+    {
+      "at": "2026-11-22T08:25:51Z",
+      "event": "check",
+      "agent": "claude-code",
+      "check": "unit",
+      "status": "passed"
+    },
+    {
+      "at": "2026-11-22T08:25:51Z",
+      "event": "check",
+      "agent": "claude-code",
+      "check": "privacy",
+      "status": "passed"
+    },
+    {
+      "at": "2026-11-22T08:26:35Z",
+      "event": "check",
+      "agent": "claude-code",
+      "check": "unit-py39",
+      "status": "passed"
+    },
+    {
+      "at": "2026-11-22T08:26:36Z",
+      "event": "check",
+      "agent": "claude-code",
+      "check": "ruff",
+      "status": "passed"
+    },
+    {
+      "at": "2026-11-22T08:26:36Z",
+      "event": "check",
+      "agent": "claude-code",
+      "check": "mypy",
+      "status": "passed"
+    },
+    {
+      "at": "2026-11-22T08:26:36Z",
+      "event": "check",
+      "agent": "claude-code",
+      "check": "golden-byte-compare",
+      "status": "passed"
+    },
+    {
+      "at": "2026-11-22T08:26:47Z",
+      "event": "check",
+      "agent": "claude-code",
+      "check": "startup-timing",
+      "status": "passed"
     }
   ],
   "baseline": {
@@ -217,7 +653,32 @@
       "head": "7e35018dd57bfc3e61ec4303c84c7e2ea1feed37",
       "dirty": {},
       "captured_at": "2026-11-22T07:52:10Z"
+    },
+    "implementation": {
+      "head": "5a7576a45085357d0d9c85af5281e9d9a1e0b07d",
+      "dirty": {},
+      "captured_at": "2026-11-22T08:06:23Z"
     }
   },
-  "updated_at": "2026-11-22T08:03:23Z"
+  "updated_at": "2026-11-22T08:26:47Z",
+  "last_checkpoint": {
+    "at": "2026-11-22T08:24:41Z",
+    "fingerprint": "fd8d5e06a3b8c68d7cb09ed88e0507a495659b167a039befb1e3bc5ed1fdc427",
+    "changes": {
+      "README.md": "99c43fb9449308fb94830227fbbe2341dc20750b",
+      "skills/ai-dev-workflow/scripts/aidw/agents/claude_hooks.py": "d8cc9fa8027bc0a649d899e85cf4688f2e7d0bab",
+      "skills/ai-dev-workflow/scripts/aidw/api.py": "f612e87e8809caf7ed4546c4e6475945960df1b9",
+      "skills/ai-dev-workflow/scripts/aidw/cli/commands.py": "4a078341cb26af9c2021f1f4c8c903cfe1e91987",
+      "skills/ai-dev-workflow/scripts/aidw/cli/helpers.py": "9d526022cab0f7adac3b45de88de4039def74e13",
+      "skills/ai-dev-workflow/scripts/aidw/core/setup.py": "ab120df55724876f4fe50a51ad65fe361f05e60b",
+      "skills/ai-dev-workflow/scripts/workflow.py": "22d7679e9bfd7e8e5b1f79cc87489245f79c3b59",
+      "tests/golden/preflight-json-analyzer-hint.txt": "9c18573047a62a1fdac764de1f1aecda5860a43d",
+      "tests/golden/preflight-json-unattributed.txt": "2da55844c3310213434c1f1efe3a9b3a743bac6b",
+      "tests/golden/refusals.json": "e4ba2611c7f9f2c90f65546b2a39f5f32cb828a1",
+      "tests/golden/workflow-public-signatures.txt": "66bc8a3c98c4f9b3f7a586ebfc179ee4946db362",
+      "tests/test_api.py": "a021f4b88b62070581fe3b541ea6a305cd9af7a4",
+      "tests/test_behaviour_pins.py": "8e893c0f37e2fd2b6de89ded9679ea3ee72afd8d",
+      "tests/test_package.py": "ac605b2f5f7154d7a1914d0ab22c4b9949f4cbe6"
+    }
+  }
 }

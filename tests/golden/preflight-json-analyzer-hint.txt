@@ -1,0 +1,6 @@
+{
+  "valid": true,
+  "problems": [],
+  "unattributed": []
+}
+Capture the analyzer baseline before your first edit: `workflow.py run favorites analyze --baseline`.
