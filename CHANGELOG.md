@@ -12,8 +12,9 @@ Security patch for 1.0.0. It contains only the TD-25 fix: no features or restruc
   `null` still mean "no session".
 - The Claude Code hooks treat the payload session id as untrusted. An invalid one is never written to `ACTIVE` or the
   hook log, and inside an active task the edit is denied. Without an active task nothing changes.
-- A failed `new` removes only the files it wrote, so no half-created task folder remains. `run` saves `state.json`
-  before rewriting the check block. Multi-file updates are still not transactional.
+- On failure, `new` removes the files it wrote (best effort; a crash or a locked file can still leave them) and never
+  removes anything else. `run` saves `state.json` before rewriting the check block. Multi-file updates are still not
+  transactional.
 - Detection is pattern-based: a credential in a format the scanner does not know is not recognised.
 - Affected: 1.0.0, and development versions before this fix. Mitigation until 1.0.1 is installed: never type
   credentials into `--agent`, `--session` or check names.

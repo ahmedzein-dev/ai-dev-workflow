@@ -245,6 +245,15 @@ def assert_no_secrets(text: str, where: str) -> None:
 
 # --------------------------------------------------------------------------- identity values (1.0.1, TD-25)
 
+SESSION_FORMAT = "The session id must be 1–256 printable characters without spaces."
+
+
+def assert_clean_value(value: str, where: str) -> None:
+    """The secret check for one identity value, over the value and its JSON form (state.json is scanned as JSON,
+    where a line break becomes an escape), so nothing the later state.json check would refuse gets through."""
+    assert_no_secrets(value + "\n" + json.dumps(value, ensure_ascii=False), where)
+
+
 def session_problem(session: Optional[str]) -> Optional[str]:
     """Why a session id must be refused, or None when it passes or is a placeholder clean_session drops. One rule
     for the commands and the Claude Code hooks; the message never contains the value. The secret check is
@@ -252,19 +261,21 @@ def session_problem(session: Optional[str]) -> Optional[str]:
     value = clean_session(session)
     if value is None:
         return None
+    if len(value) > 4096:  # far beyond any session id: refused before the regex scan, which is slow on huge input
+        return SESSION_FORMAT
     try:
-        assert_no_secrets(value, "the session id")
+        assert_clean_value(value, "the session id")
     except WorkflowError as exc:
         return str(exc)
     if not (len(value) <= 256 and value.isprintable() and not any(ch.isspace() for ch in value)):
-        return "The session id must be 1–256 printable characters without spaces."
+        return SESSION_FORMAT
     return None
 
 
 def check_identity(args: argparse.Namespace) -> None:
     """Refuse a secret-like agent name or a secret-like or malformed session id before a recording command runs
     anything or writes anything. Messages name the field, never the value."""
-    assert_no_secrets(agent_name(args), "the agent name")
+    assert_clean_value(agent_name(args), "the agent name")
     problem = session_problem(getattr(args, "session", None))
     if problem:
         raise WorkflowError(problem)
@@ -2499,7 +2510,7 @@ def cmd_step(args: argparse.Namespace) -> int:
 
 def cmd_run(args: argparse.Namespace) -> int:
     check_identity(args)
-    assert_no_secrets(args.check, "the check name")
+    assert_clean_value(args.check, "the check name")
     repo, cfg, state = require_task(args)
     agent = agent_name(args)
     checks = {c["id"]: c for c in cfg.get("checks", [])}

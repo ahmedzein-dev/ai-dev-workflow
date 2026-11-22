@@ -40,7 +40,15 @@ def token(kind: str = "github") -> str:
 
 
 TOKENS = (token("github"), token("anthropic"))
+
+
+def workflow_session_problem(value: str):  # the single-file engine's session rule
+    return workflow.session_problem(value)
 SESSION_FORMAT = "The session id must be 1–256 printable characters without spaces."
+# A value split by a line separator is not flagged line by line, but the JSON form that state.json is scanned in is
+# (audit F-1): "password=" + separator + 12 characters.
+MULTI_LINE = {name: "password=" + sep + "q7" * 6 for name, sep in
+              (("LF", "\n"), ("CR", "\r"), ("VT", "\x0b"), ("FF", "\x0c"), ("FS", "\x1c"))}
 MALFORMED_SESSIONS = {
     "line break": "abc\ndef",
     "tab": "abc\tdef",
@@ -83,11 +91,14 @@ class SecretIdentityCase(WorkflowTestCase):
         return code, out.getvalue(), err.getvalue()
 
     def assert_not_persisted(self, value: str) -> None:
-        needle = value.encode("utf-8")
+        needles = {value.encode("utf-8"), json.dumps(value)[1:-1].encode("utf-8"),
+                   json.dumps(value, ensure_ascii=False)[1:-1].encode("utf-8")}  # raw and JSON-escaped forms
         for path in self.repo.rglob("*"):
             rel = path.relative_to(self.repo).as_posix()
             if path.is_file() and not rel.startswith(".git/objects/"):
-                self.assertNotIn(needle, path.read_bytes(), f"{rel} contains the refused value")
+                data = path.read_bytes()
+                for needle in needles:
+                    self.assertNotIn(needle, data, f"{rel} contains the refused value")
 
     def assert_refused(self, args: List[str], value: str, message: str, env: Optional[Dict[str, str]] = None) -> str:
         before = snapshot(self.repo)
@@ -206,6 +217,39 @@ class CliRefusalTest(SecretIdentityCase):
             with self.subTest(label):
                 self.assert_refused(["resume", "favorites", "--session", value], value, SESSION_FORMAT)
 
+    def test_multi_line_secret_like_values_are_refused_before_anything_runs(self) -> None:  # audit F-1
+        self.to_implementation()
+        self.wf("pause", "favorites")
+        for label, value in MULTI_LINE.items():
+            with self.subTest(label):
+                self.assert_refused(["resume", "--agent", value, "favorites"], value, "Refusing to save the agent name")
+        self.wf("resume", "favorites")
+        for label, value in MULTI_LINE.items():
+            with self.subTest(label):
+                self.assert_refused(["preflight", "--agent", value, "favorites"], value, "Refusing to save the agent name")
+                self.assert_refused(["run", "favorites", value, "--", PY, "make_marker.py"], value,
+                                    "Refusing to save the check name")
+                err = self.assert_refused(["run", "favorites", value], value, "Refusing to save the check name")
+                self.assertNotIn("Unknown check", err)
+
+    def test_every_recording_command_refuses_a_secret_like_agent(self) -> None:  # audit F-4 (CLI sweep)
+        self.to_implementation()
+        value = token()
+        commands = {
+            "discover": ["discover", "--agent", value, "favorites", "--summary", "Summary."],
+            "review": ["review", "--agent", value, "favorites", "--pass", "J1"],
+            "approve": ["approve", "--agent", value, "favorites", "spec", "--evidence", "Approved"],
+            "stage": ["stage", "--agent", value, "favorites", "TESTING"],
+            "step": ["step", "--agent", value, "favorites", "S1", "done"],
+            "scope": ["scope", "--agent", value, "favorites"],
+            "decision": ["decision", "--agent", value, "favorites", "--text", "Use X", "--evidence", "Owner: use X"],
+            "close": ["close", "--agent", value, "favorites"],
+            "pause": ["pause", "--agent", value, "favorites"],
+        }
+        for name, args in commands.items():
+            with self.subTest(name):
+                self.assert_refused(args, value, "Refusing to save the agent name")
+
 
 
 class LegitimateValuesTest(SecretIdentityCase):
@@ -282,7 +326,8 @@ class HookTest(SecretIdentityCase):
             return []
         return [json.loads(line) for line in self.log.read_text(encoding="utf-8").splitlines() if line.strip()]
 
-    def assert_invalid_session_handled(self, value: str, *, expect_deny: bool, path: Optional[Path] = None) -> None:
+    def assert_invalid_session_handled(self, value: str, *, expect_deny: bool, path: Optional[Path] = None,
+                                       expect_log: bool = True) -> None:
         before = snapshot(self.repo)
         log_before = len(self.log_lines())
         out = self.hook("claude-pre-edit", self.edit_payload(path or self.repo / "app.py", session=value))
@@ -295,6 +340,8 @@ class HookTest(SecretIdentityCase):
         if self.log.exists():
             self.assertNotIn(value.encode("utf-8"), self.log.read_bytes(), "the hook log holds the invalid session")
         new_lines = self.log_lines()[log_before:]
+        if expect_log:
+            self.assertTrue(new_lines, "the hook decision was not logged")
         for line in new_lines:
             self.assertIsNone(line.get("session"))
             self.assertTrue(line.get("session_rejected"))
@@ -335,8 +382,8 @@ class HookTest(SecretIdentityCase):
         with tempfile.TemporaryDirectory() as other:
             self.assert_invalid_session_handled(token(), expect_deny=False, path=Path(other) / "x.py")
         self.assert_invalid_session_handled(token(), expect_deny=False)  # repository without records
-        self.implementation_task()  # paused: ACTIVE removed
-        self.assert_invalid_session_handled(token(), expect_deny=False)
+        self.implementation_task()  # paused: ACTIVE removed, the hook returns before logging (as before)
+        self.assert_invalid_session_handled(token(), expect_deny=False, expect_log=False)
 
     def test_paused_or_closed_task_with_an_active_pointer_allows_an_invalid_session(self) -> None:  # EC-16
         self.init()
@@ -368,6 +415,22 @@ class HookTest(SecretIdentityCase):
         out = self.hook("claude-pre-edit", payload)
         self.assertIn('"permissionDecision": "deny"', out)
         self.assertEqual(before, snapshot(self.repo))
+        line = self.log_lines()[-1]
+        self.assertIsNone(line["session"])
+        self.assertTrue(line["session_rejected"])
+
+    def test_multi_line_secret_like_session_is_rejected(self) -> None:  # audit F-1 for the hook path
+        self.implementation_task()
+        self.wf("resume", "favorites", "--agent", "claude-code")
+        for label, value in MULTI_LINE.items():
+            with self.subTest(label):
+                self.assert_invalid_session_handled(value, expect_deny=True)
+
+    def test_huge_session_is_refused_quickly(self) -> None:  # audit F-5
+        import time
+        started = time.monotonic()
+        self.assertIsNotNone(workflow_session_problem("a." * 200000))
+        self.assertLess(time.monotonic() - started, 2.0)
 
     def test_valid_uuid_session_behaves_as_before(self) -> None:  # EC-14
         self.implementation_task()
