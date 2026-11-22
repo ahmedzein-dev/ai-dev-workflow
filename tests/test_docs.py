@@ -74,7 +74,7 @@ class SkillFormatTest(unittest.TestCase):
         for line in block.group(1).splitlines():
             key, _, value = line.strip().partition(":")
             self.assertTrue(value.strip(), key)
-        self.assertIn('version: "1.0.0"', block.group(1))
+        self.assertIn('version: "1.0.1"', block.group(1))
 
     def test_body_is_short_and_hard_rules_come_first(self) -> None:
         self.assertLess(len(self.body.splitlines()), 500)

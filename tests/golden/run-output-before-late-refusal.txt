@@ -1,0 +1,7 @@
+exit: 1
+--- stdout ---
+line-one
+token [REDACTED]
+line-two
+--- stderr ---
+AIDevWorkflow: Synthetic late refusal after the command ran (test).
