@@ -13,9 +13,9 @@ from typing import Any, Dict, Optional, Tuple
 from aidw import api
 from aidw.cli.helpers import print_summary, require_task
 from aidw.constants import RECORDS
-from aidw.errors import WorkflowError
 from aidw.infra.gitutil import find_repo
 from aidw.infra.text import agent_name, bullet_list, short
+from aidw.store.config import load_config
 
 
 def print_discovery(report: Dict[str, Any]) -> None:
@@ -70,22 +70,15 @@ def print_discovery(report: Dict[str, Any]) -> None:
           + "\n  (add --without-check <id> or --add-check <id>=<command> for changes to the checks)")
 
 
-
-
-
-
-
-
-
-
 def resolve_template(args: argparse.Namespace) -> Tuple[Path, Optional[Path], str, str]:
     """Compatibility wrapper (old signature) around `aidw.api.resolve_template`."""
-    return api.resolve_template(template=args.template, rules=args.rules, no_rules=args.no_rules)
+    return api.resolve_template(template=args.template, rules=getattr(args, "rules", None),
+                                no_rules=getattr(args, "no_rules", False))
 
 
 def ensure_commit_mode(repo: Path, cfg: Dict[str, Any]) -> None:
-    """Compatibility wrapper (old behaviour: prints) around `apply_commit_mode_in_clone`, reached through the API."""
-    message = api.apply_commit_mode_in_clone(repo, cfg)
+    """Compatibility wrapper (old behaviour: prints) around `aidw.api.apply_clone_commit_mode`."""
+    message = api.apply_clone_commit_mode(repo=repo, cfg=cfg)["message"]
     if message:
         print(message)
 
@@ -119,10 +112,17 @@ def cmd_init(args: argparse.Namespace) -> int:
 
 
 def update_setup(repo: Path, args: argparse.Namespace) -> int:
-    """Compatibility wrapper (old signature) around `aidw.api.update_setup`; prints the result."""
+    """Compatibility wrapper (old signature) around `aidw.api.update_setup`; prints the result.
+
+    Like the old function, `repo` must be the repository root: the setup is read from it before anything else, so a
+    path that is not a set-up root is refused with the same message as before.
+    """
+    load_config(Path(repo))
     result = api.update_setup(repo=repo, agent=agent_name(args), commit=args.commit, standards=args.standards,
-                              template=args.template, rules=args.rules, no_rules=args.no_rules,
-                              without_check=args.without_check or (), add_check=args.add_check or ())
+                              template=args.template, rules=getattr(args, "rules", None),
+                              no_rules=getattr(args, "no_rules", False),
+                              without_check=getattr(args, "without_check", None) or (),
+                              add_check=getattr(args, "add_check", None) or ())
     print("Updated the AIDevWorkflow settings: " + ", ".join(result["changed"]) + ".")
     return 0
 
@@ -131,7 +131,7 @@ def cmd_new(args: argparse.Namespace) -> int:
     try:
         result = api.new_task(repo=repo_arg(args), task=args.task, title=args.title, task_type=args.type,
                               invocation=args.invocation, agent=agent_name(args), session=args.session)
-    except WorkflowError as exc:
+    except BaseException as exc:
         for notice in getattr(exc, "notices", ()):
             print(notice)
         raise
@@ -302,9 +302,15 @@ def cmd_step(args: argparse.Namespace) -> int:
 
 
 def cmd_run(args: argparse.Namespace) -> int:
-    result = api.run_check(repo=repo_arg(args), task=args.task, check=args.check, agent=agent_name(args),
-                           extra=args.extra or (), baseline=args.baseline, force=args.force, blocked=args.blocked,
-                           not_applicable=args.not_applicable)
+    try:
+        result = api.run_check(repo=repo_arg(args), task=args.task, check=args.check, agent=agent_name(args),
+                               extra=args.extra or (), baseline=args.baseline, force=args.force, blocked=args.blocked,
+                               not_applicable=args.not_applicable)
+    except BaseException as exc:
+        tail = getattr(exc, "output_tail", None)
+        if tail:
+            print("\n".join(tail))
+        raise
     if result["output_tail"]:
         print("\n".join(result["output_tail"]))
     entry = result["entry"]

@@ -18,9 +18,9 @@ import io
 import json
 import os
 from pathlib import Path
-from typing import Callable, Dict, Tuple
+from typing import Callable, Dict, Tuple, Union
 
-from helpers import FILLED_PLAN, FILLED_SPEC, PY, git
+from helpers import EXAMPLE_TEMPLATE, FILLED_PLAN, FILLED_SPEC, PY, git
 from test_golden import GOLDEN, UPDATE_ENV, GoldenTestCase, normalize
 
 import workflow
@@ -92,7 +92,14 @@ class RefusalsTest(GoldenTestCase):
         self.review_spec()
         self.wf("stage", "favorites", "SPEC_APPROVAL")
 
-    def scenarios(self) -> Dict[str, Tuple[Callable[[], None], Tuple[str, ...]]]:
+    def to_plan_approval_then_change_spec(self) -> None:
+        self.to_spec_approval()
+        self.wf("approve", "favorites", "spec", "--evidence", "Approve spec v1")
+        self.write(".ai-dev-workflow/tasks/favorites/plan.md", FILLED_PLAN)
+        self.wf("stage", "favorites", "PLAN_APPROVAL")
+        self.write(".ai-dev-workflow/tasks/favorites/spec.md", FILLED_SPEC + "\nChanged after approval.\n")
+
+    def scenarios(self) -> Dict[str, Tuple[Callable[[], None], Union[Tuple[str, ...], Callable[[], Tuple[str, ...]]]]]:
         secret = "ghp_" + "a1B2c3D4e5F6g7H8i9J0k1L2m3N4o5P6q7R8"
         return {
             "init-twice": (self.init, ("init", "--template", "x.md", "--commit", "all")),
@@ -121,6 +128,22 @@ class RefusalsTest(GoldenTestCase):
             "close-outside-final-report": (self.to_implementation, ("close", "favorites")),
             "stage-secret-in-reason": (self.to_implementation,
                                        ("stage", "favorites", "PLANNING", "--reason", "pass" + "word: hunter2hunter2")),
+            # Added after the independent audit (F-8); recorded, like the others, from the pre-refactor engine.
+            "unknown-task": (self.init, ("status", "nosuch")),
+            "new-before-setup": (lambda: None, ("new", "favorites", "--title", "T", "--invocation", "/ai-dev-workflow x")),
+            "init-without-commit": (lambda: None, ("init", "--template", str(EXAMPLE_TEMPLATE))),
+            "init-without-template": (lambda: None, ("init", "--commit", "all")),
+            "init-update-nothing-to-change": (self.init, ("init", "--update")),
+            "approve-spec-not-ready": (lambda: (self.to_spec_approval(), self.write(
+                ".ai-dev-workflow/tasks/favorites/spec.md", EXAMPLE_TEMPLATE.read_text(encoding="utf-8"))),
+                                       ("approve", "favorites", "spec", "--evidence", "Approve spec v1")),
+            "approve-plan-after-spec-changed": (self.to_plan_approval_then_change_spec,
+                                                ("approve", "favorites", "plan", "--evidence", "Plan approved")),
+            "review-dismiss-unknown-flag": (lambda: (self.init(), self.new_task(), self.to_specification()),
+                                            ("review", "favorites", "--dismiss", "NOFLAG", "a real reason")),
+            "not-a-git-repository": (lambda: (self.tmp / "plain").mkdir(),
+                                     lambda: ("status", "--repo", str(self.tmp / "plain"))),
+            "missing-path": (lambda: None, lambda: ("status", "--repo", str(self.tmp / "missing"))),
         }
 
     def test_refusals_match_the_pre_refactor_engine(self) -> None:
@@ -130,7 +153,7 @@ class RefusalsTest(GoldenTestCase):
                 self.tearDown()
                 self.setUp()
                 prepare()
-                code, out, err = self.refuse(*argv)
+                code, out, err = self.refuse(*(argv() if callable(argv) else argv))
                 recorded[name] = {"exit_code": code, "stdout": normalize(out, self.tmp),
                                   "stderr": normalize(err, self.tmp), "records_identical": True}
                 self.assertNotEqual(code, 0, f"{name} was not refused")
@@ -142,6 +165,31 @@ class RefusalsTest(GoldenTestCase):
         for name in expected:
             with self.subTest(scenario=name):
                 self.assertEqual(expected[name], recorded[name])
+
+
+class LateRefusalTest(GoldenTestCase):
+    """`run` prints the command's output before a refusal that comes after the command ran (audit F-1).
+
+    The scenario also writes the check id into verification.md before the refusal (pre-existing, TD-25), so record
+    integrity is not asserted here; only the output is pinned.
+    """
+
+    def test_run_output_is_printed_before_a_late_refusal(self) -> None:
+        self.to_implementation()
+        name = "ghp_" + "a1B2c3D4e5F6g7H8i9J0k1L2m3N4o5P6q7R8"
+        out, err = io.StringIO(), io.StringIO()
+        with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
+            # --repo before the positionals: Python 3.9's argparse would treat it as part of the extra command.
+            code = workflow.main(["run", "--repo", str(self.repo), "favorites", name, "--", PY, "-c",
+                                  "print('line-one'); print('line-two')"])
+        self.assertNotEqual(code, 0)
+        self.assertIn("line-one", out.getvalue())
+        text = f"exit: {code}\n--- stdout ---\n{out.getvalue()}--- stderr ---\n{err.getvalue()}"
+        path = GOLDEN / "run-output-before-late-refusal.txt"
+        actual = normalize(text, self.tmp)
+        if os.environ.get(UPDATE_ENV) == "1" and not path.exists():
+            path.write_text(actual, encoding="utf-8", newline="\n")
+        self.assertEqual(path.read_text(encoding="utf-8").replace("\r\n", "\n"), actual)
 
 
 class PreflightJsonTest(GoldenTestCase):

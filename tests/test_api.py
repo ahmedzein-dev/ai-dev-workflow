@@ -24,6 +24,9 @@ WRITERS = {"save_state", "save_json", "write_text", "activate", "clear_active", 
            "make_readonly", "apply_commit_mode", "apply_commit_mode_in_clone", "regenerate_check_block",
            "install_template"}
 LOWER = ["api.py", "constants.py", "errors.py", "core", "adapters", "store", "records", "infra"]
+# Functions defined in aidw/api.py itself (not names it imports from lower layers).
+API_FUNCTIONS = {node.name for node in ast.parse((PKG / "api.py").read_text(encoding="utf-8")).body
+                 if isinstance(node, ast.FunctionDef)}
 
 
 def modules(*parts: str) -> Iterator[Path]:
@@ -82,9 +85,12 @@ class SeparationTest(WorkflowTestCase):
             imported = {alias.name for node in ast.walk(tree) if isinstance(node, ast.ImportFrom)
                         for alias in node.names}
             calls = {called_name(node) for node in ast.walk(tree) if isinstance(node, ast.Call)}
+            attrs = {c.rsplit(".", 1)[-1] for c in calls}
+            api_calls = {c.split(".", 1)[1] for c in calls if c.startswith("api.")}
             with self.subTest(module=path.name):
                 self.assertFalse(imported & WRITERS, f"imports record writers: {imported & WRITERS}")
-                self.assertFalse(calls & WRITERS, f"calls record writers: {calls & WRITERS}")
+                self.assertFalse(attrs & WRITERS, f"calls record writers: {attrs & WRITERS}")
+                self.assertFalse(api_calls - API_FUNCTIONS, f"calls names that aidw.api only imports: {api_calls - API_FUNCTIONS}")
                 for node in ast.walk(tree):
                     if isinstance(node, ast.Call) and called_name(node) == "open":
                         modes = [a.value for a in node.args[1:2] if isinstance(a, ast.Constant)]
@@ -136,31 +142,47 @@ class NoHiddenStateTest(WorkflowTestCase):
         elsewhere.mkdir()
         before = os.getcwd()
         os.chdir(elsewhere)
-        self.addCleanup(os.chdir, before)
-        with mock.patch.dict(os.environ, {"AI_DEV_WORKFLOW_AGENT": "env-agent"}), no_output(self):
-            for repo in (repo_a, repo_b):
-                api.init_project(repo=repo, template=str(EXAMPLE_TEMPLATE), commit="all", agent="api-agent",
-                                 config=self.config_file())
-            api.new_task(repo=repo_a, task="alpha", title="Alpha", task_type="feature",
-                         invocation="/ai-dev-workflow alpha", agent="api-agent")
-            api.new_task(repo=repo_b, task="beta", title="Beta", task_type="bugfix",
-                         invocation="/ai-dev-workflow beta", agent="api-agent")
-            api.record_discovery(repo=repo_a, task="alpha", agent="api-agent", inspected=["app.py"], summary="A")
-            api.record_discovery(repo=repo_b, task="beta", agent="api-agent", summary="B")
-            status_a, status_b = api.status(repo=repo_a), api.status(repo=repo_b)
+        # Restore the working directory here, before tearDown removes the temporary folder: Windows cannot delete
+        # the current directory (the first CI run failed with WinError 32 when this used addCleanup).
+        try:
+            with mock.patch.dict(os.environ, {"AI_DEV_WORKFLOW_AGENT": "env-agent"}), no_output(self):
+                for repo in (repo_a, repo_b):
+                    api.init_project(repo=repo, template=str(EXAMPLE_TEMPLATE), commit="all", agent="api-agent",
+                                     config=self.config_file())
+                api.new_task(repo=repo_a, task="alpha", title="Alpha", task_type="feature",
+                             invocation="/ai-dev-workflow alpha", agent="api-agent")
+                api.new_task(repo=repo_b, task="beta", title="Beta", task_type="bugfix",
+                             invocation="/ai-dev-workflow beta", agent="api-agent")
+                api.record_discovery(repo=repo_a, task="alpha", agent="api-agent", inspected=["app.py"], summary="A")
+                api.record_discovery(repo=repo_b, task="beta", agent="api-agent", summary="B")
+                status_a, status_b = api.status(repo=repo_a), api.status(repo=repo_b)
+                self.assertEqual(Path(os.getcwd()).resolve(), elsewhere.resolve())
+            self.assertEqual([t["task"] for t in status_a["tasks"]], ["alpha"])
+            self.assertEqual([t["task"] for t in status_b["tasks"]], ["beta"])
+            self.assertEqual((status_a["active"], status_b["active"]), ("alpha", "beta"))
+            state_a = json.loads((repo_a / ".ai-dev-workflow/tasks/alpha/state.json").read_text(encoding="utf-8"))
+            state_b = json.loads((repo_b / ".ai-dev-workflow/tasks/beta/state.json").read_text(encoding="utf-8"))
+            self.assertEqual((state_a["discovery"]["summary"], state_b["discovery"]["summary"]), ("A", "B"))
+            self.assertEqual((state_a["created_by"], state_b["created_by"]), ("api-agent", "api-agent"))
+            self.assertEqual(state_b["type"], "bugfix")
+            self.assertFalse((repo_a / ".ai-dev-workflow/tasks/beta").exists())
+            self.assertFalse((repo_b / ".ai-dev-workflow/tasks/alpha").exists())
+            self.assertFalse((elsewhere / ".ai-dev-workflow").exists())
             self.assertEqual(Path(os.getcwd()).resolve(), elsewhere.resolve())
-        self.assertEqual([t["task"] for t in status_a["tasks"]], ["alpha"])
-        self.assertEqual([t["task"] for t in status_b["tasks"]], ["beta"])
-        self.assertEqual((status_a["active"], status_b["active"]), ("alpha", "beta"))
-        state_a = json.loads((repo_a / ".ai-dev-workflow/tasks/alpha/state.json").read_text(encoding="utf-8"))
-        state_b = json.loads((repo_b / ".ai-dev-workflow/tasks/beta/state.json").read_text(encoding="utf-8"))
-        self.assertEqual((state_a["discovery"]["summary"], state_b["discovery"]["summary"]), ("A", "B"))
-        self.assertEqual((state_a["created_by"], state_b["created_by"]), ("api-agent", "api-agent"))
-        self.assertEqual(state_b["type"], "bugfix")
-        self.assertFalse((repo_a / ".ai-dev-workflow/tasks/beta").exists())
-        self.assertFalse((repo_b / ".ai-dev-workflow/tasks/alpha").exists())
-        self.assertFalse((elsewhere / ".ai-dev-workflow").exists())
-        self.assertEqual(Path(os.getcwd()).resolve(), elsewhere.resolve())
+        finally:
+            os.chdir(before)
+
+    def test_a_repository_path_of_spaces_is_reported_as_before(self) -> None:
+        try:
+            workflow.find_repo(" ")
+        except workflow.WorkflowError as exc:
+            expected_code, expected_message = exc.code, f"AIDevWorkflow: {exc}\n"
+        else:
+            self.skipTest("on this platform a path of spaces resolves to an existing repository")
+        out, err = io.StringIO(), io.StringIO()
+        with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
+            code = workflow.main(["status", "--repo", " "])
+        self.assertEqual((code, out.getvalue(), err.getvalue()), (expected_code, "", expected_message))
 
     def test_an_empty_repository_path_is_refused(self) -> None:
         for call in (lambda: api.status(repo=""), lambda: api.discover_setup(repo="  ")):
@@ -173,6 +195,36 @@ class JsonParityTest(WorkflowTestCase):
         text = self.wf(*argv, expect=expect)
         value, end = json.JSONDecoder().raw_decode(text)
         return value, text[end:]
+
+    def assert_raw_parity(self, repo: str) -> None:
+        """Byte-level parity (key order and formatting included) for the read-only --json commands."""
+        cases = (
+            (("init", "--discover", "--json"), lambda: json.dumps(api.discover_setup(repo=repo), indent=2), 0),
+            (("status", "--json"), lambda: json.dumps(api.status(repo=repo), indent=2), 0),
+            (("status", "favorites", "--json"),
+             lambda: json.dumps(api.status(repo=repo, task="favorites"), indent=2, ensure_ascii=False), 0),
+            (("spec-check", "favorites", "--json"),
+             lambda: json.dumps(api.spec_check(repo=repo, task="favorites"), indent=2, ensure_ascii=False), 0),
+            (("plan-check", "favorites", "--json"),
+             lambda: json.dumps(api.plan_check(repo=repo, task="favorites"), indent=2, ensure_ascii=False), 0),
+            (("scope", "favorites", "--json"),
+             lambda: json.dumps(api.scope(repo=repo, task="favorites", agent="test-agent"), indent=2), 0),
+            (("outcome", "favorites", "--json"),
+             lambda: json.dumps(api.outcome(repo=repo, task="favorites"), indent=2, ensure_ascii=False), 0),
+            (("check", "--json"), lambda: json.dumps(api.check_records(repo=repo), indent=2), 0),
+        )
+        for argv, render, code in cases:
+            with self.subTest(raw=argv[0]):
+                self.assertEqual(self.wf(*argv, expect=code), render() + "\n")
+
+    def test_check_json_with_errors_matches_the_api(self) -> None:
+        self.to_implementation()
+        (self.task / "audit.md").unlink()
+        text = self.wf("check", "--json", expect=1)
+        result = api.check_records(repo=str(self.repo))
+        self.assertFalse(result["ok"])
+        self.assertIn("favorites: audit.md is missing.", result["errors"])
+        self.assertEqual(text, json.dumps(result, indent=2) + "\n")
 
     def test_cli_json_equals_the_api_result(self) -> None:
         repo = str(self.repo)
@@ -192,6 +244,7 @@ class JsonParityTest(WorkflowTestCase):
                 printed, rest = self.cli_json(*argv)
                 self.assertEqual(rest.strip(), "")
                 self.assertEqual(printed, call())
+        self.assert_raw_parity(repo)
         scope = api.scope(repo=repo, task="favorites", agent="test-agent")
         self.assertEqual(sorted(scope), sorted(["baseline", "task_changes", "unattributed", "preexisting_modified",
                                                 "preexisting_untouched", "excluded", "notes"]))
@@ -204,8 +257,10 @@ class JsonParityTest(WorkflowTestCase):
 class ApiLifecycleTest(WorkflowTestCase):
     """The same task driven through the CLI (self.repo) and through the API only (a second repository)."""
 
-    VOLATILE = {"at", "created_at", "updated_at", "closed_at", "recorded_at", "fingerprint", "baseline", "checkpoints",
-                "last_checkpoint", "duration_s", "preflight_at"}
+    # Only times, code fingerprints, git baselines (commit ids differ between the two repositories) and durations;
+    # checkpoints themselves (session, changes, unattributed, validity) are compared.
+    VOLATILE = {"at", "created_at", "updated_at", "closed_at", "recorded_at", "confirmed_at", "fingerprint", "baseline",
+                "duration_s", "preflight_at"}
 
     def normalized(self, value: Any) -> Any:
         if isinstance(value, dict):
@@ -271,7 +326,7 @@ class ApiLifecycleTest(WorkflowTestCase):
         self.write(".ai-dev-workflow/tasks/favorites/report.md", FILLED_REPORT.format(status="Completed"))
         self.wf("close", "favorites")
 
-        other = make_repo(self.tmp / "api-repo")
+        other = make_repo(self.tmp / "api" / "repo")  # same folder name: the project name comes from it
         results = self.drive_api(other)
         self.assertEqual(results["init"]["checks"], ["unit"])
         self.assertEqual((results["new"]["task"], results["new"]["paused"], results["new"]["commit_mode_message"]),
@@ -294,7 +349,10 @@ class ApiLifecycleTest(WorkflowTestCase):
                      "approved/plan.v1.md"):
             with self.subTest(record=name):
                 self.assertEqual((other / rel / name).read_bytes(), (self.repo / rel / name).read_bytes())
-        self.assertEqual((other / ".ai-dev-workflow" / "config.json").exists(), True)
+        configs = [json.loads((root / ".ai-dev-workflow" / "config.json").read_text(encoding="utf-8"))
+                   for root in (self.repo, other)]
+        self.assertEqual(self.normalized(configs[1]), self.normalized(configs[0]))
+        self.assertEqual([(root / ".ai-dev-workflow" / "ACTIVE").exists() for root in (self.repo, other)], [False, False])
 
 
 class CommitModeNoticeTest(WorkflowTestCase):

@@ -100,5 +100,65 @@
   "stdout": "",
   "stderr": "AIDevWorkflow: Refusing to save the reason: it looks like it contains a secret — password value (line 1). Task records must never hold credentials, tokens, keys or passwords; refer to them by name instead.\n",
   "records_identical": true
+ },
+ "unknown-task": {
+  "exit_code": 1,
+  "stdout": "",
+  "stderr": "AIDevWorkflow: There is no task named 'nosuch'. Run `workflow.py status` to list tasks.\n",
+  "records_identical": true
+ },
+ "new-before-setup": {
+  "exit_code": 1,
+  "stdout": "",
+  "stderr": "AIDevWorkflow: This project has no AIDevWorkflow setup yet (.ai-dev-workflow/config.json). Run `workflow.py init --discover`, agree the setup with the user, then run `workflow.py init`.\n",
+  "records_identical": true
+ },
+ "init-without-commit": {
+  "exit_code": 1,
+  "stdout": "",
+  "stderr": "AIDevWorkflow: Choose how task records are saved in git with --commit all, config-only or none. Explain the options (`init --discover`) and ask the user.\n",
+  "records_identical": true
+ },
+ "init-without-template": {
+  "exit_code": 1,
+  "stdout": "",
+  "stderr": "AIDevWorkflow: Choose the specification template with --template <path> or --template user:<name>. Ask the user; never invent one. `init --discover` lists the recommendation and candidates.\n",
+  "records_identical": true
+ },
+ "init-update-nothing-to-change": {
+  "exit_code": 1,
+  "stdout": "",
+  "stderr": "AIDevWorkflow: Nothing to change: pass --commit, --standards, --template, --add-check or --without-check.\n",
+  "records_identical": true
+ },
+ "approve-spec-not-ready": {
+  "exit_code": 1,
+  "stdout": "",
+  "stderr": "AIDevWorkflow: The spec is not ready for approval:\n  - Template placeholder left: [Feature name]\n  - Template placeholder left: [The problem this solves, and for whom.]\n  - Template placeholder left: [What a user can do once this ships.]\n  - Template placeholder left: [A specific, testable behavior]\n  - Template placeholder left: [Another behavior]\n  - Template placeholder left: [Something a reader might assume is part of this, but is not]\n  - Template placeholder left: [e.g. The network drops during the request]\n  - Template placeholder left: [e.g. Show \"No connection\" with a Retry button; nothing is saved]\n  - Template placeholder left: [Modules, public APIs or behavior that stay as they are]\n  - Template placeholder left: [Classes, components or modules to add or change, and the existing code each one follows]\n  - Template placeholder left: [Libraries or services to add, or \"None\"]\n  - Template placeholder left: [situation]\n  - Template placeholder left: [action]\n  - Template placeholder left: [result]\n  - AC-1: write acceptance criteria as: Given …, when …, then ….\n  - EC-1: every edge case needs a situation and a specific expected behavior.\n  - 'Problem' has no content.\n  - 'Outcome' has no content.\n  - 'REQ-n items' has no content.\n  - 'Not included' has no content. Write the entries, or 'None — <reason>'.\n  - 'Edge Cases' has no content. Write the entries, or 'None — <reason>'.\n  - 'Structures' has no content. Write the entries, or 'None — <reason>'.\n  - J1 not reviewed\n  - J2 not reviewed\n  - J3 not reviewed\n  - J4 not reviewed\n",
+  "records_identical": true
+ },
+ "approve-plan-after-spec-changed": {
+  "exit_code": 1,
+  "stdout": "",
+  "stderr": "AIDevWorkflow: spec.md changed after v1 was approved; the change needs the user's renewed approval.\n",
+  "records_identical": true
+ },
+ "review-dismiss-unknown-flag": {
+  "exit_code": 1,
+  "stdout": "",
+  "stderr": "AIDevWorkflow: There is no current flag 'NOFLAG'. Run spec-check to list flags.\n",
+  "records_identical": true
+ },
+ "not-a-git-repository": {
+  "exit_code": 3,
+  "stdout": "",
+  "stderr": "AIDevWorkflow: <TMP>/plain is not inside a git repository. AIDevWorkflow uses git to track changes and evidence; run it from the project's repository.\n",
+  "records_identical": true
+ },
+ "missing-path": {
+  "exit_code": 3,
+  "stdout": "",
+  "stderr": "AIDevWorkflow: <TMP>/missing does not exist.\n",
+  "records_identical": true
  }
 }

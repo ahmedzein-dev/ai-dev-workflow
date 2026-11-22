@@ -149,15 +149,11 @@
     "S1": {
       "status": "done",
       "files": [
-        "tests/golden/preflight-json-analyzer-hint.txt",
-        "tests/golden/preflight-json-unattributed.txt",
-        "tests/golden/refusals.json",
-        "tests/golden/workflow-public-signatures.txt",
         "tests/test_behaviour_pins.py"
       ],
-      "note": "Pinned with the unchanged engine: tests/test_behaviour_pins.py with golden workflow-public-signatures.txt, refusals.json (17 scenarios, records byte-identical in-test), preflight-json-unattributed.txt and preflight-json-analyzer-hint.txt; golden copy saved outside the repo; baseline timing --version 61.2 ms, hook 60.9 ms (median of 15).",
+      "note": "FIXING: --repo placed before the positionals in the late-refusal pin (Python 3.9 argparse); verified on the pre-refactor engine with Python 3.13 and 3.9.",
       "agent": "claude-code",
-      "at": "2026-11-22T08:09:37Z"
+      "at": "2026-11-22T08:49:23Z"
     },
     "S2": {
       "status": "done",
@@ -200,19 +196,18 @@
         "skills/ai-dev-workflow/scripts/aidw/api.py",
         "skills/ai-dev-workflow/scripts/aidw/cli/commands.py"
       ],
-      "note": "API: preflight (also returns task, stage, analyzer_hint; CLI keeps the TD-24 trailing lines), step, run_check (returns output_tail), scope (exactly the seven keys), decision, check_records, outcome, close; all cmd_* are renderers; ensure_commit_mode wrapper reaches the write through the API. Full suite 160 OK; pre-existing golden files byte-identical to the S1 copy; ruff, mypy clean.",
+      "note": "FIXING (audit): F-1 run_check hands output_tail to any exception after the command ran, cmd_run prints it first; new_task notice kept on any exception; F-2 only an empty repo path refused, spaces go to find_repo as before; F-3 api.apply_clone_commit_mode for the ensure_commit_mode wrapper; F-4 update_setup wrapper reads the setup from the given path first and tolerates missing args fields; F-5/F-6 module docstring corrected; F-13 blank lines, local rename.",
       "agent": "claude-code",
-      "at": "2026-11-22T08:21:34Z"
+      "at": "2026-11-22T08:44:59Z"
     },
     "S6": {
       "status": "done",
       "files": [
-        "skills/ai-dev-workflow/scripts/aidw/api.py",
         "tests/test_api.py"
       ],
-      "note": "tests/test_api.py: CLI writes no records (AST; proven to flag the pre-refactor commands.py), lower layers never print/exit/chdir/read argv and the API never reads the agent from the environment or the cwd, hooks import nothing from the CLI, API not re-exported, two repositories alternating with cwd and fd-level output checks (proven to catch a child-process leak), empty repo path refused, JSON parity for the eight --json commands (scope exactly seven keys; preflight three keys), API-only lifecycle matching the CLI's records, EC-10 commit-mode notice before Created task and kept on a refusal.",
+      "note": "FIXING: Windows CI failure fixed (working directory restored in try/finally before tearDown; assertions unchanged); F-3 separation test also checks attribute calls and that CLI calls name functions defined in api.py; F-9 raw-text JSON parity incl. check with errors; F-10 checkpoints and config compared; F-2 spaces test.",
       "agent": "claude-code",
-      "at": "2026-11-22T08:24:22Z"
+      "at": "2026-11-22T08:44:59Z"
     },
     "S7": {
       "status": "done",
@@ -330,6 +325,216 @@
       "status": "passed",
       "summary": "after: --version 62.7 ms (before 61.2), hook 61.8 ms (before 60.9)",
       "fingerprint": "fd8d5e06a3b8c68d7cb09ed88e0507a495659b167a039befb1e3bc5ed1fdc427"
+    },
+    {
+      "id": "unit",
+      "name": "Unit, scenario and doc tests",
+      "kind": "result",
+      "agent": "claude-code",
+      "at": "2026-11-22T08:45:11Z",
+      "counts": null,
+      "reason": null,
+      "command": "python3 -m unittest discover -s tests",
+      "duration_s": 61.7,
+      "exit_code": 0,
+      "status": "passed",
+      "summary": "OK",
+      "fingerprint": "f10b7fd90244d04ec7c1eba024472f7a450c470dbdf6296c7736529ee79b2a18"
+    },
+    {
+      "id": "privacy",
+      "name": "Pre-publish secret and privacy scan",
+      "kind": "result",
+      "agent": "claude-code",
+      "at": "2026-11-22T08:46:13Z",
+      "counts": null,
+      "reason": null,
+      "command": "python3 tools/prepublish_check.py",
+      "duration_s": 0.3,
+      "exit_code": 0,
+      "status": "passed",
+      "summary": "Scanned 199 files: no findings.",
+      "fingerprint": "f10b7fd90244d04ec7c1eba024472f7a450c470dbdf6296c7736529ee79b2a18"
+    },
+    {
+      "id": "unit-py39",
+      "name": "unit-py39",
+      "kind": "result",
+      "agent": "claude-code",
+      "at": "2026-11-22T08:46:13Z",
+      "counts": null,
+      "reason": null,
+      "command": "/usr/bin/python3 -m unittest discover -s tests",
+      "duration_s": 46.6,
+      "exit_code": 1,
+      "status": "failed",
+      "summary": "exit 1: FAILED (errors=1)",
+      "fingerprint": "f10b7fd90244d04ec7c1eba024472f7a450c470dbdf6296c7736529ee79b2a18"
+    },
+    {
+      "id": "ruff",
+      "name": "ruff",
+      "kind": "result",
+      "agent": "claude-code",
+      "at": "2026-11-22T08:47:00Z",
+      "counts": null,
+      "reason": null,
+      "command": ".venv/bin/ruff check .",
+      "duration_s": 0.0,
+      "exit_code": 0,
+      "status": "passed",
+      "summary": "All checks passed!",
+      "fingerprint": "f10b7fd90244d04ec7c1eba024472f7a450c470dbdf6296c7736529ee79b2a18"
+    },
+    {
+      "id": "mypy",
+      "name": "mypy",
+      "kind": "result",
+      "agent": "claude-code",
+      "at": "2026-11-22T08:47:00Z",
+      "counts": null,
+      "reason": null,
+      "command": ".venv/bin/mypy",
+      "duration_s": 0.1,
+      "exit_code": 0,
+      "status": "passed",
+      "summary": "Success: no issues found in 31 source files",
+      "fingerprint": "f10b7fd90244d04ec7c1eba024472f7a450c470dbdf6296c7736529ee79b2a18"
+    },
+    {
+      "id": "golden-byte-compare",
+      "name": "golden-byte-compare",
+      "kind": "result",
+      "agent": "claude-code",
+      "at": "2026-11-22T08:47:00Z",
+      "counts": null,
+      "reason": null,
+      "command": "python3 -c 'import filecmp,sys; d=filecmp.dircmp('\"'\"'/private/tmp/claude-501/-Users-ahmedalhosani-Desktop-Ahmed-Zein-downloads-ZEIN-ORIGINALS/78554fc3-22ec-4f7b-b324-d53654d9842d/scratchpad/golden-before-f104'\"'\"','\"'\"'tests/golden'\"'\"'); bad=d.left_only+[f for f in d.common_files if not filecmp.cmp('\"'\"'/private/tmp/claude-501/-Users-ahmedalhosani-Desktop-Ahmed-Zein-downloads-ZEIN-ORIGINALS/78554fc3-22ec-4f7b-b324-d53654d9842d/scratchpad/golden-before-f104/'\"'\"'+f,'\"'\"'tests/golden/'\"'\"'+f,shallow=False)]; print('\"'\"'pre-existing golden files:'\"'\"', len(d.common_files), '\"'\"'differences:'\"'\"', bad, '\"'\"'new:'\"'\"', len(d.right_only)); sys.exit(1 if bad else 0)'",
+      "duration_s": 0.0,
+      "exit_code": 0,
+      "status": "passed",
+      "summary": "pre-existing golden files: 9 differences: [] new: 5",
+      "fingerprint": "f10b7fd90244d04ec7c1eba024472f7a450c470dbdf6296c7736529ee79b2a18"
+    },
+    {
+      "id": "startup-timing",
+      "name": "startup-timing",
+      "kind": "result",
+      "agent": "claude-code",
+      "at": "2026-11-22T08:47:01Z",
+      "counts": null,
+      "reason": null,
+      "command": "python3 -c '\nimport subprocess,sys,time,statistics,json\ns='\"'\"'skills/ai-dev-workflow/scripts/workflow.py'\"'\"'\ndef med(cmd, inp=None):\n    ts=[]\n    for _ in range(15):\n        t=time.perf_counter(); subprocess.run(cmd, input=inp, capture_output=True, text=True); ts.append((time.perf_counter()-t)*1000)\n    return round(statistics.median(ts),1)\nv=med([sys.executable, s, '\"'\"'--version'\"'\"']); h=med([sys.executable, s, '\"'\"'hook'\"'\"', '\"'\"'claude-pre-edit'\"'\"'], json.dumps({'\"'\"'tool_name'\"'\"':'\"'\"'Edit'\"'\"','\"'\"'tool_input'\"'\"':{'\"'\"'file_path'\"'\"':'\"'\"'/tmp/x'\"'\"'},'\"'\"'cwd'\"'\"':'\"'\"'/tmp'\"'\"'}))\nprint(f'\"'\"'after: --version {v} ms (before 61.2), hook {h} ms (before 60.9)'\"'\"'); sys.exit(0 if v-61.2<50 and h-60.9<50 else 1)'",
+      "duration_s": 1.9,
+      "exit_code": 0,
+      "status": "passed",
+      "summary": "after: --version 63.0 ms (before 61.2), hook 62.7 ms (before 60.9)",
+      "fingerprint": "f10b7fd90244d04ec7c1eba024472f7a450c470dbdf6296c7736529ee79b2a18"
+    },
+    {
+      "id": "unit",
+      "name": "Unit, scenario and doc tests",
+      "kind": "result",
+      "agent": "claude-code",
+      "at": "2026-11-22T08:49:23Z",
+      "counts": null,
+      "reason": null,
+      "command": "python3 -m unittest discover -s tests",
+      "duration_s": 61.7,
+      "exit_code": 0,
+      "status": "passed",
+      "summary": "OK",
+      "fingerprint": "95ff438c03665a67ff8ee18f170b73dff0f5e0c26afe71e141d3fca1cde82106"
+    },
+    {
+      "id": "privacy",
+      "name": "Pre-publish secret and privacy scan",
+      "kind": "result",
+      "agent": "claude-code",
+      "at": "2026-11-22T08:50:25Z",
+      "counts": null,
+      "reason": null,
+      "command": "python3 tools/prepublish_check.py",
+      "duration_s": 0.3,
+      "exit_code": 0,
+      "status": "passed",
+      "summary": "Scanned 199 files: no findings.",
+      "fingerprint": "95ff438c03665a67ff8ee18f170b73dff0f5e0c26afe71e141d3fca1cde82106"
+    },
+    {
+      "id": "unit-py39",
+      "name": "unit-py39",
+      "kind": "result",
+      "agent": "claude-code",
+      "at": "2026-11-22T08:50:25Z",
+      "counts": null,
+      "reason": null,
+      "command": "/usr/bin/python3 -m unittest discover -s tests",
+      "duration_s": 47.3,
+      "exit_code": 0,
+      "status": "passed",
+      "summary": "OK",
+      "fingerprint": "95ff438c03665a67ff8ee18f170b73dff0f5e0c26afe71e141d3fca1cde82106"
+    },
+    {
+      "id": "ruff",
+      "name": "ruff",
+      "kind": "result",
+      "agent": "claude-code",
+      "at": "2026-11-22T08:51:13Z",
+      "counts": null,
+      "reason": null,
+      "command": ".venv/bin/ruff check .",
+      "duration_s": 0.0,
+      "exit_code": 0,
+      "status": "passed",
+      "summary": "All checks passed!",
+      "fingerprint": "95ff438c03665a67ff8ee18f170b73dff0f5e0c26afe71e141d3fca1cde82106"
+    },
+    {
+      "id": "mypy",
+      "name": "mypy",
+      "kind": "result",
+      "agent": "claude-code",
+      "at": "2026-11-22T08:51:13Z",
+      "counts": null,
+      "reason": null,
+      "command": ".venv/bin/mypy",
+      "duration_s": 0.1,
+      "exit_code": 0,
+      "status": "passed",
+      "summary": "Success: no issues found in 31 source files",
+      "fingerprint": "95ff438c03665a67ff8ee18f170b73dff0f5e0c26afe71e141d3fca1cde82106"
+    },
+    {
+      "id": "golden-byte-compare",
+      "name": "golden-byte-compare",
+      "kind": "result",
+      "agent": "claude-code",
+      "at": "2026-11-22T08:51:13Z",
+      "counts": null,
+      "reason": null,
+      "command": "python3 -c 'import filecmp,sys; d=filecmp.dircmp('\"'\"'/private/tmp/claude-501/-Users-ahmedalhosani-Desktop-Ahmed-Zein-downloads-ZEIN-ORIGINALS/78554fc3-22ec-4f7b-b324-d53654d9842d/scratchpad/golden-before-f104'\"'\"','\"'\"'tests/golden'\"'\"'); bad=d.left_only+[f for f in d.common_files if not filecmp.cmp('\"'\"'/private/tmp/claude-501/-Users-ahmedalhosani-Desktop-Ahmed-Zein-downloads-ZEIN-ORIGINALS/78554fc3-22ec-4f7b-b324-d53654d9842d/scratchpad/golden-before-f104/'\"'\"'+f,'\"'\"'tests/golden/'\"'\"'+f,shallow=False)]; print('\"'\"'pre-existing golden files:'\"'\"', len(d.common_files), '\"'\"'differences:'\"'\"', bad, '\"'\"'new:'\"'\"', len(d.right_only)); sys.exit(1 if bad else 0)'",
+      "duration_s": 0.0,
+      "exit_code": 0,
+      "status": "passed",
+      "summary": "pre-existing golden files: 9 differences: [] new: 5",
+      "fingerprint": "95ff438c03665a67ff8ee18f170b73dff0f5e0c26afe71e141d3fca1cde82106"
+    },
+    {
+      "id": "startup-timing",
+      "name": "startup-timing",
+      "kind": "result",
+      "agent": "claude-code",
+      "at": "2026-11-22T08:51:13Z",
+      "counts": null,
+      "reason": null,
+      "command": "python3 -c '\nimport subprocess,sys,time,statistics,json\ns='\"'\"'skills/ai-dev-workflow/scripts/workflow.py'\"'\"'\ndef med(cmd, inp=None):\n    ts=[]\n    for _ in range(15):\n        t=time.perf_counter(); subprocess.run(cmd, input=inp, capture_output=True, text=True); ts.append((time.perf_counter()-t)*1000)\n    return round(statistics.median(ts),1)\nv=med([sys.executable, s, '\"'\"'--version'\"'\"']); h=med([sys.executable, s, '\"'\"'hook'\"'\"', '\"'\"'claude-pre-edit'\"'\"'], json.dumps({'\"'\"'tool_name'\"'\"':'\"'\"'Edit'\"'\"','\"'\"'tool_input'\"'\"':{'\"'\"'file_path'\"'\"':'\"'\"'/tmp/x'\"'\"'},'\"'\"'cwd'\"'\"':'\"'\"'/tmp'\"'\"'}))\nprint(f'\"'\"'after: --version {v} ms (before 61.2), hook {h} ms (before 60.9)'\"'\"'); sys.exit(0 if v-61.2<50 and h-60.9<50 else 1)'",
+      "duration_s": 1.9,
+      "exit_code": 0,
+      "status": "passed",
+      "summary": "after: --version 63.3 ms (before 61.2), hook 62.5 ms (before 60.9)",
+      "fingerprint": "95ff438c03665a67ff8ee18f170b73dff0f5e0c26afe71e141d3fca1cde82106"
     }
   ],
   "checkpoints": [
@@ -411,10 +616,56 @@
       "valid": true,
       "changed_files": 14,
       "step": "S7"
+    },
+    {
+      "at": "2026-11-22T08:39:49Z",
+      "kind": "preflight",
+      "agent": "claude-code",
+      "fingerprint": "fd8d5e06a3b8c68d7cb09ed88e0507a495659b167a039befb1e3bc5ed1fdc427",
+      "valid": true,
+      "changed_files": 14
+    },
+    {
+      "at": "2026-11-22T08:44:59Z",
+      "kind": "step",
+      "agent": "claude-code",
+      "fingerprint": "f10b7fd90244d04ec7c1eba024472f7a450c470dbdf6296c7736529ee79b2a18",
+      "valid": true,
+      "changed_files": 15,
+      "step": "S5"
+    },
+    {
+      "at": "2026-11-22T08:44:59Z",
+      "kind": "step",
+      "agent": "claude-code",
+      "fingerprint": "f10b7fd90244d04ec7c1eba024472f7a450c470dbdf6296c7736529ee79b2a18",
+      "valid": true,
+      "changed_files": 15,
+      "step": "S1"
+    },
+    {
+      "at": "2026-11-22T08:44:59Z",
+      "kind": "step",
+      "agent": "claude-code",
+      "fingerprint": "f10b7fd90244d04ec7c1eba024472f7a450c470dbdf6296c7736529ee79b2a18",
+      "valid": true,
+      "changed_files": 15,
+      "step": "S6"
+    },
+    {
+      "at": "2026-11-22T08:49:23Z",
+      "kind": "step",
+      "agent": "claude-code",
+      "fingerprint": "95ff438c03665a67ff8ee18f170b73dff0f5e0c26afe71e141d3fca1cde82106",
+      "valid": true,
+      "changed_files": 15,
+      "step": "S1"
     }
   ],
   "decisions": [],
-  "excluded": [],
+  "excluded": [
+    "docs/roadmap/TECHNICAL_DEBT.md"
+  ],
   "history": [
     {
       "at": "2026-11-22T07:52:10Z",
@@ -646,6 +897,163 @@
       "agent": "claude-code",
       "check": "startup-timing",
       "status": "passed"
+    },
+    {
+      "at": "2026-11-22T08:39:49Z",
+      "event": "stage",
+      "agent": "claude-code",
+      "from": "TESTING",
+      "to": "FIXING",
+      "reason": "CI failed on Windows (test restored cwd after tearDown); independent audit findings F-1 to F-14 to resolve"
+    },
+    {
+      "at": "2026-11-22T08:39:49Z",
+      "event": "preflight",
+      "agent": "claude-code",
+      "valid": true
+    },
+    {
+      "at": "2026-11-22T08:44:49Z",
+      "event": "scope-exclude",
+      "agent": "claude-code",
+      "files": [
+        "docs/roadmap/TECHNICAL_DEBT.md"
+      ],
+      "reason": "standing rule in PROJECT.md: roadmap files are outside every task's scope (TD-25, TD-26 recorded there)"
+    },
+    {
+      "at": "2026-11-22T08:44:59Z",
+      "event": "step",
+      "agent": "claude-code",
+      "step": "S5",
+      "status": "done"
+    },
+    {
+      "at": "2026-11-22T08:44:59Z",
+      "event": "step",
+      "agent": "claude-code",
+      "step": "S1",
+      "status": "done"
+    },
+    {
+      "at": "2026-11-22T08:44:59Z",
+      "event": "step",
+      "agent": "claude-code",
+      "step": "S6",
+      "status": "done"
+    },
+    {
+      "at": "2026-11-22T08:46:13Z",
+      "event": "check",
+      "agent": "claude-code",
+      "check": "unit",
+      "status": "passed"
+    },
+    {
+      "at": "2026-11-22T08:46:13Z",
+      "event": "check",
+      "agent": "claude-code",
+      "check": "privacy",
+      "status": "passed"
+    },
+    {
+      "at": "2026-11-22T08:47:00Z",
+      "event": "check",
+      "agent": "claude-code",
+      "check": "unit-py39",
+      "status": "failed"
+    },
+    {
+      "at": "2026-11-22T08:47:00Z",
+      "event": "check",
+      "agent": "claude-code",
+      "check": "ruff",
+      "status": "passed"
+    },
+    {
+      "at": "2026-11-22T08:47:00Z",
+      "event": "check",
+      "agent": "claude-code",
+      "check": "mypy",
+      "status": "passed"
+    },
+    {
+      "at": "2026-11-22T08:47:00Z",
+      "event": "check",
+      "agent": "claude-code",
+      "check": "golden-byte-compare",
+      "status": "passed"
+    },
+    {
+      "at": "2026-11-22T08:47:02Z",
+      "event": "check",
+      "agent": "claude-code",
+      "check": "startup-timing",
+      "status": "passed"
+    },
+    {
+      "at": "2026-11-22T08:49:23Z",
+      "event": "step",
+      "agent": "claude-code",
+      "step": "S1",
+      "status": "done"
+    },
+    {
+      "at": "2026-11-22T08:49:23Z",
+      "event": "stage",
+      "agent": "claude-code",
+      "from": "FIXING",
+      "to": "TESTING",
+      "reason": "fixes for the Windows CI failure and audit findings F-1-F-6, F-8-F-10, F-13 applied; re-test"
+    },
+    {
+      "at": "2026-11-22T08:50:25Z",
+      "event": "check",
+      "agent": "claude-code",
+      "check": "unit",
+      "status": "passed"
+    },
+    {
+      "at": "2026-11-22T08:50:25Z",
+      "event": "check",
+      "agent": "claude-code",
+      "check": "privacy",
+      "status": "passed"
+    },
+    {
+      "at": "2026-11-22T08:51:12Z",
+      "event": "check",
+      "agent": "claude-code",
+      "check": "unit-py39",
+      "status": "passed"
+    },
+    {
+      "at": "2026-11-22T08:51:13Z",
+      "event": "check",
+      "agent": "claude-code",
+      "check": "ruff",
+      "status": "passed"
+    },
+    {
+      "at": "2026-11-22T08:51:13Z",
+      "event": "check",
+      "agent": "claude-code",
+      "check": "mypy",
+      "status": "passed"
+    },
+    {
+      "at": "2026-11-22T08:51:13Z",
+      "event": "check",
+      "agent": "claude-code",
+      "check": "golden-byte-compare",
+      "status": "passed"
+    },
+    {
+      "at": "2026-11-22T08:51:15Z",
+      "event": "check",
+      "agent": "claude-code",
+      "check": "startup-timing",
+      "status": "passed"
     }
   ],
   "baseline": {
@@ -660,24 +1068,25 @@
       "captured_at": "2026-11-22T08:06:23Z"
     }
   },
-  "updated_at": "2026-11-22T08:26:47Z",
+  "updated_at": "2026-11-22T08:51:15Z",
   "last_checkpoint": {
-    "at": "2026-11-22T08:24:41Z",
-    "fingerprint": "fd8d5e06a3b8c68d7cb09ed88e0507a495659b167a039befb1e3bc5ed1fdc427",
+    "at": "2026-11-22T08:49:23Z",
+    "fingerprint": "95ff438c03665a67ff8ee18f170b73dff0f5e0c26afe71e141d3fca1cde82106",
     "changes": {
       "README.md": "99c43fb9449308fb94830227fbbe2341dc20750b",
       "skills/ai-dev-workflow/scripts/aidw/agents/claude_hooks.py": "d8cc9fa8027bc0a649d899e85cf4688f2e7d0bab",
-      "skills/ai-dev-workflow/scripts/aidw/api.py": "f612e87e8809caf7ed4546c4e6475945960df1b9",
-      "skills/ai-dev-workflow/scripts/aidw/cli/commands.py": "4a078341cb26af9c2021f1f4c8c903cfe1e91987",
+      "skills/ai-dev-workflow/scripts/aidw/api.py": "98cd0734a48cfe67581cca5b4b77fbd60b7d67c2",
+      "skills/ai-dev-workflow/scripts/aidw/cli/commands.py": "e22cfa1450dcefd17a78c33cf961ef7382968306",
       "skills/ai-dev-workflow/scripts/aidw/cli/helpers.py": "9d526022cab0f7adac3b45de88de4039def74e13",
       "skills/ai-dev-workflow/scripts/aidw/core/setup.py": "ab120df55724876f4fe50a51ad65fe361f05e60b",
       "skills/ai-dev-workflow/scripts/workflow.py": "22d7679e9bfd7e8e5b1f79cc87489245f79c3b59",
       "tests/golden/preflight-json-analyzer-hint.txt": "9c18573047a62a1fdac764de1f1aecda5860a43d",
       "tests/golden/preflight-json-unattributed.txt": "2da55844c3310213434c1f1efe3a9b3a743bac6b",
-      "tests/golden/refusals.json": "e4ba2611c7f9f2c90f65546b2a39f5f32cb828a1",
+      "tests/golden/refusals.json": "1b71a87aadf4da3712de3aab17c5f908d7b694c3",
+      "tests/golden/run-output-before-late-refusal.txt": "a2af7ecebb959ba13456f197a2563adf768a7200",
       "tests/golden/workflow-public-signatures.txt": "66bc8a3c98c4f9b3f7a586ebfc179ee4946db362",
-      "tests/test_api.py": "a021f4b88b62070581fe3b541ea6a305cd9af7a4",
-      "tests/test_behaviour_pins.py": "8e893c0f37e2fd2b6de89ded9679ea3ee72afd8d",
+      "tests/test_api.py": "0ab530c7e3cb7364f2d4a330d796d2383e1a4357",
+      "tests/test_behaviour_pins.py": "f93b09e706db38f856dde73d1808901702283c09",
       "tests/test_package.py": "ac605b2f5f7154d7a1914d0ab22c4b9949f4cbe6"
     }
   }

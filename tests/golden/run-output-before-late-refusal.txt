@@ -1,0 +1,6 @@
+exit: 1
+--- stdout ---
+line-one
+line-two
+--- stderr ---
+AIDevWorkflow: Refusing to save state.json: it looks like it contains a secret — GitHub token (line 87), GitHub token (line 88), GitHub token (line 197). Task records must never hold credentials, tokens, keys or passwords; refer to them by name instead.

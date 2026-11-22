@@ -4,9 +4,11 @@ Internal and unversioned: the CLI, the Claude Code hooks and later front ends (d
 functions; nothing outside this repository should rely on them yet. Rules for every function here:
 
 - keyword parameters only, with the repository and the agent name passed explicitly (no working-directory default,
-  no `AI_DEV_WORKFLOW_AGENT` lookup, no `argparse.Namespace`);
+  no `AI_DEV_WORKFLOW_AGENT` lookup, no `argparse.Namespace`); pass absolute paths: a relative path (repository,
+  template, config, notes) is resolved against the process's working directory, as `pathlib` does;
 - the result is a JSON-serialisable dict whose keys are named in the docstring;
-- a refusal raises `WorkflowError` before anything is written;
+- a refusal raises `WorkflowError` at the same point as before F1.0.4, which is before any write except where a
+  function's docstring says otherwise (`new_task`, `update_setup`, `run_check`);
 - nothing is printed, `sys.argv` is never read and the process never exits.
 
 The only environment input is `AI_DEV_WORKFLOW_HOME` (the user's template library, through `store.config`), as before.
@@ -238,8 +240,12 @@ def validate_task(repo: Path, cfg: Dict[str, Any], state: Dict[str, Any]) -> Tup
 # ------------------------------------------------------------------------------------------- loading a task
 
 def _root(repo: PathLike) -> Path:
-    """The repository root for an explicit path; the API never falls back to the current directory."""
-    if not str(repo).strip():
+    """The repository root for an explicit path; the API never falls back to the current directory.
+
+    Only an empty path is refused here (it would mean "the current directory"); anything else, including a path of
+    spaces, goes to `find_repo`, which reports it exactly as before.
+    """
+    if not str(repo):
         raise WorkflowError("The engine API needs an explicit repository path.")
     return find_repo(str(repo))
 
@@ -253,6 +259,12 @@ def _task(repo: PathLike, task: str) -> Tuple[Path, Dict[str, Any], Dict[str, An
 
 
 # ------------------------------------------------------------------------------------------ setup and tasks
+
+def apply_clone_commit_mode(*, repo: PathLike, cfg: Dict[str, Any]) -> Dict[str, Any]:
+    """Apply the project's records commit mode in this clone if it is not applied yet. Returns `message` (the notice
+    for the user, or None when nothing was applied). Used by the `ensure_commit_mode` compatibility wrapper."""
+    return {"message": apply_commit_mode_in_clone(Path(repo), cfg)}
+
 
 def discover_setup(*, repo: PathLike) -> Dict[str, Any]:
     """Setup proposal for a repository (nothing is written). Returns the discovery report: `repository`, `existing`,
@@ -369,8 +381,8 @@ def new_task(*, repo: PathLike, task: str, title: str, task_type: str, invocatio
     """Create a task. Returns `task`, `commit_mode_message` (or None), `paused` (task paused by this one, or None),
     `preexisting` (count of files with uncommitted changes), `next` and `read`.
 
-    If the records commit mode was applied in this clone and a later check refuses the task, the refusal carries
-    the message in its `notices` attribute, because it was already applied.
+    If the records commit mode was applied in this clone and anything later fails, the exception carries the
+    message in its `notices` attribute, because it was already applied.
     """
     if not invocation or not INVOCATION_RE.search(invocation):
         raise WorkflowError(
@@ -382,7 +394,7 @@ def new_task(*, repo: PathLike, task: str, title: str, task_type: str, invocatio
     notice = apply_commit_mode_in_clone(root, cfg)
     try:
         return _create_task(root, cfg, task, title, task_type, invocation, agent, session, notice)
-    except WorkflowError as exc:
+    except BaseException as exc:
         if notice:
             setattr(exc, "notices", [notice])
         raise
@@ -746,7 +758,9 @@ def run_check(*, repo: PathLike, task: str, check: str, agent: str, extra: Seque
               not_applicable: Optional[str] = None) -> Dict[str, Any]:
     """Run a configured check (or an extra command) and record the evidence. Returns `entry` (the recorded result:
     `id`, `status`, `summary`, `reason`, `fingerprint`, …), `output_tail` (the last 120 output lines, redacted;
-    empty when nothing ran) and `recorded_on_purpose` (True for --blocked or --not-applicable)."""
+    empty when nothing ran) and `recorded_on_purpose` (True for --blocked or --not-applicable).
+
+    If anything fails after the command ran, the exception carries the output in its `output_tail` attribute."""
     root, cfg, state = _task(repo, task)
     checks = {c["id"]: c for c in cfg.get("checks", [])}
     chosen = checks.get(check)
@@ -763,70 +777,76 @@ def run_check(*, repo: PathLike, task: str, check: str, agent: str, extra: Seque
     entry: Dict[str, Any] = {"id": chosen["id"], "name": chosen.get("name", chosen["id"]), "kind": "result",
                              "agent": agent, "at": now_iso(), "counts": None, "reason": None}
     output_tail: List[str] = []
-    if not_applicable:
-        if chosen.get("required") and not chosen.get("when"):
-            raise WorkflowError(f"'{chosen['id']}' is always required; if it cannot run, use --blocked \"<reason>\".")
-        entry.update(status="not-applicable", summary="", reason=not_applicable.strip())
-    elif blocked:
-        entry.update(status="blocked", summary="", reason=blocked.strip())
-    elif chosen.get("builtin"):
-        status, summary, _ = builtin_check(root, state, cfg, chosen)
-        entry.update(status=status, summary=redact(summary)[:500], command=f"built-in {chosen['builtin']}")
-    else:
-        if baseline and chosen.get("parser") != "dart-analyzer":
-            raise WorkflowError("--baseline is only for analyzer checks (parser dart-analyzer).")
-        if baseline:
-            base = state["baseline"].get("implementation")
-            if not base:
-                raise WorkflowError("Capture the baseline after the plan is approved (IMPLEMENTATION), before editing code.")
-            if change_set(root, base, state.get("excluded", []))["task"] and not force:
-                raise WorkflowError("Code already changed since implementation started; a baseline now would hide new "
-                                    "issues. Use --force only if the user agrees.")
-        code, output, duration, error = execute(root, chosen["command"], extra_args, int(chosen.get("timeout_s", 1800)))
-        command_text = redact(" ".join([chosen["command"], *extra_args]))
-        entry.update(command=command_text, duration_s=round(duration, 1), exit_code=code)
-        if error:
-            entry.update(status="blocked", summary="", reason=f"Could not run: {error}.")
+    try:
+        if not_applicable:
+            if chosen.get("required") and not chosen.get("when"):
+                raise WorkflowError(f"'{chosen['id']}' is always required; if it cannot run, use --blocked \"<reason>\".")
+            entry.update(status="not-applicable", summary="", reason=not_applicable.strip())
+        elif blocked:
+            entry.update(status="blocked", summary="", reason=blocked.strip())
+        elif chosen.get("builtin"):
+            builtin_status, summary, _ = builtin_check(root, state, cfg, chosen)
+            entry.update(status=builtin_status, summary=redact(summary)[:500], command=f"built-in {chosen['builtin']}")
         else:
-            output_tail = [redact(line) for line in output.splitlines()[-120:]]
-            if chosen.get("parser") == "dart-analyzer":
-                issues, counts = parse_analyzer(output)
-                entry["counts"] = counts
-                if baseline:
-                    state["baseline"].setdefault("analyzer", {})[chosen["id"]] = sorted({analyzer_key(i) for i in issues})
-                    entry.update(kind="baseline", status="baseline",
-                                 summary=f"{counts['error']} errors, {counts['warning']} warnings, {counts['info']} infos")
-                else:
-                    recognized = bool(issues) or "no issues found" in output.lower()
-                    baseline_keys = state["baseline"].get("analyzer", {}).get(chosen["id"])
-                    has_baseline = baseline_keys is not None
-                    baseline_set = set(baseline_keys or [])
-                    fail_on = chosen.get("fail_on", ["error", "warning"])
-                    failing = [i for i in issues if i["severity"] in fail_on]
-                    new = [i for i in issues if analyzer_key(i) not in baseline_set] if has_baseline else []
-                    if has_baseline and "new" in fail_on:
-                        failing += [i for i in new if i not in failing]
-                    summary = f"{counts['error']} errors, {counts['warning']} warnings, {counts['info']} infos"
-                    summary += f"; {len(new)} new since baseline" if has_baseline else "; no baseline captured"
-                    if not recognized and code != 0:
-                        entry.update(status="failed", summary=f"exit {code}: {last_line(output)}")
-                    elif not failing:
-                        entry.update(status="passed", summary=summary)
-                    elif has_baseline and all(analyzer_key(i) in baseline_set for i in failing):
-                        entry.update(status="preexisting", summary=summary)
-                    else:
-                        entry.update(status="failed", summary=summary)
+            if baseline and chosen.get("parser") != "dart-analyzer":
+                raise WorkflowError("--baseline is only for analyzer checks (parser dart-analyzer).")
+            if baseline:
+                base = state["baseline"].get("implementation")
+                if not base:
+                    raise WorkflowError("Capture the baseline after the plan is approved (IMPLEMENTATION), before editing code.")
+                if change_set(root, base, state.get("excluded", []))["task"] and not force:
+                    raise WorkflowError("Code already changed since implementation started; a baseline now would hide new "
+                                        "issues. Use --force only if the user agrees.")
+            code, output, duration, error = execute(root, chosen["command"], extra_args, int(chosen.get("timeout_s", 1800)))
+            command_text = redact(" ".join([chosen["command"], *extra_args]))
+            entry.update(command=command_text, duration_s=round(duration, 1), exit_code=code)
+            if error:
+                entry.update(status="blocked", summary="", reason=f"Could not run: {error}.")
             else:
-                entry.update(status="passed" if code == 0 else "failed",
-                             summary=(f"exit {code}: " if code else "") + last_line(output))
-    if entry.get("reason"):
-        assert_no_secrets(entry["reason"], "the reason")
-    entry["fingerprint"] = code_fingerprint(root)
-    state["checks"].append(entry)
-    del state["checks"][:-200]
-    add_history(state, "check", agent, check=chosen["id"], status=entry["status"])
-    regenerate_check_block(root, state)
-    save_state(root, state)
+                output_tail = [redact(line) for line in output.splitlines()[-120:]]
+                if chosen.get("parser") == "dart-analyzer":
+                    issues, counts = parse_analyzer(output)
+                    entry["counts"] = counts
+                    if baseline:
+                        state["baseline"].setdefault("analyzer", {})[chosen["id"]] = sorted({analyzer_key(i) for i in issues})
+                        entry.update(kind="baseline", status="baseline",
+                                     summary=f"{counts['error']} errors, {counts['warning']} warnings, {counts['info']} infos")
+                    else:
+                        recognized = bool(issues) or "no issues found" in output.lower()
+                        baseline_keys = state["baseline"].get("analyzer", {}).get(chosen["id"])
+                        has_baseline = baseline_keys is not None
+                        baseline_set = set(baseline_keys or [])
+                        fail_on = chosen.get("fail_on", ["error", "warning"])
+                        failing = [i for i in issues if i["severity"] in fail_on]
+                        new = [i for i in issues if analyzer_key(i) not in baseline_set] if has_baseline else []
+                        if has_baseline and "new" in fail_on:
+                            failing += [i for i in new if i not in failing]
+                        summary = f"{counts['error']} errors, {counts['warning']} warnings, {counts['info']} infos"
+                        summary += f"; {len(new)} new since baseline" if has_baseline else "; no baseline captured"
+                        if not recognized and code != 0:
+                            entry.update(status="failed", summary=f"exit {code}: {last_line(output)}")
+                        elif not failing:
+                            entry.update(status="passed", summary=summary)
+                        elif has_baseline and all(analyzer_key(i) in baseline_set for i in failing):
+                            entry.update(status="preexisting", summary=summary)
+                        else:
+                            entry.update(status="failed", summary=summary)
+                else:
+                    entry.update(status="passed" if code == 0 else "failed",
+                                 summary=(f"exit {code}: " if code else "") + last_line(output))
+        if entry.get("reason"):
+            assert_no_secrets(entry["reason"], "the reason")
+        entry["fingerprint"] = code_fingerprint(root)
+        state["checks"].append(entry)
+        del state["checks"][:-200]
+        add_history(state, "check", agent, check=chosen["id"], status=entry["status"])
+        regenerate_check_block(root, state)
+        save_state(root, state)
+    except BaseException as exc:
+        # The CLI printed the output before any later refusal; keep that by handing the tail to the caller.
+        if output_tail:
+            setattr(exc, "output_tail", output_tail)
+        raise
     return {"entry": entry, "output_tail": output_tail, "recorded_on_purpose": bool(blocked or not_applicable)}
 
 
