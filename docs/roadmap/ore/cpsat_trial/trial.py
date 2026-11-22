@@ -525,7 +525,14 @@ def run_isolated(job: Dict[str, Any], wall: float, memory_mb: int, cancel_after:
     if WIN is not None:
         win_job = WIN.job_for(proc.pid, os_limit_mb)
         os_limit = f"job object process memory limit {os_limit_mb} MB" if os_limit_mb else None
-    assert proc.stdin is not None
+    assert proc.stdin is not None and proc.stdout is not None and proc.stderr is not None
+    # Drain both pipes while the child runs: a child blocked on a full pipe never finishes (Windows pipes hold about
+    # 4 KB; found by the CI run of this trial).
+    chunks: Dict[str, List[str]] = {"out": [], "err": []}
+    readers = [threading.Thread(target=lambda s=s, k=k: chunks[k].append(s.read()), daemon=True)
+               for s, k in ((proc.stdout, "out"), (proc.stderr, "err"))]
+    for r in readers:
+        r.start()
     proc.stdin.write(json.dumps(job))
     proc.stdin.close()
     reason, peak, how = None, 0, None
@@ -543,8 +550,9 @@ def run_isolated(job: Dict[str, Any], wall: float, memory_mb: int, cancel_after:
             break
         time.sleep(0.05)
     elapsed = round(time.monotonic() - t0, 3)
-    stdout = proc.stdout.read() if proc.stdout else ""
-    stderr = proc.stderr.read() if proc.stderr else ""
+    for r in readers:
+        r.join(timeout=10)
+    stdout, stderr = "".join(chunks["out"]), "".join(chunks["err"])
     if win_job is not None and WIN is not None:
         WIN.k.CloseHandle(win_job)
     result = None
@@ -578,6 +586,9 @@ def child() -> None:
         sub.stdin.write(json.dumps(job["job"]))
         sub.stdin.close()
         sub.wait()
+        return
+    if job["kind"] == "big_output":  # more than any pipe buffer
+        print(json.dumps({"payload": "x" * job["bytes"]}))
         return
     if job["kind"] == "hog":
         blocks = []
@@ -841,6 +852,9 @@ def t_limits_and_cancel() -> Dict[str, Any]:
     iso = run_isolated({"kind": "solve", "model": opt, "limits": {"threads": 1, "time": 600}}, wall=1.5,
                        memory_mb=2048)
     out["hard_wall_clock_kill"] = {k: iso[k] for k in ("killed_for", "stopped_by", "returncode", "elapsed", "peak_rss_mb")}
+    big = run_isolated({"kind": "big_output", "bytes": 1_000_000}, wall=30, memory_mb=2048)
+    out["large_output_1mb"] = {"completed": big["result"] is not None and big["killed_for"] is None,
+                               "elapsed": big["elapsed"], "killed_for": big["killed_for"]}
     ok = (out["timeout_with_solution"]["classification"] == "FEASIBLE_NOT_PROVEN"
           and out["timeout_no_solution"]["classification"] == "TIMEOUT"
           and out["conflict_limit"]["classification"] in ("RESOURCE_LIMIT", "FEASIBLE_NOT_PROVEN")
@@ -848,7 +862,8 @@ def t_limits_and_cancel() -> Dict[str, Any]:
           and out["cancel_in_process"]["classification"] == "CANCELLED"
           and out["cancel_in_process"]["feasible_solution_kept"]
           and out["cancel_process_group"]["killed_for"] == "cancelled"
-          and out["hard_wall_clock_kill"]["killed_for"] == "time_limit")
+          and out["hard_wall_clock_kill"]["killed_for"] == "time_limit"
+          and out["large_output_1mb"]["completed"])
     out["pass"] = ok
     return out
 
