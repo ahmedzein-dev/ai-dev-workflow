@@ -2,7 +2,7 @@
 
 ## 1.0.1 — Security (unreleased; awaiting the owner's release approval)
 
-Security patch for 1.0.0. It contains only the TD-25 fix: no features or restructuring from later development.
+Security patch for 1.0.0, plus two owner-approved Windows compatibility fixes. No features or restructuring from later development.
 
 - A secret-like agent name (`--agent` or `AI_DEV_WORKFLOW_AGENT`), session id (`--session`) or check name
   (`run <task> <name>`) is refused before anything runs or is written. In 1.0.0 such a value could reach
@@ -19,6 +19,10 @@ Security patch for 1.0.0. It contains only the TD-25 fix: no features or restruc
   the documented cases. The session format check independently disallows those separators.
 - Affected: 1.0.0, and development versions before this fix. Mitigation until 1.0.1 is installed: never type
   credentials into `--agent`, `--session` or check names.
+- Windows compatibility: decode check-command output as UTF-8, with the system code page as fallback; accept the
+  replacement `?` separator in analyzer output. The line-ending regression fixture now normalizes existing CRLF
+  before converting to CRLF, so it tests the intended hash behavior on Windows. Both failures existed in the
+  original 1.0.0 Windows CI; the fixes are limited ports of `ad5bfd3` and `0bd5a6c` with regression tests.
 
 ## 1.0.0 — 2026-11-12
 
