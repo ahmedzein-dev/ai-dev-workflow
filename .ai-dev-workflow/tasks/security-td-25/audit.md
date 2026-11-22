@@ -11,12 +11,18 @@ implementer's conclusions.
 - Codex handover review on `c072342` and `0951ed0`, by a separate read-only reviewer. The review confirmed the
   round-2 code changes and found an Important rollback ownership gap (F-13), plus stale or imprecise evidence
   (F-14). Its initial verdict was NO-GO.
+- Final release code review by a separate read-only reviewer on `6a7cba0`: GO for the narrow Windows code and
+  regression tests. It compared the changes with `ad5bfd3` and `0bd5a6c`, checked that the TD-25 fix and the
+  single-file v1.0.0 architecture remained intact, and found no new code defect. CI and records were pending at
+  review time; [CI 45038409846](https://github.com/ahmedzein-dev/ai-dev-workflow/actions/runs/45038409846)
+  subsequently passed 6/6. The later record-publication privacy finding is F-16 below.
 
 **Reviewed scope:**
 - `aidw/api.py`, `aidw/agents/claude_hooks.py`, `tests/test_secret_identity.py`;
 - `tests/test_behaviour_pins.py` (`LateRefusalTest`) and its golden file;
 - `CHANGELOG.md`, `docs/roadmap/TECHNICAL_DEBT.md` (TD-25–TD-30);
 - the `release/1.0.x` backport (`git diff v1.0.0`);
+- the final Windows ports and tests in release commit `6a7cba0`;
 - approved spec v2 (`9cf6cec3`) and plan v2 (`f1c2745d`).
 
 ## Dimensions
@@ -44,7 +50,8 @@ implementer's conclusions.
   - Gaps were found in the log assertions, in the 1.0.1 CLI sweep and in the JSON-escaped persistence check (F-3, F-4); fixed.
 - **H. Scope compliance:**
   - TD-24 and TD-26–TD-30 are not fixed here.
-  - The backport holds only the TD-25 fix, the version, the CHANGELOG and CI changes.
+  - The backport holds the TD-25 fix, the version, the CHANGELOG and CI changes, plus the two explicitly approved
+    Windows compatibility fixes and their regression tests. No architectural refactor was ported.
 - **I. Reliability and performance:**
   - The regex scan was quadratic on huge session ids (F-5); fixed with a 4,096-character bound.
   - The rollback is best effort (F-6); the wording was corrected.
@@ -53,8 +60,10 @@ implementer's conclusions.
 
 No standards files are configured (`standards: []`). Spec constraints:
 - Standard library only: yes.
-- Protected files untouched: yes. Every existing test is unchanged apart from `LateRefusalTest` (one module-docstring
-  line and two imports in that file); `aidw/infra/secrets.py`, `aidw/store/`, `SKILL.md` and `references/` are untouched.
+- Development branch protected files: every pre-existing test is unchanged apart from `LateRefusalTest` (one
+  module-docstring line and two imports); `aidw/infra/secrets.py`, `aidw/store/`, `SKILL.md` and `references/`
+  are untouched. On the release branch, the owner-approved Windows ports changed `test_evidence_and_outcomes.py`
+  and the CRLF fixture in `test_lifecycle.py`; the earlier backport also updated SKILL.md version metadata.
 - Synthetic values only, no literal token: yes. The privacy scan is clean.
 
 ## Findings
@@ -75,6 +84,8 @@ No standards files are configured (`standards: []`). Spec constraints:
 | F-12 | Minor | A | Stale numbers in verification.md (DW-7 28/24, AC-12 counts); DW-7 marked Passed despite the noted Windows failures | verification.md | Fixed | Counts recomputed from the final test file; DW-7 status reads "Passed (with 2 pre-existing Windows failures noted)" |
 | F-13 | Important | I, G | Failed task creation registered destinations for cleanup before confirming it had written them. This could remove a foreign file at a failed destination. | `api.py` and backport `workflow.py`, `RecoveryTest` | Fixed | The revisions reserve temporary names exclusively and clean up only files they own. Both RecoveryTest paths passed locally and in CI. The separate reviewer rechecked both revisions and confirmed the fix. Concurrent changes remain TD-29. |
 | F-14 | Minor | A, G | Round-2 documents cited older CI as final, used an unsupported DW-7 status, and overstated F-9. The report omitted the fsync and false-positive limitations. One hook test name contradicted its assertion. | verification.md, report.md, technical debt and changelogs, hook regression | Fixed | Evidence now identifies exact commits and CI, uses a canonical DW-7 status, explains scanner and persistence limits, and names the hook test according to its actual assertion. |
+| F-15 | Minor | A | The standards checklist described only the development branch and could be read as saying no release tests or SKILL.md metadata changed. | audit.md checklist | Fixed | The checklist now separates development protection from the approved release test and version changes. |
+| F-16 | Minor | D, A | Three historical golden-byte-compare command fields contained a machine-specific temporary absolute path, local username and UUID. The privacy scanner did not flag it. | state.json `checks[7]`, `[13]`, `[19]` | Fixed | With the owner's explicit approval, only the directory prefix in the current record's three fields was replaced by `[REDACTED_LOCAL_TMP]/`; backup and semantic comparison are documented in verification.md. Historical public Git commits still contain the original path and were not rewritten. |
 
 ## Remediation log
 
@@ -102,3 +113,14 @@ No standards files are configured (`standards: []`). Spec constraints:
   verification.md for the final local and CI evidence. The first two review rounds covered the hook path and the
   F-1 pin. Codex reran the historical control test in a separate export and compared the unchanged golden.
 - **Re-run checks and CI:** recorded in verification.md.
+- **Owner-approved Windows follow-up:** `6a7cba0` ports only the analyzer separator, command-output decoding,
+  and CRLF test correction from `ad5bfd3` and `0bd5a6c`, with two additional regression tests. The original
+  v1.0.0 Windows CI and `095c511` both failed the same two tests on Python 3.9 and 3.13. The final release
+  locally passed 152/152 on both interpreters and [CI 45038409846](https://github.com/ahmedzein-dev/ai-dev-workflow/actions/runs/45038409846)
+  passed all six jobs. The independent release code audit was GO; the task stays in FINAL_REPORT.
+- **Final record review and privacy correction:** an independent read-only reviewer checked the final CI links,
+  commit and fingerprint and found them accurate. It flagged checklist wording (F-15) and the historical local
+  path publication gate (F-16). The owner approved narrow redaction. A private, byte-identical backup was made;
+  only the six occurrences of that directory prefix inside the three command fields were replaced with the clear
+  marker. The JSON comparison, workflow integrity check and privacy checks are in verification.md. Existing public
+  history was left unchanged. The sanitized commands are not represented as the original executable commands.

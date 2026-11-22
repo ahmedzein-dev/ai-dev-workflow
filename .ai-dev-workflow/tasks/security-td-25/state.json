@@ -381,7 +381,7 @@
       "at": "2026-11-22T12:17:06Z",
       "counts": null,
       "reason": null,
-      "command": "python3 /private/tmp/claude-501/-Users-ahmedalhosani-Desktop-Ahmed-Zein-downloads-ZEIN-ORIGINALS/78554fc3-22ec-4f7b-b324-d53654d9842d/scratchpad/golden_compare.py tests/golden /private/tmp/claude-501/-Users-ahmedalhosani-Desktop-Ahmed-Zein-downloads-ZEIN-ORIGINALS/78554fc3-22ec-4f7b-b324-d53654d9842d/scratchpad/golden-before-td25 run-output-before-late-refusal.txt",
+      "command": "python3 [REDACTED_LOCAL_TMP]/golden_compare.py tests/golden [REDACTED_LOCAL_TMP]/golden-before-td25 run-output-before-late-refusal.txt",
       "duration_s": 0.0,
       "exit_code": 0,
       "status": "passed",
@@ -471,7 +471,7 @@
       "at": "2026-11-22T12:38:10Z",
       "counts": null,
       "reason": null,
-      "command": "python3 /private/tmp/claude-501/-Users-ahmedalhosani-Desktop-Ahmed-Zein-downloads-ZEIN-ORIGINALS/78554fc3-22ec-4f7b-b324-d53654d9842d/scratchpad/golden_compare.py tests/golden /private/tmp/claude-501/-Users-ahmedalhosani-Desktop-Ahmed-Zein-downloads-ZEIN-ORIGINALS/78554fc3-22ec-4f7b-b324-d53654d9842d/scratchpad/golden-before-td25 run-output-before-late-refusal.txt",
+      "command": "python3 [REDACTED_LOCAL_TMP]/golden_compare.py tests/golden [REDACTED_LOCAL_TMP]/golden-before-td25 run-output-before-late-refusal.txt",
       "duration_s": 0.0,
       "exit_code": 0,
       "status": "passed",
@@ -561,7 +561,7 @@
       "at": "2026-11-22T12:54:11Z",
       "counts": null,
       "reason": null,
-      "command": "python3 /private/tmp/claude-501/-Users-ahmedalhosani-Desktop-Ahmed-Zein-downloads-ZEIN-ORIGINALS/78554fc3-22ec-4f7b-b324-d53654d9842d/scratchpad/golden_compare.py tests/golden /private/tmp/claude-501/-Users-ahmedalhosani-Desktop-Ahmed-Zein-downloads-ZEIN-ORIGINALS/78554fc3-22ec-4f7b-b324-d53654d9842d/scratchpad/golden-before-td25 run-output-before-late-refusal.txt",
+      "command": "python3 [REDACTED_LOCAL_TMP]/golden_compare.py tests/golden [REDACTED_LOCAL_TMP]/golden-before-td25 run-output-before-late-refusal.txt",
       "duration_s": 0.0,
       "exit_code": 0,
       "status": "passed",
@@ -1029,6 +1029,14 @@
       "valid": true,
       "changed_files": 7,
       "step": "S10"
+    },
+    {
+      "at": "2026-11-22T15:24:36Z",
+      "kind": "preflight",
+      "agent": "codex",
+      "fingerprint": "fd10d4edf94522f066af80d764f0aeb5d3929edfcc8c8a9fc9085a61c364379d",
+      "valid": false,
+      "changed_files": 7
     }
   ],
   "decisions": [
@@ -1045,6 +1053,20 @@
       "by": "user",
       "recorded_by": "claude-code",
       "at": "2026-11-22T12:05:29Z"
+    },
+    {
+      "text": "Owner approves the two specified Windows compatibility fixes and relevant tests on release/1.0.x, commits and pushes of approved branch work and accurate TD-25 records; keep task at FINAL_REPORT and do not tag, publish, merge, install, or close.",
+      "evidence": "Owner message: TD-25 — Owner Decisions and Next Steps, 2026-11-22; explicit release-only Windows fix authorization and FINAL_REPORT boundary.",
+      "by": "owner",
+      "recorded_by": "codex",
+      "at": "2026-11-22T15:24:47Z"
+    },
+    {
+      "text": "Owner approves redacting only the machine-specific temporary absolute path in the three historical golden-byte-compare command fields for public-repository privacy; preserve all approvals, check results, timestamps, counts, fingerprints and outcome classifications; do not rewrite Git history.",
+      "evidence": "Owner message: TD-25 — Owner Decision: Redact Historical Local Paths, 2026-11-22; explicit option 1 and record-only commit/push authorization.",
+      "by": "owner",
+      "recorded_by": "codex",
+      "at": "2026-11-22T16:08:05Z"
     }
   ],
   "excluded": [
@@ -1676,6 +1698,22 @@
       "agent": "codex",
       "from": "AUDIT",
       "to": "FINAL_REPORT"
+    },
+    {
+      "at": "2026-11-22T15:24:36Z",
+      "event": "preflight",
+      "agent": "codex",
+      "valid": false
+    },
+    {
+      "at": "2026-11-22T15:24:47Z",
+      "event": "decision",
+      "agent": "codex"
+    },
+    {
+      "at": "2026-11-22T16:08:05Z",
+      "event": "decision",
+      "agent": "codex"
     }
   ],
   "baseline": {
@@ -1715,9 +1753,9 @@
       "captured_at": "2026-11-22T12:05:43Z"
     }
   },
-  "updated_at": "2026-11-22T15:16:31Z",
+  "updated_at": "2026-11-22T16:08:05Z",
   "last_checkpoint": {
-    "at": "2026-11-22T15:16:31Z",
+    "at": "2026-11-22T15:24:36Z",
     "fingerprint": "fd10d4edf94522f066af80d764f0aeb5d3929edfcc8c8a9fc9085a61c364379d",
     "changes": {
       "CHANGELOG.md": "1b97efbee0fcc94f9fa3bccf4eeba80b9a7f3c1a",

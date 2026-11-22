@@ -2,10 +2,24 @@
 
 Development code commit: `c0f5800519e0934e30184142e7f92cbcabbb45f4`, [CI 45036934864](https://github.com/ahmedzein-dev/ai-dev-workflow/actions/runs/45036934864), 7/7. Local tests used the same TD-25 files. The local engine fingerprint `fd10d4edf94522f066af80d764f0aeb5d3929edfcc8c8a9fc9085a61c364379d` includes the pre-existing uncommitted roadmap edits. The committed code fingerprint is `bafffcdf17229af827e11c1f2f7a9019abe59833aaa376ab562c427dead61dee` (git tree checked using the installed engine's fingerprint rules).
 
-Release code commit: `095c511aacc0923d735a8d9b3e8d9ee04cee35dd`, [CI 45036741638](https://github.com/ahmedzein-dev/ai-dev-workflow/actions/runs/45036741638), 4/6. The release code fingerprint is `eee45da5f92683fb7b6bb75431aa595bc4824519be732ad03afba555fcbdd7eb`.
+Release code commit: `6a7cba0da146421e51988edf386fbfb3adda5f20`, [CI 45038409846](https://github.com/ahmedzein-dev/ai-dev-workflow/actions/runs/45038409846), 6/6. The release code fingerprint is `fc9a168e7ab37d45271025f603fe9ff3c63c18a5815bb45b6b03519d820cc4d2`. This commit includes the security backport at `095c511` and the owner-approved Windows compatibility fixes from `ad5bfd3` and `0bd5a6c` (only relevant code and tests).
 
-Historical development runs: `c072342` 45024827167, `49ba40a` 45023454467 and `a346300` 45021516859 all passed 7/7. Historical release runs: `0951ed0` 45024829613 and `d8efe25` 45023456456, both 4/6 with the same pre-existing Windows failures.
+Historical development runs: `c072342` 45024827167, `49ba40a` 45023454467 and `a346300` 45021516859 all passed 7/7. Historical release runs: `0951ed0` 45024829613, `d8efe25` 45023456456 and `095c511` 45036741638 each passed 4/6 with the same pre-existing Windows failures. The original v1.0.0 run 43175463889 failed the same two Windows tests on both Python versions.
 Approved documents: spec v2 `9cf6cec3`, plan v2 `f1c2745d`.
+
+**Public-record sanitation (owner-approved, after the checks ran):** The installed v1.0.0 engine has no supported
+command for editing an existing check entry. A byte-identical backup of state.json was saved outside the repository
+in private local Codex data (file mode `0600`, backup SHA-256 `e296237b36dbca2990814f966a3063ae3e88eea1b5146ae1251480a87a8c0d73`). The three historical
+`golden-byte-compare` entries at `checks[7].command` (12:17:06Z), `checks[13].command` (12:38:10Z), and
+`checks[19].command` (12:54:11Z) each contained the same machine-specific temporary directory twice. Only that
+directory prefix was replaced with `[REDACTED_LOCAL_TMP]/` (six substitutions). A parsed-JSON comparison confirmed
+every other field was unchanged; the sanitized state SHA-256 is
+`0fc01e24a64cddbbd358673fa3d69ad62557c4525e61f5cef1e6784d74a179f6`. These command strings are
+privacy-redacted descriptions of historical checks, **not the original executable command lines**. Their results,
+timestamps, fingerprints, and approval records remain intact. The original paths remain in previously published Git
+history; no history rewrite was performed. `workflow.py check` reports consistent records; `status` reports valid
+spec/plan approvals and active `FINAL_REPORT`; `outcome` still permits Completed with Limitations. The privacy scan
+found no issues in 212 files, and a separate machine-path search found none in the four records being committed.
 
 **Approval history (condition 4 of the v2 approval).**
 - S1–S3 were implemented under the approved **spec v1 `2fdbc034` and plan v1 `b60cd6f0`** (approved 2026-11-22,
@@ -82,7 +96,7 @@ for Blocked and Not Verified it says why. A check that did not run is never Pass
 | DW-4 | Passed | [CI 45036934864](https://github.com/ahmedzein-dev/ai-dev-workflow/actions/runs/45036934864) on `c0f5800`: lint and all six Linux/macOS/Windows jobs for Python 3.9 and 3.13 passed. |
 | DW-5 | Passed | Independent audit rounds and Codex handover review in audit.md. The handover reviewer confirmed the correction for F-13. F-9 remains Deferred. No known Important finding remains open and no existing check or gate was weakened. |
 | DW-6 | Passed | 38 task record files; 0 flagged; ACTIVE present=True, flagged=False. |
-| DW-7 | Passed | Backport preparation and testing on `095c511`: 150/150 locally on each Python version, including 32 TD-25 tests. [Release CI](https://github.com/ahmedzein-dev/ai-dev-workflow/actions/runs/45036741638) completed with four passing jobs and two Windows jobs failing the same two legacy tests as [CI on the v1.0.0 commit](https://github.com/ahmedzein-dev/ai-dev-workflow/actions/runs/43175463889). All 32 TD-25 tests passed in both Windows jobs. Baseline macOS suites 118/118 on each version. The pre-fix TD-25 reproduction is inherited from Claude Code. Windows backport is pending the owner decision R0. |
+| DW-7 | Passed | Release `6a7cba0`: 152/152 locally under Python 3.13 and 3.9.6, including 32 TD-25 tests; privacy scan 65 files with no findings; golden files unchanged from v1.0.0. [Final release CI](https://github.com/ahmedzein-dev/ai-dev-workflow/actions/runs/45038409846) passed all six Linux/macOS/Windows × Python 3.9/3.13 jobs. Both Windows jobs ran 152/152, passed the two previously failing tests and the new decoding regression, and passed the privacy scan. The same two failures were verified in [original v1.0.0 CI](https://github.com/ahmedzein-dev/ai-dev-workflow/actions/runs/43175463889) and `095c511` CI. The 118 original v1.0.0 tests passed locally on each Python version. Pre-fix TD-25 reproduction is inherited from Claude Code. No tag, release, merge, installation or closure. |
 | DW-8 | Passed | Both audit rounds covered the hook path (invalid, non-text, multi-line sessions; logging; fail-closed inside an active task) and the FR-13 pin (golden regenerated by the auditor from fa6a676, byte-identical) |
 | DW-9 | Passed | TECHNICAL_DEBT TD-25 marked "fixed on the development branch; installed copies still affected"; release proposal in report.md for the owner's separate approval; F1.0.4 records untouched |
 
@@ -98,4 +112,4 @@ for Blocked and Not Verified it says why. A check that did not run is never Pass
 - **Persistence (FR-9, TD-29):** single files are replaced atomically; multi-file updates are not transactional. `resume`, `preflight` and pausing another task still write ACTIVE or another task's state.json before the task's own. The check block can lag state.json until the next `run` after a failed write (tested, EC-13).
 - **Trust boundary (TD-30):** direct Python calls to the exported writers (`activate`, `save_state`, …) bypass the API checks; no protection is claimed for them.
 - **Installed copies:** the installed v1.0.0 engine is still affected until v1.0.1 is approved, released and installed.
-- **Backport on Windows:** two pre-existing v1.0.0 test failures (analyzer output decoding on the Windows code page; a line-ending test). They are identical in the original CI run on the commit tagged v1.0.0 and were fixed on `main` after the release (ad5bfd3, 0bd5a6c), and not ported (outside the TD-25 scope; owner decision pending).
+- **Windows baseline:** the two pre-existing v1.0.0 test failures were corrected on the release branch with the owner's approval. This is compatibility work, not a claim of broader Windows coverage beyond the 6/6 CI matrix.
