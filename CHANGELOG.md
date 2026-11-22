@@ -12,6 +12,21 @@
   template when no task is open.
 - The `config-only` and `none` exclusions are re-applied in a new clone when a task starts.
 
+## 1.0.1 — 2026-11-22
+
+Security release for TD-25, based on v1.0.0. Main retains its separate unreleased changes above.
+
+- Secret-like agent names (`--agent` or `AI_DEV_WORKFLOW_AGENT`), session ids and check ids are rejected before
+  affected records are written or check commands run. Refusals name the field without echoing its value.
+- Session ids have a separate 1–256 printable-character format rule. Claude Code hooks reject invalid session ids
+  without logging them and deny edits inside an active task when the session identity cannot be validated.
+- Task-creation rollback preserves files the operation did not write; `run` saves state before regenerating the
+  verification check block. Multi-file updates remain non-transactional.
+- Detection is pattern-based and can miss unknown credential formats, including the documented U+0085 and U+2028
+  cases. The session format rule independently rejects those separators.
+- Windows compatibility: command output falls back to the system code page if UTF-8 decoding fails, analyzer
+  output accepts the replacement separator, and the CRLF regression fixture normalizes existing line endings.
+
 ## 1.0.0 — 2026-11-12
 
 First release.
