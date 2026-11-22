@@ -84,8 +84,16 @@ def ensure_commit_mode(repo: Path, cfg: Dict[str, Any]) -> None:
 
 
 def repo_arg(args: argparse.Namespace) -> str:
-    """The CLI's repository default: --repo, else the current directory (the API never assumes one)."""
-    return args.repo or os.getcwd()
+    """The CLI's repository default: --repo, else the current directory (the API never assumes one).
+
+    A --repo of spaces goes to `find_repo` here, which reports or resolves it exactly as before F1.0.4 (it does not
+    exist on macOS and Linux; on Windows it means the current directory), so the API only ever gets a real path.
+    """
+    if not args.repo:
+        return os.getcwd()
+    if not args.repo.strip():
+        return str(find_repo(args.repo))
+    return args.repo
 
 
 def cmd_init(args: argparse.Namespace) -> int:

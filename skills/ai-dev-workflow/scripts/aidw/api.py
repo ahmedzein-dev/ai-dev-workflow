@@ -242,10 +242,10 @@ def validate_task(repo: Path, cfg: Dict[str, Any], state: Dict[str, Any]) -> Tup
 def _root(repo: PathLike) -> Path:
     """The repository root for an explicit path; the API never falls back to the current directory.
 
-    Only an empty path is refused here (it would mean "the current directory"); anything else, including a path of
-    spaces, goes to `find_repo`, which reports it exactly as before.
+    An empty path or a path of spaces is refused: `pathlib` would turn either into the current directory (on Windows
+    also a path of spaces). The CLI resolves those values itself, exactly as before F1.0.4.
     """
-    if not str(repo):
+    if not str(repo).strip():
         raise WorkflowError("The engine API needs an explicit repository path.")
     return find_repo(str(repo))
 
@@ -262,7 +262,12 @@ def _task(repo: PathLike, task: str) -> Tuple[Path, Dict[str, Any], Dict[str, An
 
 def apply_clone_commit_mode(*, repo: PathLike, cfg: Dict[str, Any]) -> Dict[str, Any]:
     """Apply the project's records commit mode in this clone if it is not applied yet. Returns `message` (the notice
-    for the user, or None when nothing was applied). Used by the `ensure_commit_mode` compatibility wrapper."""
+    for the user, or None when nothing was applied). Used by the `ensure_commit_mode` compatibility wrapper.
+
+    `repo` must be the repository root, as for the old `ensure_commit_mode`: it is used as given, not resolved.
+    """
+    if not str(repo).strip():
+        raise WorkflowError("The engine API needs an explicit repository path.")
     return {"message": apply_commit_mode_in_clone(Path(repo), cfg)}
 
 

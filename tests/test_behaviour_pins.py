@@ -175,13 +175,16 @@ class LateRefusalTest(GoldenTestCase):
     """
 
     def test_run_output_is_printed_before_a_late_refusal(self) -> None:
+        # A script file instead of `python -c "…"`: an extra command with quotes is not portable to Windows.
+        self.write("two_lines.py", "print('line-one')\nprint('line-two')\n")
+        git(self.repo, "add", "-A")
+        git(self.repo, "commit", "-q", "-m", "fixture")
         self.to_implementation()
         name = "ghp_" + "a1B2c3D4e5F6g7H8i9J0k1L2m3N4o5P6q7R8"
         out, err = io.StringIO(), io.StringIO()
         with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
             # --repo before the positionals: Python 3.9's argparse would treat it as part of the extra command.
-            code = workflow.main(["run", "--repo", str(self.repo), "favorites", name, "--", PY, "-c",
-                                  "print('line-one'); print('line-two')"])
+            code = workflow.main(["run", "--repo", str(self.repo), "favorites", name, "--", PY, "two_lines.py"])
         self.assertNotEqual(code, 0)
         self.assertIn("line-one", out.getvalue())
         text = f"exit: {code}\n--- stdout ---\n{out.getvalue()}--- stderr ---\n{err.getvalue()}"

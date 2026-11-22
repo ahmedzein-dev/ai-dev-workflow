@@ -91,9 +91,13 @@ class SeparationTest(WorkflowTestCase):
                 self.assertFalse(imported & WRITERS, f"imports record writers: {imported & WRITERS}")
                 self.assertFalse(attrs & WRITERS, f"calls record writers: {attrs & WRITERS}")
                 self.assertFalse(api_calls - API_FUNCTIONS, f"calls names that aidw.api only imports: {api_calls - API_FUNCTIONS}")
+                aliases = [a for n in ast.walk(tree) if isinstance(n, (ast.Import, ast.ImportFrom)) for a in n.names
+                           if a.asname and (a.name in ("api", "aidw.api") or a.name.startswith("aidw.api"))]
+                self.assertFalse(aliases, "aidw.api imported under another name")
                 for node in ast.walk(tree):
-                    if isinstance(node, ast.Call) and called_name(node) == "open":
-                        modes = [a.value for a in node.args[1:2] if isinstance(a, ast.Constant)]
+                    if isinstance(node, ast.Call) and called_name(node).rsplit(".", 1)[-1] == "open":
+                        first = 0 if isinstance(node.func, ast.Attribute) else 1  # path.open(mode) vs open(path, mode)
+                        modes = [a.value for a in node.args[first:first + 1] if isinstance(a, ast.Constant)]
                         modes += [k.value.value for k in node.keywords if k.arg == "mode" and isinstance(k.value, ast.Constant)]
                         self.assertFalse(any(set(str(m)) & set("wax+") for m in modes), "opens a file for writing")
                     if isinstance(node, ast.Attribute) and node.attr in ("write_text", "write_bytes"):
@@ -185,9 +189,11 @@ class NoHiddenStateTest(WorkflowTestCase):
         self.assertEqual((code, out.getvalue(), err.getvalue()), (expected_code, "", expected_message))
 
     def test_an_empty_repository_path_is_refused(self) -> None:
-        for call in (lambda: api.status(repo=""), lambda: api.discover_setup(repo="  ")):
-            with self.assertRaises(workflow.WorkflowError):
+        for call in (lambda: api.status(repo=""), lambda: api.discover_setup(repo="  "),
+                     lambda: api.apply_clone_commit_mode(repo="", cfg={})):
+            with self.assertRaises(workflow.WorkflowError) as caught:
                 call()
+            self.assertIn("explicit repository path", str(caught.exception))
 
 
 class JsonParityTest(WorkflowTestCase):
