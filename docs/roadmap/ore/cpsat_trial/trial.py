@@ -26,7 +26,7 @@ import threading
 import time
 from fractions import Fraction
 from math import lcm
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 INT_SAFE = 2**62  # ORE's own headroom below int64 for every scaled linear expression (CP-SAT also checks overflow)
 GUARANTEE_RANK = {"G0": 0, "G1": 1, "G2": 2, "G3": 3}
@@ -400,8 +400,12 @@ class _Win:
                 (n, ctypes.c_size_t) for n in ("PeakWorkingSetSize", "WorkingSetSize", "QuotaPeakPagedPoolUsage",
                                                "QuotaPagedPoolUsage", "QuotaPeakNonPagedPoolUsage",
                                                "QuotaNonPagedPoolUsage", "PagefileUsage", "PeakPagefileUsage")]
-        self.Extended, self.Counters = Extended, Counters
+        class PidList(ctypes.Structure):
+            _fields_ = [("Assigned", wintypes.DWORD), ("InList", wintypes.DWORD),
+                        ("Ids", ctypes.c_size_t * 256)]
+        self.Extended, self.Counters, self.PidList = Extended, Counters, PidList
         k.K32GetProcessMemoryInfo.argtypes = [H, ctypes.POINTER(Counters), wintypes.DWORD]
+        k.QueryInformationJobObject.argtypes = [H, ctypes.c_int, ctypes.c_void_p, wintypes.DWORD, ctypes.c_void_p]
 
     def job_for(self, pid: int, memory_mb: Optional[int]) -> Any:
         """Job object that kills the whole tree on close; with a per-process committed-memory limit if asked."""
@@ -421,6 +425,11 @@ class _Win:
             raise OSError(c.get_last_error(), "AssignProcessToJobObject failed")  # type: ignore[attr-defined]
         return job
 
+    def job_pids(self, job: Any) -> List[int]:
+        info = self.PidList()
+        ok = self.k.QueryInformationJobObject(job, 3, self.ctypes.byref(info), self.ctypes.sizeof(info), None)
+        return [int(info.Ids[i]) for i in range(info.InList)] if ok else []
+
     def rss_kb(self, pid: int) -> int:
         h = self.k.OpenProcess(0x1000 | 0x0010, False, pid)  # QUERY_LIMITED_INFORMATION | VM_READ
         if not h:
@@ -435,8 +444,37 @@ class _Win:
 WIN = _Win() if IS_WINDOWS else None
 
 
+def tree_rss_kb(proc: "subprocess.Popen[str]", job: Any) -> int:
+    """Resident memory of the child and everything it started, measured from outside, on each platform.
+
+    Needed because a process may not do the work itself: on Windows the python.exe of a virtual environment is a
+    launcher that runs the real interpreter as its own child (found by the CI run of this trial).
+    """
+    if WIN is not None:
+        return sum(WIN.rss_kb(pid) for pid in WIN.job_pids(job))
+    if sys.platform.startswith("linux"):
+        total = 0
+        for entry in os.listdir("/proc"):
+            if not entry.isdigit():
+                continue
+            try:
+                with open(f"/proc/{entry}/stat", encoding="ascii", errors="replace") as fh:
+                    fields = fh.read().rsplit(")", 1)[1].split()
+                if int(fields[2]) == proc.pid:  # process group (the child leads its own session)
+                    total += rss_kb(int(entry))
+            except (OSError, IndexError, ValueError):
+                continue
+        return total
+    try:
+        out = subprocess.run(["ps", "-o", "rss=", "-g", str(proc.pid)], capture_output=True, text=True,
+                             timeout=2).stdout
+        return sum(int(x) for x in out.split())
+    except (ValueError, subprocess.TimeoutExpired):
+        return 0
+
+
 def rss_kb(pid: int) -> int:
-    """Resident memory of a process, measured from outside it, on each platform."""
+    """Resident memory of one process, measured from outside it, on each platform."""
     if WIN is not None:
         return WIN.rss_kb(pid)
     if sys.platform.startswith("linux"):
@@ -493,7 +531,7 @@ def run_isolated(job: Dict[str, Any], wall: float, memory_mb: int, cancel_after:
     reason, peak, how = None, 0, None
     while proc.poll() is None:
         elapsed = time.monotonic() - t0
-        peak = max(peak, rss_kb(proc.pid))
+        peak = max(peak, tree_rss_kb(proc, win_job))
         if cancel_after is not None and elapsed >= cancel_after:
             reason = "cancelled"
         elif elapsed >= wall:
@@ -533,6 +571,14 @@ def child() -> None:
                 notes.append(f"{rname} setrlimit failed: {exc}")
         os_note = "; ".join(notes)
     job = json.loads(sys.stdin.read())
+    if job["kind"] == "spawn":  # the work happens in a grandchild: the watchdog must see and stop the whole tree
+        sub = subprocess.Popen([sys.executable, "-I", os.path.abspath(__file__), "--child"], stdin=subprocess.PIPE,
+                               text=True)
+        assert sub.stdin is not None
+        sub.stdin.write(json.dumps(job["job"]))
+        sub.stdin.close()
+        sub.wait()
+        return
     if job["kind"] == "hog":
         blocks = []
         try:
@@ -812,18 +858,24 @@ def t_memory() -> Dict[str, Any]:
     out: Dict[str, Any] = {}
     watched = run_isolated({"kind": "hog", "mb": 2048, "delay": 0.002}, wall=60, memory_mb=300)
     out["rss_watchdog_300mb"] = {k: watched[k] for k in ("killed_for", "stopped_by", "returncode", "elapsed", "peak_rss_mb")}
+    tree = run_isolated({"kind": "spawn", "job": {"kind": "hog", "mb": 2048, "delay": 0.002}}, wall=90, memory_mb=300)
+    out["rss_watchdog_grandchild_300mb"] = {k: tree[k] for k in ("killed_for", "stopped_by", "returncode", "elapsed",
+                                                                 "peak_rss_mb")}
     small = market_split(3, 2, 12, optimise=True)
     base = run_isolated({"kind": "solve", "model": small, "limits": {"threads": 1, "time": 5}}, wall=30,
                         memory_mb=4096)
     out["cpsat_child_peak_rss_small_model"] = {"peak_rss_mb": base["peak_rss_mb"], "elapsed": base["elapsed"],
+                                               "killed_for": base["killed_for"], "stderr_tail": base["stderr_tail"],
                                                "status": (base["result"] or {}).get("info", {}).get("status")}
     big = market_split(11, 40, 400, optimise=True)
     mm = run_isolated({"kind": "solve", "model": big, "limits": {"threads": 1, "time": 8, "memory_mb": 64}},
-                      wall=30, memory_mb=4096)
+                      wall=60, memory_mb=4096)
     out["cpsat_max_memory_in_mb_64"] = {"peak_rss_mb": mm["peak_rss_mb"], "elapsed": mm["elapsed"],
+                                        "killed_for": mm["killed_for"], "stderr_tail": mm["stderr_tail"],
                                         "status": (mm["result"] or {}).get("info", {}).get("status"),
                                         "termination": (mm["result"] or {}).get("termination")}
-    out["pass"] = watched["killed_for"] == "memory_limit" and base["result"] is not None and mm["result"] is not None
+    out["pass"] = watched["killed_for"] == "memory_limit" and tree["killed_for"] == "memory_limit" and \
+        base["result"] is not None and mm["result"] is not None
     return out
 
 
