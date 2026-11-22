@@ -8,10 +8,10 @@ entries first. Feature statuses live in [roadmap-data.js](roadmap-data.js); this
 | | |
 |---|---|
 | Phase | 1 — Foundations & universal technology support (in progress) |
-| Done in Phase 1 | F1.0.1 self-hosting setup · F1.0.2 dev tooling (Completed with Limitations: CI after the owner pushes) |
-| In progress | F1.0.3 (task `engine-package-f1-0-3`) in IMPLEMENTATION: spec v1 e4243a94 and plan v1 963f000b approved |
-| Waiting on | Nothing from the owner right now; D-037 (first optional solver) will be presented after the solver research |
-| Next action | Implement F1.0.3; finish the solver comparison |
+| Done in Phase 1 | F1.0.1 self-hosting setup · F1.0.2 dev tooling · F1.0.3 engine package (both Completed with Limitations: CI after the owner pushes) |
+| In progress | — |
+| Waiting on | The owner: D-037 (first optional solver, CP-SAT recommended); commit and push of F1.0.3 |
+| Next action | F1.0.4 (engine API) or F1.0.5 (state schema, migration, locking) |
 | Blockers | None |
 
 ## Phase progress
@@ -21,8 +21,8 @@ history in MASTER_ROADMAP §9.
 
 | Phase | Features done / total | Status |
 |---|---|---|
-| 0 | 14 / 15 | Nearly done (F0.4.2 solver comparison in progress) |
-| 1 | 2 / 25 | In progress |
+| 0 | 15 / 15 | Done (D-037 waiting for the owner) |
+| 1 | 3 / 25 | In progress |
 | 2 | 0 / 20 | Planned |
 | 3 | 0 / 12 | Planned (MVP) |
 | 4 | 0 / 12 | Planned (MVP) |
@@ -43,6 +43,15 @@ history in MASTER_ROADMAP §9.
 | 19 | 0 / 8 | Planned (checklist from v1.1) |
 
 ## Log
+
+### 2026-11-22 — F1.0.3 closed: Completed with Limitations; solver comparison done
+
+- `workflow.py` (3,458 lines) moved verbatim into `scripts/aidw/` (19 modules, 7 subpackages, 5 layer levels); the entry
+  point has no engine logic. Independent AST comparison: identical except `SKILL_DIR`.
+- Audit: one Important finding (bytecode written into installed copies) fixed with `sys.dont_write_bytecode` and a
+  project-install test; four Minor findings fixed. Checks on code 9b5f860b53: 156 tests on Python 3.13 and 3.9, privacy,
+  ruff, mypy, golden byte-identical, startup +3 to +5 ms. CI after push.
+- ORE solver comparison written from official sources (ore/SOLVER_COMPARISON.md); D-037 recommends OR-Tools CP-SAT.
 
 ### 2026-11-22 — Approvals and first commit
 

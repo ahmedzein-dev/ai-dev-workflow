@@ -35,8 +35,8 @@ as ORE's recommendation. Agents cannot write classifications; only the verifier 
 | Level | Meaning | Examples |
 |---|---|---|
 | G0 none | heuristic or approximate | local search, time-limited run |
-| G1 tolerance | solver reports optimal within floating-point tolerances and a gap setting | float LP/MIP solvers with default gaps |
-| G2 exact-solver | solver proves optimality in exact (integer or rational) arithmetic with zero gap; ORE independently re-checks feasibility and objective exactly | an integer-only model solved with zero gap limits by a solver whose arithmetic is exact for that class (to be confirmed per solver in SOLVER_COMPARISON) |
+| G1 tolerance | solver reports optimal within floating-point tolerances and a gap setting | HiGHS, SciPy, SCIP pip builds (their "optimal" holds within gap and feasibility tolerances, even with gaps set to 0) |
+| G2 exact-solver | solver proves optimality in exact (integer or rational) arithmetic; ORE independently re-checks feasibility and objective exactly | CP-SAT on an integer model with an integer objective, status `OPTIMAL` and best bound equal to the objective; Z3 `Optimize` on linear integer/real models (SOLVER_COMPARISON §2) |
 | G3 independent | optimality established by a method independent of the solving solver, checked by ORE | built-in exhaustive enumeration; an exact LP dual certificate checked in rational arithmetic; a second exact solver proving the same optimal value |
 
 **Recommended default (D-034): `exact` = G2 or G3.** G1 results are classified `FEASIBLE_NOT_PROVEN` in strict mode,

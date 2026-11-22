@@ -1,6 +1,6 @@
 # Phase 0 — Current System Audit & Architecture Assessment
 
-**Status:** Nearly done (solver comparison F0.4.2 in progress) — first review approved on 2026-11-22 («موافق على كله و قالب المواصفات الخاص بيا»); the strategic
+**Status:** Done; D-037 (first optional solver) presented for approval — first review approved on 2026-11-22 («موافق على كله و قالب المواصفات الخاص بيا»); the strategic
 integration of brief 2 approved the same day («Approved»).
 **Version:** none (no production code changes).
 
@@ -58,7 +58,7 @@ None taken. Proposed decisions are in [DECISIONS.md](../DECISIONS.md).
 | F0.3.4 | Owner review of the integration and decisions D-020–D-030 | Done | Owner: «Approved» (DECISIONS.md) |
 | E0.4 | **ORE integration (brief 3)** | | |
 | F0.4.1 | ORE design: responsibilities, fit gate, lifecycle, architecture, schema, strict policy, security, validation | Done | `ore/*.md` |
-| F0.4.2 | Solver comparison from official sources | In progress | `ore/SOLVER_COMPARISON.md` |
+| F0.4.2 | Solver comparison from official sources | Done | `ore/SOLVER_COMPARISON.md` |
 | F0.4.3 | Phase renumbering (0–19) with ORE phases 6 and 10 and ORE epics in phases 9, 11, 14, 15, 16, 19 | Done | `MASTER_ROADMAP.md`, `phases/` |
 | F0.4.4 | Traceability matrix extended to brief 3 | Done | `REQUIREMENTS_TRACEABILITY.md` |
 | F0.4.5 | Owner review of the ORE integration and decisions D-031–D-040 | Done | Owner: «Approved all and you do the commit»; D-037 pending research |

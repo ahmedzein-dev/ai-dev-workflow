@@ -9,15 +9,15 @@ window.ROADMAP = {
  "current": {
   "phase": 1,
   "next": {
-   "en": "F1.0.3 in progress: split workflow.py into the aidw/ package (spec and plan approved). Solver comparison and D-037 next.",
-   "ar": "شغّالين في F1.0.3: تقسيم workflow.py لحزمة aidw/ (المواصفات والخطة متوافق عليهم). وبعدها مقارنة المحركات وقرار D-037."
+   "en": "F1.0.3 closed. Waiting on the owner: D-037 (OR-Tools CP-SAT recommended as the first optional ORE solver). Next feature: F1.0.4 or F1.0.5.",
+   "ar": "F1.0.3 اتقفلت. مستنيين صاحب المشروع في D-037 (OR-Tools CP-SAT مقترح كأول محرك حل اختياري). الخاصية الجاية: F1.0.4 أو F1.0.5."
   }
  },
  "phases": [
   {
    "id": 0,
    "target": "—",
-   "status": "in-progress",
+   "status": "done",
    "effort": "done",
    "deps": [],
    "file": "phases/PHASE_00.md",
@@ -135,7 +135,7 @@ window.ROADMAP = {
        "t": "Solver comparison from official sources",
        "pri": "P0",
        "eff": "—",
-       "st": "in-progress"
+       "st": "done"
       },
       {
        "id": "F0.4.3",
@@ -210,11 +210,12 @@ window.ROADMAP = {
        "t": "Mechanical split of workflow.py into the aidw/ package; workflow.py becomes the entry point; no behaviour change",
        "pri": "P0",
        "eff": "L",
-       "st": "planned",
+       "st": "done",
        "dep": [
         "F1.0.2"
        ],
-       "mvp": true
+       "mvp": true,
+       "note": "Closed as Completed with Limitations: CI runs after the owner pushes"
       },
       {
        "id": "F1.0.4",
@@ -1343,7 +1344,7 @@ window.ROADMAP = {
      "features": [
       {
        "id": "F6.0.1",
-       "t": "Desk study: solver comparison from official sources (SOLVER_COMPARISON.md)",
+       "t": "Desk study: solver comparison from official sources (SOLVER_COMPARISON.md; done in Phase 0 as F0.4.2)",
        "pri": "P0",
        "eff": "S",
        "st": "planned"
@@ -3298,6 +3299,12 @@ window.ROADMAP = {
    "date": "2026-11-22",
    "what": "F1.0.2: unit (147 tests) on Python 3.13 and 3.9, privacy, ruff, mypy",
    "result": "All passed · code 1705ed3d78",
+   "ok": true
+  },
+  {
+   "date": "2026-11-22",
+   "what": "F1.0.3: 156 tests on 3.13 and 3.9, ruff, mypy, privacy, golden byte-identical",
+   "result": "All passed · code 9b5f860b53",
    "ok": true
   },
   {
