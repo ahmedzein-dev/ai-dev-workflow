@@ -8,9 +8,9 @@ entries first. Feature statuses live in [roadmap-data.js](roadmap-data.js); this
 | | |
 |---|---|
 | Phase | 1 — Foundations & universal technology support (in progress) |
-| Done in Phase 1 | F1.0.1 self-hosting setup · F1.0.2 dev tooling · F1.0.3 engine package (both Completed with Limitations: CI after the owner pushes) |
-| In progress | F6.0.2 CP-SAT trial (D-037): macOS part done — [ore/CPSAT_TRIAL.md](ore/CPSAT_TRIAL.md) |
-| Waiting on | The owner: policy questions P-1–P-3 and the final D-037 decision; a push so CI verifies F1.0.2/F1.0.3 and the trial can run on Linux and Windows |
+| Done in Phase 1 | F1.0.1 self-hosting setup · F1.0.2 dev tooling · F1.0.3 engine package (CI passed on 3 OSes × Python 3.9/3.13 at `3837bb2`) |
+| In progress | F6.0.2: CP-SAT trial complete on Linux, Windows, macOS — [ore/CPSAT_TRIAL.md](ore/CPSAT_TRIAL.md); Z3/HiGHS checks remain (Phase 10) |
+| Waiting on | The owner: final review of D-037 (CP-SAT) on the cross-platform evidence |
 | Next action | F1.0.4 (engine API) or F1.0.5 (state schema, migration, locking) |
 | Blockers | None |
 
@@ -43,6 +43,19 @@ history in MASTER_ROADMAP §9.
 | 19 | 0 / 8 | Planned (checklist from v1.1) |
 
 ## Log
+
+### 2026-11-22 — Pushed; CI green; CP-SAT trial complete on three operating systems
+
+- Owner approved the push and P-1–P-3, and added R1–R6 (quoted in DECISIONS.md).
+- Branch `phase-1/foundations` pushed (the active GitHub CLI account had no access, so the push used the owner's
+  `ahmedzein-dev` credential for that command only). CI now also runs on `phase-*` branches.
+- `tests` at `3837bb2`: 6 jobs (Linux, Windows, macOS × Python 3.9, 3.13) and lint passed. F1.0.2 and F1.0.3 verified
+  by CI.
+- `ore-cpsat-trial` at `3837bb2`: 6 of 6 jobs passed after two controller fixes found by the first runs on Windows
+  (memory over the whole process tree; pipes drained while running). 0 mismatches against enumeration in 1,650 models
+  per run; the gap trap reproduced on every platform; OS memory limits enforced on Linux and Windows, unavailable on
+  macOS; cold start of 38–42 s reproduced only on the owner's Mac.
+- D-037 stays approved in principle until the owner's final review.
 
 ### 2026-11-22 — F1.0.3 committed; D-037 conditionally approved; CP-SAT trial (F6.0.2, part 1)
 

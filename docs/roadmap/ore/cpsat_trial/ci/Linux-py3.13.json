@@ -1,0 +1,543 @@
+{
+ "environment": {
+  "python": "3.13.18",
+  "platform": "Linux-7.0.0-1014-aws-x86_64-with-glibc2.39",
+  "machine": "x86_64",
+  "ortools": "9.15.6755",
+  "dependencies": {
+   "ortools": "9.15.6755",
+   "numpy": "2.5.5",
+   "pandas": "3.1.1",
+   "protobuf": "6.33.6",
+   "absl-py": "2.5.1",
+   "immutabledict": "4.3.1"
+  },
+  "cp_model_import_s": 0.205,
+  "cp_model_import_fresh_processes_s": [
+   0.229,
+   0.231,
+   0.231
+  ],
+  "bytecode_writing_disabled": false
+ },
+ "C9 correctness vs enumeration": {
+  "models": 1500,
+  "by_classification": {
+   "PROVEN_OPTIMAL": 1225,
+   "PROVEN_INFEASIBLE": 275
+  },
+  "mismatches": 0,
+  "examples": [],
+  "pass": true,
+  "seconds": 1.47
+ },
+ "C9 correctness vs enumeration, medium models": {
+  "models": 150,
+  "by_classification": {
+   "PROVEN_INFEASIBLE": 34,
+   "PROVEN_OPTIMAL": 116
+  },
+  "mismatches": 0,
+  "examples": [],
+  "pass": true,
+  "seconds": 5.75
+ },
+ "C6 C7 C8 gap trap and strict gaps": {
+  "absolute_gap_50": {
+   "raw": {
+    "adapter": "cpsat",
+    "guarantee": "G2",
+    "termination": "completed",
+    "solution_status": "optimal_claimed",
+    "values": {
+     "x0": 0,
+     "x1": 0,
+     "x2": 0,
+     "x3": 0,
+     "x4": 0,
+     "x5": 1,
+     "x6": 1,
+     "x7": 1,
+     "x8": 1,
+     "x9": 0,
+     "x10": 1,
+     "x11": 1,
+     "x12": 1,
+     "x13": 1,
+     "x14": 1,
+     "x15": 0,
+     "x16": 1,
+     "x17": 1,
+     "x18": 1,
+     "x19": 0,
+     "x20": 1,
+     "x21": 0,
+     "x22": 1,
+     "x23": 1,
+     "x24": 1,
+     "x25": 0,
+     "x26": 0,
+     "x27": 0,
+     "x28": 1,
+     "x29": 0,
+     "p0": 0,
+     "q0": 5,
+     "p1": 5,
+     "q1": 0,
+     "p2": 12,
+     "q2": 0,
+     "p3": 2,
+     "q3": 0
+    },
+    "reported_objective": "24.0",
+    "exact_bound": "0",
+    "config": {
+     "absolute_gap_limit": 50.0,
+     "relative_gap_limit": 0.0,
+     "num_workers": 1,
+     "max_time_in_seconds": 10.0,
+     "random_seed": 0,
+     "max_memory_in_mb": 1024
+    },
+    "info": {
+     "status": "OPTIMAL",
+     "wall_time": 0.0015,
+     "deterministic_time": 0.00013523960000000004,
+     "branches": 94,
+     "conflicts": 0,
+     "solution_info": "main",
+     "best_bound_double": 0.0,
+     "objective_multiplier": 1,
+     "inner_lower_bound": 0
+    }
+   },
+   "verdict": {
+    "model_status": "valid",
+    "required_level": "G2",
+    "solver_claim": "optimal_claimed",
+    "verification": "feasibility_only",
+    "level_reached": "G0",
+    "problems": [],
+    "termination": "completed",
+    "exact_objective": "24",
+    "evidence": [
+     "gap limits not zero: configuration does not meet the strict policy",
+     "exact bound 0 != exact objective 24: gap 24"
+    ],
+    "classification": "FEASIBLE_NOT_PROVEN",
+    "gap": "24"
+   }
+  },
+  "relative_gap_0_99": {
+   "raw": {
+    "adapter": "cpsat",
+    "guarantee": "G2",
+    "termination": "time_limit",
+    "solution_status": "feasible",
+    "values": {
+     "x0": 0,
+     "x1": 0,
+     "x2": 0,
+     "x3": 0,
+     "x4": 1,
+     "x5": 1,
+     "x6": 1,
+     "x7": 1,
+     "x8": 0,
+     "x9": 1,
+     "x10": 0,
+     "x11": 0,
+     "x12": 1,
+     "x13": 0,
+     "x14": 0,
+     "x15": 0,
+     "x16": 1,
+     "x17": 1,
+     "x18": 1,
+     "x19": 1,
+     "x20": 1,
+     "x21": 1,
+     "x22": 1,
+     "x23": 1,
+     "x24": 0,
+     "x25": 0,
+     "x26": 0,
+     "x27": 0,
+     "x28": 1,
+     "x29": 1,
+     "p0": 0,
+     "q0": 0,
+     "p1": 0,
+     "q1": 0,
+     "p2": 0,
+     "q2": 1,
+     "p3": 0,
+     "q3": 0
+    },
+    "reported_objective": "1.0",
+    "exact_bound": "0",
+    "config": {
+     "absolute_gap_limit": 0.0,
+     "relative_gap_limit": 0.99,
+     "num_workers": 1,
+     "max_time_in_seconds": 10.0,
+     "random_seed": 0,
+     "max_memory_in_mb": 1024
+    },
+    "info": {
+     "status": "FEASIBLE",
+     "wall_time": 10.0008,
+     "deterministic_time": 12.183859394423399,
+     "branches": 201564,
+     "conflicts": 47436,
+     "solution_info": "main",
+     "best_bound_double": 0.0,
+     "objective_multiplier": 1,
+     "inner_lower_bound": 0
+    }
+   },
+   "verdict": {
+    "model_status": "valid",
+    "required_level": "G2",
+    "solver_claim": "feasible",
+    "verification": "feasibility_only",
+    "level_reached": "G0",
+    "problems": [],
+    "termination": "time_limit",
+    "exact_objective": "1",
+    "evidence": [],
+    "classification": "FEASIBLE_NOT_PROVEN",
+    "gap": "1"
+   }
+  },
+  "strict_small": {
+   "raw": {
+    "adapter": "cpsat",
+    "guarantee": "G2",
+    "termination": "completed",
+    "solution_status": "optimal_claimed",
+    "values": {
+     "x": 9,
+     "y": 2
+    },
+    "reported_objective": "35.0",
+    "exact_bound": "107/6",
+    "config": {
+     "absolute_gap_limit": 0.0,
+     "relative_gap_limit": 0.0,
+     "num_workers": 1,
+     "max_time_in_seconds": 20.0,
+     "random_seed": 0,
+     "max_memory_in_mb": 1024
+    },
+    "info": {
+     "status": "OPTIMAL",
+     "wall_time": 0.0004,
+     "deterministic_time": 1e-08,
+     "branches": 0,
+     "conflicts": 0,
+     "solution_info": "main",
+     "best_bound_double": 35.0,
+     "objective_multiplier": 2,
+     "inner_lower_bound": -35
+    }
+   },
+   "verdict": {
+    "model_status": "valid",
+    "required_level": "G2",
+    "solver_claim": "optimal_claimed",
+    "verification": "verified",
+    "level_reached": "G2",
+    "problems": [],
+    "termination": "completed",
+    "exact_objective": "107/6",
+    "evidence": [
+     "status OPTIMAL, gaps 0, exact bound == exact objective"
+    ],
+    "classification": "PROVEN_OPTIMAL",
+    "proof": "proven by the solver under the approved model, not independently certified"
+   }
+  },
+  "enumerator_small": {
+   "model_status": "valid",
+   "required_level": "G2",
+   "solver_claim": "optimal_claimed",
+   "verification": "verified",
+   "level_reached": "G3",
+   "problems": [],
+   "termination": "completed",
+   "exact_objective": "107/6",
+   "evidence": [
+    "exhaustive enumeration"
+   ],
+   "classification": "PROVEN_OPTIMAL",
+   "proof": "independently certified"
+  },
+  "pass": true,
+  "seconds": 10.01
+ },
+ "C7 precision beyond 2^53": {
+  "exact_objective": "36028797018963969",
+  "solver_double": "3.602879701896397e+16",
+  "double_equals_exact": false,
+  "double_as_int": 36028797018963968,
+  "exact_bound": "36028797018963969",
+  "classification": "PROVEN_OPTIMAL",
+  "pass": true,
+  "seconds": 0.0
+ },
+ "C4 C7 overflow and floats": {
+  "lcd_overflow_precheck": {
+   "model_status": "numerical_uncertainty",
+   "required_level": "G2",
+   "solver_claim": null,
+   "verification": "not_verified",
+   "level_reached": null,
+   "problems": [],
+   "classification": "NUMERICAL_UNCERTAINTY",
+   "why": "scaled coefficients exceed the int64 headroom (never rounded)"
+  },
+  "float_input": {
+   "model_status": "invalid_model",
+   "required_level": "G2",
+   "solver_claim": null,
+   "verification": "not_verified",
+   "level_reached": null,
+   "problems": [],
+   "classification": "INVALID_MODEL",
+   "why": "floats are rejected, use an exact decimal string: 0.1"
+  },
+  "cpsat_overflow_status": "MODEL_INVALID",
+  "cpsat_api": {
+   "float in constraint": "TypeError: Linear constraints only accept integer values and coefficients: FloatA",
+   "2^63 coefficient": "TypeError: Linear constraints only accept integer values and coefficients: FloatA",
+   "float objective": "accepted silently as floating_point_objective"
+  },
+  "pass": true,
+  "seconds": 0.0
+ },
+ "C10 P-2 infeasible and conflict set": {
+  "cpsat_verdict": {
+   "model_status": "valid",
+   "required_level": "G2",
+   "solver_claim": "infeasible_claimed",
+   "verification": "not_verified",
+   "level_reached": "G2",
+   "problems": [],
+   "termination": "completed",
+   "classification": "PROVEN_INFEASIBLE",
+   "proof": "proven by the solver under the approved model, not independently certified",
+   "conflict_set": [
+    "budget",
+    "need_a",
+    "need_b",
+    "c_small"
+   ],
+   "conflict_set_minimal": "not proven"
+  },
+  "enumerator": "PROVEN_INFEASIBLE",
+  "enumerator_proof": "independently certified",
+  "reported_conflict_set": [
+   "budget",
+   "need_a",
+   "need_b",
+   "c_small"
+  ],
+  "reported_set_minimal": false,
+  "deletion_filter_set": [
+   "budget",
+   "need_a",
+   "need_b"
+  ],
+  "deletion_filter_minimal_proven": true,
+  "minimality_evidence": "set infeasible at G2; each set without one member has an exactly verified solution",
+  "deletion_filter_set_infeasible_by_enumeration_G3": true,
+  "pass": true,
+  "seconds": 0.01
+ },
+ "R4 R5 no automatic downgrade": {
+  "cpsat_required_G3": {
+   "classification": "FEASIBLE_NOT_PROVEN",
+   "level_reached": "G2",
+   "required_level": "G3"
+  },
+  "enumerator_required_G3": {
+   "classification": "PROVEN_OPTIMAL",
+   "level_reached": "G3",
+   "proof": "independently certified"
+  },
+  "cpsat_infeasible_required_G3": {
+   "classification": "UNKNOWN",
+   "level_reached": "G2",
+   "evidence": [
+    "infeasibility established at G2, below the required G3"
+   ]
+  },
+  "pass": true,
+  "seconds": 0.0
+ },
+ "C10 C11 limits and cancellation": {
+  "timeout_with_solution": {
+   "status": "FEASIBLE",
+   "termination": "time_limit",
+   "classification": "FEASIBLE_NOT_PROVEN",
+   "gap": "2"
+  },
+  "timeout_no_solution": {
+   "status": "UNKNOWN",
+   "termination": "time_limit",
+   "classification": "TIMEOUT"
+  },
+  "conflict_limit": {
+   "status": "UNKNOWN",
+   "termination": "resource_limit",
+   "classification": "RESOURCE_LIMIT",
+   "conflicts": 2002
+  },
+  "invalid_model": {
+   "model_status": "invalid_model",
+   "required_level": "G2",
+   "solver_claim": null,
+   "verification": "not_verified",
+   "level_reached": null,
+   "problems": [],
+   "classification": "INVALID_MODEL",
+   "why": "variable x: empty domain 5..3"
+  },
+  "cancel_in_process": {
+   "status": "FEASIBLE",
+   "termination": "cancelled",
+   "classification": "CANCELLED",
+   "feasible_solution_kept": true,
+   "returned_after_s": 0.502
+  },
+  "cancel_process_group": {
+   "killed_for": "cancelled",
+   "stopped_by": "SIGTERM to process group",
+   "returncode": -15,
+   "elapsed": 1.053,
+   "peak_rss_mb": 113
+  },
+  "hard_wall_clock_kill": {
+   "killed_for": "time_limit",
+   "stopped_by": "SIGTERM to process group",
+   "returncode": -15,
+   "elapsed": 1.523,
+   "peak_rss_mb": 113
+  },
+  "large_output_1mb": {
+   "completed": true,
+   "elapsed": 0.053,
+   "killed_for": null
+  },
+  "pass": true,
+  "seconds": 5.28
+ },
+ "C11 memory": {
+  "rss_watchdog_300mb": {
+   "killed_for": "memory_limit",
+   "stopped_by": "SIGTERM to process group",
+   "returncode": -15,
+   "elapsed": 0.747,
+   "peak_rss_mb": 302
+  },
+  "rss_watchdog_grandchild_300mb": {
+   "killed_for": "memory_limit",
+   "stopped_by": "SIGTERM to process group",
+   "returncode": -15,
+   "elapsed": 0.733,
+   "peak_rss_mb": 304
+  },
+  "cpsat_child_peak_rss_small_model": {
+   "peak_rss_mb": 110,
+   "elapsed": 0.316,
+   "killed_for": null,
+   "stderr_tail": [],
+   "status": "OPTIMAL"
+  },
+  "cpsat_max_memory_in_mb_64": {
+   "peak_rss_mb": 126,
+   "elapsed": 8.359,
+   "killed_for": null,
+   "stderr_tail": [],
+   "status": "FEASIBLE",
+   "termination": "time_limit"
+  },
+  "pass": true,
+  "seconds": 10.17
+ },
+ "C11 R1 memory OS limit": {
+  "killed_for": null,
+  "returncode": 0,
+  "elapsed": 0.521,
+  "peak_rss_mb": 912,
+  "os_limit": null,
+  "result": {
+   "memory_error_after_mb": 998,
+   "os_limit": "RLIMIT_AS soft limit set; RLIMIT_DATA soft limit set"
+  },
+  "stderr_tail": [],
+  "enforced": true,
+  "platform": "linux",
+  "pass": true,
+  "seconds": 0.52
+ },
+ "C11 threads and determinism": {
+  "cpu": {
+   "workers_1": {
+    "cpu_s": 3.51,
+    "solver_wall_s": 3.0008,
+    "cpu_per_wall": 1.17
+   },
+   "workers_4": {
+    "cpu_s": 12.229,
+    "solver_wall_s": 3.0016,
+    "cpu_per_wall": 4.07
+   }
+  },
+  "deterministic_limit_identical_runs": true,
+  "deterministic_runs": [
+   {
+    "branches": 63695,
+    "conflicts": 15668,
+    "objective": "2"
+   },
+   {
+    "branches": 63695,
+    "conflicts": 15668,
+    "objective": "2"
+   },
+   {
+    "branches": 63695,
+    "conflicts": 15668,
+    "objective": "2"
+   },
+   {
+    "branches": 63695,
+    "conflicts": 15668,
+    "objective": "2"
+   },
+   {
+    "branches": 63695,
+    "conflicts": 15668,
+    "objective": "2"
+   }
+  ],
+  "wall_limit_runs": [
+   {
+    "branches": 43802,
+    "objective": "2"
+   },
+   {
+    "branches": 43841,
+    "objective": "2"
+   },
+   {
+    "branches": 43845,
+    "objective": "2"
+   }
+  ],
+  "pass": true,
+  "seconds": 17.84
+ }
+}

@@ -2,7 +2,7 @@
 
 Compiled on 2026-11-22 from official documentation, release notes, source code at release tags, PyPI metadata and OSV
 (no software was installed). Items marked **unverified** could not be confirmed and go to the hands-on spike (F6.0.2).
-**Update 2026-11-22:** the CP-SAT items of §3 were checked hands-on on macOS — [CPSAT_TRIAL.md](CPSAT_TRIAL.md).
+**Update 2026-11-22:** the CP-SAT items of §3 were checked hands-on on Linux, Windows and macOS — [CPSAT_TRIAL.md](CPSAT_TRIAL.md).
 Selection criterion: what each tool can **prove** under the strict policy ([STRICT_OPTIMALITY_POLICY.md](STRICT_OPTIMALITY_POLICY.md)).
 
 ## 1. Summary table

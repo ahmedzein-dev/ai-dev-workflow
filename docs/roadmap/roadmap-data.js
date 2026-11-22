@@ -9,8 +9,8 @@ window.ROADMAP = {
  "current": {
   "phase": 1,
   "next": {
-   "en": "F1.0.3 committed. D-037 conditionally approved; CP-SAT trial on macOS met the conditions with ORE controls. Waiting on the owner: policy questions P-1–P-3, Linux/Windows trial runs (push), final D-037. Next feature: F1.0.4 or F1.0.5.",
-   "ar": "F1.0.3 اتعملها commit. D-037 متوافق عليه بشروط، وتجربة CP-SAT على macOS حققت الشروط مع ضوابط ORE. مستنيين صاحب المشروع: أسئلة السياسة P-1–P-3، تشغيل التجربة على Linux وWindows (بعد الـ push)، والقرار النهائي في D-037. الخاصية الجاية: F1.0.4 أو F1.0.5."
+   "en": "Branch pushed; CI green on Linux, Windows, macOS. CP-SAT trial met every condition on all three (with ORE controls). Waiting on the owner: final review of D-037. Next feature: F1.0.4 or F1.0.5.",
+   "ar": "الفرع اترفع والـ CI نجح على Linux وWindows وmacOS. تجربة CP-SAT حققت كل الشروط على الثلاثة (مع ضوابط ORE). مستنيين صاحب المشروع يراجع D-037 للقرار النهائي. الخاصية الجاية: F1.0.4 أو F1.0.5."
   }
  },
  "phases": [
@@ -203,7 +203,7 @@ window.ROADMAP = {
         "F1.0.1"
        ],
        "mvp": true,
-       "note": "Closed as Completed with Limitations: CI runs after the owner pushes"
+       "note": "Completed with Limitations; CI passed on 3 OSes × Python 3.9/3.13 (3837bb2)"
       },
       {
        "id": "F1.0.3",
@@ -215,7 +215,7 @@ window.ROADMAP = {
         "F1.0.2"
        ],
        "mvp": true,
-       "note": "Closed as Completed with Limitations: CI runs after the owner pushes"
+       "note": "Completed with Limitations; CI passed on 3 OSes × Python 3.9/3.13 (3837bb2)"
       },
       {
        "id": "F1.0.4",
@@ -676,7 +676,7 @@ window.ROADMAP = {
       },
       {
        "id": "F2.5.2",
-       "t": "Process runner: new process group/session, kill the group on timeout, stream output to a temp file (TD-11, TD-12)",
+       "t": "Process runner: new process group/session (job object on Windows), kill the group on timeout, stream output to a temp file or drain pipes while running (TD-11, TD-12; both failure modes reproduced on Windows by the F6.0.2 trial: a venv launcher child and a blocked 4 KB pipe)",
        "pri": "P0",
        "eff": "M",
        "st": "planned",
@@ -1351,14 +1351,14 @@ window.ROADMAP = {
       },
       {
        "id": "F6.0.2",
-       "t": "Hands-on spike: candidate solvers in a throwaway virtual environment, run scenarios ORE-A/I/J/K/L, confirm guarantees, status mapping and resource controls; decision record",
+       "t": "Hands-on spike: candidate solvers in a throwaway virtual environment, run scenarios ORE-A/I/J/K/L, confirm guarantees, status mapping and resource controls; decision record. CP-SAT trial done 2026-11-22 on Linux, Windows and macOS, Python 3.9 and 3.13 ([ore/CPSAT_TRIAL.md](../ore/CPSAT_TRIAL.md)); Z3 and HiGHS checks remain (Phase 10)",
        "pri": "P0",
        "eff": "M",
        "st": "in-progress",
        "dep": [
         "F6.0.1"
        ],
-       "note": "CP-SAT part run on macOS (Python 3.9, 3.13): conditions met with ORE controls; Linux/Windows runs and owner decisions pending (ore/CPSAT_TRIAL.md)"
+       "note": "CP-SAT trial complete on Linux, Windows, macOS × Python 3.9/3.13 (ore/CPSAT_TRIAL.md); D-037 awaits the owner's final review; Z3/HiGHS checks remain"
       }
      ]
     },
@@ -1498,7 +1498,7 @@ window.ROADMAP = {
      "features": [
       {
        "id": "F6.4.1",
-       "t": "Execution controller: separate process, time, memory and thread limits, cancellation, termination reasons",
+       "t": "Execution controller: separate process, time, memory and thread limits, cancellation, termination reasons; memory over the whole process tree, OS limits where they exist (Linux RLIMIT_AS, Windows job objects), watchdog everywhere (CPSAT_TRIAL §4.7)",
        "pri": "P0",
        "eff": "M",
        "st": "planned",
@@ -3310,9 +3310,15 @@ window.ROADMAP = {
   },
   {
    "date": "2026-11-22",
-   "what": "F1.0.2: GitHub Actions (lint job, 6 test jobs)",
-   "result": "Not run until the owner pushes",
-   "ok": false
+   "what": "GitHub Actions tests at 3837bb2: lint + 6 test jobs (Linux, Windows, macOS × Python 3.9, 3.13)",
+   "result": "All passed",
+   "ok": true
+  },
+  {
+   "date": "2026-11-22",
+   "what": "ore-cpsat-trial at 3837bb2: 6 jobs (Linux, Windows, macOS × Python 3.9, 3.13), 1,650 models each vs enumeration",
+   "result": "6/6 passed · 0 mismatches",
+   "ok": true
   }
  ],
  "releases": [
