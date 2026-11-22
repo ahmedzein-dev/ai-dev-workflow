@@ -5,7 +5,7 @@ license: MIT
 compatibility: "Requires git and Python 3.9+. Read by Claude Code, Codex, Gemini CLI, Antigravity and other Agent Skills clients; invocation and limits differ per agent (see docs/compatibility.md in the AIDevWorkflow repository)."
 metadata:
   project: AIDevWorkflow
-  version: "1.0.0"
+  version: "1.0.1"
 disable-model-invocation: true
 argument-hint: "[feature request | task name | status | pause <task> | audit <task>]"
 hooks:

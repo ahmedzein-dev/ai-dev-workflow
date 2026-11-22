@@ -26,7 +26,7 @@ import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence, Set, Tuple
 
-__version__ = "1.0.0"
+__version__ = "1.0.1"
 
 SKILL_NAME = "ai-dev-workflow"
 RECORDS = ".ai-dev-workflow"
@@ -241,6 +241,48 @@ def assert_no_secrets(text: str, where: str) -> None:
             f"Refusing to save {where}: it looks like it contains a secret — {listed}. "
             "Task records must never hold credentials, tokens, keys or passwords; refer to them by name instead."
         )
+
+
+# --------------------------------------------------------------------------- identity values (1.0.1, TD-25)
+
+def session_problem(session: Optional[str]) -> Optional[str]:
+    """Why a session id must be refused, or None when it passes or is a placeholder clean_session drops. One rule
+    for the commands and the Claude Code hooks; the message never contains the value. The secret check is
+    pattern-based; the format rule (1-256 printable characters without whitespace) bounds structure only."""
+    value = clean_session(session)
+    if value is None:
+        return None
+    try:
+        assert_no_secrets(value, "the session id")
+    except WorkflowError as exc:
+        return str(exc)
+    if not (len(value) <= 256 and value.isprintable() and not any(ch.isspace() for ch in value)):
+        return "The session id must be 1–256 printable characters without spaces."
+    return None
+
+
+def check_identity(args: argparse.Namespace) -> None:
+    """Refuse a secret-like agent name or a secret-like or malformed session id before a recording command runs
+    anything or writes anything. Messages name the field, never the value."""
+    assert_no_secrets(agent_name(args), "the agent name")
+    problem = session_problem(getattr(args, "session", None))
+    if problem:
+        raise WorkflowError(problem)
+
+
+def remove_partial_task(tdir: Path, written: List[Path]) -> None:
+    """After a failed `new`: remove the files this call wrote (and their temporary files), then the folder only if
+    it is empty. Never removes anything else; a failed removal never hides the original error."""
+    for path in written:
+        for candidate in (path, path.with_name(f".{path.name}.{os.getpid()}.tmp")):
+            try:
+                candidate.unlink()
+            except OSError:
+                pass
+    try:
+        tdir.rmdir()
+    except OSError:
+        pass
 
 
 # --------------------------------------------------------------------------- git
@@ -2004,6 +2046,7 @@ def cmd_init(args: argparse.Namespace) -> int:
 
 
 def cmd_new(args: argparse.Namespace) -> int:
+    check_identity(args)
     if not args.invocation or not INVOCATION_RE.search(args.invocation):
         raise WorkflowError(
             "Task files are created only when the user explicitly starts AIDevWorkflow. Pass the user's starting "
@@ -2025,22 +2068,31 @@ def cmd_new(args: argparse.Namespace) -> int:
     invocation = redact(args.invocation.strip())[:500]
     assert_no_secrets(title, "the task title")
     tdir.mkdir(parents=True)
-    write_text(tdir / "spec.md", read_text(tpl_path))
-    for name in ("dependencies.md", "plan.md", "verification.md", "audit.md", "report.md"):
-        write_text(tdir / name, read_text(record_template(name)).replace("[Task title]", title))
-    state: Dict[str, Any] = {
-        "schema": 1, "id": args.task, "title": title, "type": args.type,
-        "created_at": now_iso(), "created_by": agent, "invocation": invocation,
-        "stage": "DISCOVERY", "status": "active", "outcome": None,
-        "template": {"path": cfg["spec_template"], "sha256": sha256_file(tpl_path), "rules": cfg.get("spec_rules")},
-        "discovery": {"inspected": [], "summary": ""},
-        "approvals": {}, "spec_review": {}, "progress": {}, "checks": [], "checkpoints": [],
-        "decisions": [], "excluded": [], "history": [],
-        "baseline": {"start": git_baseline(repo)},
-    }
-    add_history(state, "created", agent, invocation=invocation)
+    written: List[Path] = []
+    try:
+        records = [("spec.md", read_text(tpl_path))]
+        records += [(name, read_text(record_template(name)).replace("[Task title]", title))
+                    for name in ("dependencies.md", "plan.md", "verification.md", "audit.md", "report.md")]
+        for name, text in records:
+            written.append(tdir / name)
+            write_text(tdir / name, text)
+        state: Dict[str, Any] = {
+            "schema": 1, "id": args.task, "title": title, "type": args.type,
+            "created_at": now_iso(), "created_by": agent, "invocation": invocation,
+            "stage": "DISCOVERY", "status": "active", "outcome": None,
+            "template": {"path": cfg["spec_template"], "sha256": sha256_file(tpl_path), "rules": cfg.get("spec_rules")},
+            "discovery": {"inspected": [], "summary": ""},
+            "approvals": {}, "spec_review": {}, "progress": {}, "checks": [], "checkpoints": [],
+            "decisions": [], "excluded": [], "history": [],
+            "baseline": {"start": git_baseline(repo)},
+        }
+        add_history(state, "created", agent, invocation=invocation)
+        written.append(state_path(repo, args.task))
+        save_state(repo, state)  # before activating: a failure leaves ACTIVE and any other task untouched
+    except BaseException:
+        remove_partial_task(tdir, written)
+        raise
     paused = activate(repo, state, agent, args.session)
-    save_state(repo, state)
     print(f"Created task '{args.task}' in {RECORDS}/tasks/{args.task}/ (stage DISCOVERY).")
     if paused:
         print(f"Task '{paused}' was active and is now paused.")
@@ -2082,6 +2134,7 @@ def cmd_status(args: argparse.Namespace) -> int:
 
 
 def cmd_discover(args: argparse.Namespace) -> int:
+    check_identity(args)
     repo, _, state = require_task(args)
     discovery = state.setdefault("discovery", {"inspected": [], "summary": ""})
     missing = []
@@ -2154,6 +2207,7 @@ def cmd_plan_check(args: argparse.Namespace) -> int:
 
 
 def cmd_review(args: argparse.Namespace) -> int:
+    check_identity(args)
     repo, cfg, state = require_task(args)
     agent = agent_name(args)
     if state["stage"] not in ("SPECIFICATION", "SPEC_APPROVAL"):
@@ -2229,6 +2283,7 @@ def cmd_review(args: argparse.Namespace) -> int:
 
 
 def cmd_approve(args: argparse.Namespace) -> int:
+    check_identity(args)
     repo, cfg, state = require_task(args)
     agent = agent_name(args)
     doc_name = args.document
@@ -2293,6 +2348,7 @@ def cmd_approve(args: argparse.Namespace) -> int:
 
 
 def cmd_stage(args: argparse.Namespace) -> int:
+    check_identity(args)
     repo, cfg, state = require_task(args)
     agent = agent_name(args)
     if args.reason:
@@ -2306,6 +2362,7 @@ def cmd_stage(args: argparse.Namespace) -> int:
 
 
 def cmd_resume(args: argparse.Namespace) -> int:
+    check_identity(args)
     repo, cfg, state = require_task(args)
     agent = agent_name(args)
     if state["status"] == "closed":
@@ -2324,6 +2381,7 @@ def cmd_resume(args: argparse.Namespace) -> int:
 
 
 def cmd_pause(args: argparse.Namespace) -> int:
+    check_identity(args)
     repo, _, state = require_task(args)
     if state["status"] == "closed":
         raise WorkflowError("The task is closed.")
@@ -2351,6 +2409,7 @@ def scan_records(repo: Path, slug: str) -> List[str]:
 
 
 def cmd_preflight(args: argparse.Namespace) -> int:
+    check_identity(args)
     repo, _, state = require_task(args)
     agent = agent_name(args)
     session = clean_session(args.session)
@@ -2407,6 +2466,7 @@ def cmd_preflight(args: argparse.Namespace) -> int:
 
 
 def cmd_step(args: argparse.Namespace) -> int:
+    check_identity(args)
     repo, _, state = require_task(args)
     agent = agent_name(args)
     if state["stage"] not in CODE_STAGES or state["status"] != "active":
@@ -2438,6 +2498,8 @@ def cmd_step(args: argparse.Namespace) -> int:
 
 
 def cmd_run(args: argparse.Namespace) -> int:
+    check_identity(args)
+    assert_no_secrets(args.check, "the check name")
     repo, cfg, state = require_task(args)
     agent = agent_name(args)
     checks = {c["id"]: c for c in cfg.get("checks", [])}
@@ -2519,8 +2581,8 @@ def cmd_run(args: argparse.Namespace) -> int:
     state["checks"].append(entry)
     del state["checks"][:-200]
     add_history(state, "check", agent, check=check["id"], status=entry["status"])
-    regenerate_check_block(repo, state)
     save_state(repo, state)
+    regenerate_check_block(repo, state)  # a view of state.json, written after it (not a multi-file transaction)
     shown = entry.get("summary") or entry.get("reason") or ""
     print(f"Check '{check['id']}': {entry['status']}{' — ' + shown if shown else ''} (code {short(entry['fingerprint'], 10)})")
     recorded_on_purpose = bool(args.blocked or args.not_applicable)
@@ -2528,6 +2590,7 @@ def cmd_run(args: argparse.Namespace) -> int:
 
 
 def cmd_scope(args: argparse.Namespace) -> int:
+    check_identity(args)
     repo, _, state = require_task(args)
     agent = agent_name(args)
     if args.exclude:
@@ -2569,6 +2632,7 @@ def cmd_scope(args: argparse.Namespace) -> int:
 
 
 def cmd_decision(args: argparse.Namespace) -> int:
+    check_identity(args)
     repo, _, state = require_task(args)
     text, evidence = (args.text or "").strip(), (args.evidence or "").strip()
     if not text or not evidence:
@@ -2673,6 +2737,7 @@ def cmd_outcome(args: argparse.Namespace) -> int:
 
 
 def cmd_close(args: argparse.Namespace) -> int:
+    check_identity(args)
     repo, cfg, state = require_task(args)
     agent = agent_name(args)
     if state["status"] == "closed":
@@ -2724,6 +2789,27 @@ def _deny(reason: str) -> int:
     return 0
 
 
+def _session_rejected(raw: Any) -> bool:
+    """The payload session id is untrusted input: refuse it when it is not text, looks like a secret or breaks the
+    session format. Missing ids and the placeholders clean_session drops are not rejected, as before."""
+    if raw is None:
+        return False
+    return not isinstance(raw, str) or session_problem(raw) is not None
+
+
+def _rejected_session_reason(repo: Path, active: Dict[str, Any]) -> Optional[str]:
+    """Deny inside an active task, whatever the binding, so an invalid session can never bypass the gates; without an
+    active task there is nothing to gate. The reason never contains the session id."""
+    if not (task_dir(repo, active["task"]) / "state.json").exists():
+        return None
+    state = load_state(repo, active["task"])
+    if state["status"] != "active":
+        return None
+    return (f"AIDevWorkflow: this session's id is not valid (it must be 1–256 printable characters without spaces and "
+            f"must not look like a credential), so this edit cannot be checked against task '{state['id']}'. "
+            f"Pause the task (`workflow.py pause {state['id']}`) for unrelated work.")
+
+
 def gate_decision(repo: Path, active: Dict[str, Any], target: Path, session: Optional[str]) -> Optional[str]:
     """Return a denial reason, or None to allow the edit."""
     state = load_state(repo, active["task"])
@@ -2770,17 +2856,30 @@ def hook_claude_pre_edit(raw: str) -> int:
         file_path = tool_input.get("file_path") or tool_input.get("notebook_path") or tool_input.get("path")
         if not file_path:
             return 0
-        session = clean_session(data.get("session_id"))
+        rejected = _session_rejected(data.get("session_id"))
+        session = None if rejected else clean_session(data.get("session_id"))
+        flags: Dict[str, Any] = {"session_rejected": True} if rejected else {}
         target = Path(file_path)
         if not target.is_absolute():
             target = Path(data.get("cwd") or os.getcwd()) / target
         repo = _find_records(target.parent)
         if repo is None:
-            _hook_log("claude-pre-edit", session=session, file=str(target), decision="allow", why="no active task")
+            _hook_log("claude-pre-edit", session=session, file=str(target), decision="allow", why="no active task", **flags)
             return 0
         active = read_active(repo)
         if not active:
             return 0
+    except Exception:  # noqa: BLE001 - without an active task the hook must never interfere
+        return 0
+    if rejected:
+        try:
+            reason = _rejected_session_reason(repo, active)
+        except Exception as exc:  # noqa: BLE001 - inside an active task, fail closed
+            reason = f"AIDevWorkflow could not validate task '{active.get('task')}' ({type(exc).__name__}). Fix the records or pause the task."
+        _hook_log("claude-pre-edit", session=None, file=str(target), task=active.get("task"),
+                  decision="deny" if reason else "allow", why=reason or "no active task", **flags)
+        return _deny(reason) if reason else 0
+    try:
         bound = active.get("session")
         if bound and session and bound != session:
             _hook_log("claude-pre-edit", session=session, file=str(target), decision="allow", why="other session")
@@ -2809,6 +2908,8 @@ def hook_claude_pre_edit(raw: str) -> int:
 def hook_claude_prompt(raw: str) -> int:
     try:
         data = json.loads(raw or "{}")
+        if _session_rejected(data.get("session_id")):
+            return 0  # an invalid session gets no reminder and nothing is written
         session = clean_session(data.get("session_id"))
         repo = _find_records(Path(data.get("cwd") or os.getcwd()))
         if repo is None:
