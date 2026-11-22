@@ -1,5 +1,7 @@
 # Verification: F1.0.4 Engine API: commands return data, the CLI only prints
 
+Tested commit: **fa6a676** — CI run 45005422565 (7/7 jobs). Local checks: code fingerprint 23f78e988f at fa6a676, re-run as b46e1599a2 after a roadmap-only edit (TD-25 in docs/roadmap/TECHNICAL_DEBT.md); `skills/` and `tests/` are identical to fa6a676 (`git diff fa6a676 -- skills tests` is empty). Commits after fa6a676 change records and roadmap files only.
+
 ## Check runs
 
 Written by `workflow.py run`; do not edit between the markers.
@@ -7,13 +9,13 @@ Written by `workflow.py run`; do not edit between the markers.
 <!-- aidw:checks:start -->
 | Check | Status | Summary | Code fingerprint | When | Agent |
 |---|---|---|---|---|---|
-| golden-byte-compare | passed | pre-existing golden files: 9 differences: [] new: 5 | `23f78e988f` | 2026-11-22T09:00:10Z | claude-code |
-| mypy | passed | Success: no issues found in 31 source files | `23f78e988f` | 2026-11-22T09:00:10Z | claude-code |
-| privacy | passed | Scanned 199 files: no findings. | `23f78e988f` | 2026-11-22T08:59:23Z | claude-code |
-| ruff | passed | All checks passed! | `23f78e988f` | 2026-11-22T09:00:10Z | claude-code |
-| startup-timing | passed | after: --version 63.1 ms (before 61.2), hook 62.7 ms (before 60.9) | `23f78e988f` | 2026-11-22T09:00:11Z | claude-code |
-| unit | passed | OK | `23f78e988f` | 2026-11-22T08:58:21Z | claude-code |
-| unit-py39 | passed | OK | `23f78e988f` | 2026-11-22T08:59:23Z | claude-code |
+| golden-byte-compare | passed | pre-existing golden files: 9 differences: [] new: 5 | `b46e1599a2` | 2026-11-22T09:06:26Z | claude-code |
+| mypy | passed | Success: no issues found in 31 source files | `b46e1599a2` | 2026-11-22T09:06:26Z | claude-code |
+| privacy | passed | Scanned 199 files: no findings. | `b46e1599a2` | 2026-11-22T09:05:38Z | claude-code |
+| ruff | passed | All checks passed! | `b46e1599a2` | 2026-11-22T09:06:26Z | claude-code |
+| startup-timing | passed | after: --version 44.3 ms (before 61.2), hook 44.0 ms (before 60.9) | `b46e1599a2` | 2026-11-22T09:06:26Z | claude-code |
+| unit | passed | OK | `b46e1599a2` | 2026-11-22T09:04:37Z | claude-code |
+| unit-py39 | passed | OK | `b46e1599a2` | 2026-11-22T09:05:39Z | claude-code |
 <!-- aidw:checks:end -->
 
 ## Acceptance matrix
@@ -24,13 +26,13 @@ for Blocked and Not Verified it says why. A check that did not run is never Pass
 
 | Item | Status | Evidence |
 |------|--------|----------|
-| AC-1 | Passed | check `unit` (173 tests: 156 pre-existing unchanged, 5 behaviour pins, 12 API tests) and `unit-py39` on code 23f78e988f; check `golden-byte-compare`: the 9 pre-existing files in tests/golden/ are byte-identical to the copy taken in S1 |
+| AC-1 | Passed | check `unit` (173 tests: 156 pre-existing unchanged, 5 behaviour pins, 12 API tests) and `unit-py39` on code 23f78e988f and again on b46e1599a2; check `golden-byte-compare`: the 9 pre-existing files in tests/golden/ are byte-identical to the copy taken in S1 |
 | AC-2 | Passed | checks `ruff` and `mypy` (31 files) |
 | AC-3 | Passed | `test_api.SeparationTest.test_cli_modules_write_no_records`: writer imports, bare and attribute calls (`api.x`), and calls to names `aidw.api` only imports; shown to flag the pre-refactor `cli/commands.py` and, after the audit (F-3), the first implementation's wrapper call |
 | AC-4 | Passed | `test_api.ApiLifecycleTest.test_api_only_lifecycle_matches_the_cli`: setup to close through the API only, no output, normalised state.json and the spec, plan, dependencies, audit, report and approved snapshots byte-identical to the CLI-driven repository |
 | AC-5 | Passed | `test_api.JsonParityTest`: values and raw text (key order and formatting) for status (list and task), spec-check, plan-check, scope (exactly seven keys), check (with and without errors), outcome, init --discover; preflight: its three keys |
 | AC-6 | Passed | `test_package` layer, cycle and public-names tests with api=4, agents/cli=5; `test_api.SeparationTest.test_hooks_import_nothing_from_the_cli` |
-| AC-7 | Passed | check `startup-timing` on 23f78e988f: `--version` 61.2 → 63.1 ms, hook 60.9 → 62.7 ms (median of 15) |
+| AC-7 | Passed | check `startup-timing`, paired with the S1 baseline on the same machine state: `--version` 61.2 → 63.1 ms, hook 60.9 → 62.7 ms (median of 15, code 23f78e988f); the independent auditor measured +1.1 to +1.7 ms on the hook. The last run (b46e1599a2) shows 44.3/44.0 ms because the machine was less loaded, so only paired runs are compared |
 | AC-8 | Passed | `test_behaviour_pins.RefusalsTest`: 27 refusal scenarios (17 from S1, 10 added after the audit, F-8), all recorded from the pre-refactor engine 5a7576a and passing there with Python 3.13 and 3.9 (exit code, stdout, stderr, normalised); every file under .ai-dev-workflow/ compared byte for byte before and after inside each run |
 | AC-9 | Passed | `test_api.NoHiddenStateTest.test_alternating_repositories_in_one_process`: two repositories, working directory unchanged, nothing on Python streams or file descriptors 1/2 (shown to catch a child-process write), AI_DEV_WORKFLOW_AGENT ignored by the API |
 | AC-10 | Passed | `test_behaviour_pins.SignaturesTest` against tests/golden/workflow-public-signatures.txt recorded in S1 (includes the wrappers resolve_template, update_setup, ensure_commit_mode) |
@@ -48,8 +50,8 @@ for Blocked and Not Verified it says why. A check that did not run is never Pass
 | EC-10 | Passed | `test_api.CommitModeNoticeTest`: notice printed before "Created task …", and kept on stdout when a later check refuses |
 | DW-1 | Passed | FR-1–FR-12 covered by AC-1–AC-12 above |
 | DW-2 | Passed | EC-1–EC-10 above |
-| DW-3 | Passed | checks `unit`, `unit-py39`, `privacy`, `ruff`, `mypy` on code 23f78e988f |
-| DW-4 | Not Verified | CI runs after the push; recorded here when it has run |
+| DW-3 | Passed | checks `unit`, `unit-py39`, `privacy`, `ruff`, `mypy` on code 23f78e988f and b46e1599a2 |
+| DW-4 | Passed | GitHub Actions `tests` run 45005422565 on the final code commit fa6a676: ubuntu-24.04, windows-latest and macos-latest with Python 3.9 and 3.13, and lint (ruff + mypy): 7/7 jobs passed. Earlier runs on cea2e9f and b2f5b8e failed on Windows only (sections below) |
 | DW-5 | Passed | TD-24 in docs/roadmap/TECHNICAL_DEBT.md (committed in 5a7576a) |
 | DW-6 | Passed | README "Development" section describes the internal API layer |
 
@@ -93,5 +95,4 @@ for Blocked and Not Verified it says why. A check that did not run is never Pass
 
 ## Limitations
 
-- CI on Linux, Windows and macOS (DW-4) runs after the push.
 - Signature compatibility covers parameter names, kinds and defaults; annotations are not compared (their text differs between Python versions).
