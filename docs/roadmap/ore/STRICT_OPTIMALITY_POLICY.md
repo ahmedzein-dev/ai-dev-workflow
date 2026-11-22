@@ -24,6 +24,7 @@ The **result classification** shown to people is computed by the engine from the
 | `UNBOUNDED` | unboundedness established at the required level |
 | `INVALID_MODEL` · `INSUFFICIENT_DATA` · `UNSUPPORTED_PROBLEM` · `NOT_MODELABLE` · `NUMERICAL_UNCERTAINTY` | from the model status |
 | `TIMEOUT` · `RESOURCE_LIMIT` | termination before any verified solution; with a feasible solution, the classification is `FEASIBLE_NOT_PROVEN` and the termination reason is kept |
+| `CANCELLED` | the run was cancelled (owner, P-1). A feasible solution found before cancellation is kept **separately** as a verified feasible solution (`feasibility_only`), never as optimal and never as the result |
 | `VERIFICATION_FAILED` | the solver's answer failed ORE's own check (the answer is never shown as a result) |
 | `SOLVER_ERROR` · `UNKNOWN` | otherwise |
 
@@ -54,6 +55,17 @@ with the solver's reported gap shown. Projects can require G3 for critical decis
 4. Any mismatch → `VERIFICATION_FAILED`, recorded with the details.
 
 Checking that a solution is feasible never proves it is optimal; step 3 is always required for `PROVEN_OPTIMAL`.
+
+### Labels for solver-proven and certified results (owner, P-2, R4, R5)
+
+- Every `PROVEN_OPTIMAL` and `PROVEN_INFEASIBLE` result shows its level and who established it: **G2 — "proven by the
+  solver under the approved model, not independently certified"**; **G3 — "independently certified"** (enumeration,
+  exact dual certificate, or a second exact solver).
+- CP-SAT `INFEASIBLE` is accepted at G2 with that label.
+- A conflict set (infeasibility explanation) is shown as "these constraints conflict together". It is called
+  **minimal** only when minimality is proven: the set itself is infeasible at the required level, and removing any
+  one constraint leaves a model with an exactly verified feasible solution.
+- The required level is never lowered automatically to obtain a result. A lower level needs a new approved policy.
 
 ## 4. Numerical precision
 

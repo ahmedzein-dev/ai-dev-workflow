@@ -30,7 +30,9 @@ from typing import Any, Dict, Optional, Tuple
 
 INT_SAFE = 2**62  # ORE's own headroom below int64 for every scaled linear expression (CP-SAT also checks overflow)
 GUARANTEE_RANK = {"G0": 0, "G1": 1, "G2": 2, "G3": 3}
-REQUIRED_LEVEL = "G2"  # D-034 default: exact = G2 or G3
+REQUIRED_LEVEL = "G2"  # D-034 default: exact = G2 or G3; never lowered automatically (owner R5)
+PROOF_LABEL = {"G3": "independently certified",
+               "G2": "proven by the solver under the approved model, not independently certified"}  # owner P-2, R4
 
 # --------------------------------------------------------------------------------------------- model (ore/1 subset)
 # {"vars": [{"name", "lb", "ub"}], "constraints": [{"name", "terms": {var: "p/q"}, "op": "<=|>=|==", "rhs": "p/q",
@@ -268,10 +270,11 @@ ADAPTERS = {"enumerator": EnumeratorAdapter(), "cpsat": CpSatAdapter()}
 # ---------------------------------------------------------------------------------------- verifier (C5, C6, C8)
 
 
-def verify(model: Dict[str, Any], model_status: str, res: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+def verify(model: Dict[str, Any], model_status: str, res: Optional[Dict[str, Any]],
+           required: str = REQUIRED_LEVEL) -> Dict[str, Any]:
     """Computes verification and classification from the four dimensions; never trusts the solver's claim."""
-    out: Dict[str, Any] = {"model_status": model_status, "solver_claim": None, "verification": "not_verified",
-                           "level_reached": None, "problems": []}
+    out: Dict[str, Any] = {"model_status": model_status, "required_level": required, "solver_claim": None,
+                           "verification": "not_verified", "level_reached": None, "problems": []}
     if model_status != "valid":
         out["classification"] = model_status.upper()
         return out
@@ -317,9 +320,16 @@ def verify(model: Dict[str, Any], model_status: str, res: Optional[Dict[str, Any
                 evidence.append("status OPTIMAL, gaps 0, exact bound == exact objective")
         out["evidence"] = evidence
         out["level_reached"] = level
-        if GUARANTEE_RANK[level] >= GUARANTEE_RANK[REQUIRED_LEVEL]:
+        if term == "cancelled":  # owner P-1: distinct; a feasible solution is kept separately, never as optimal
+            out["verification"] = "feasibility_only"
+            out["classification"] = "CANCELLED"
+            out["feasible_solution"] = {"values": values, "exact_objective": str(obj),
+                                        "note": "found before cancellation; feasibility verified; not optimal"}
+            return out
+        if GUARANTEE_RANK[level] >= GUARANTEE_RANK[required]:
             out["verification"] = "verified"
             out["classification"] = "PROVEN_OPTIMAL"
+            out["proof"] = PROOF_LABEL[level]
         else:
             out["verification"] = "feasibility_only"
             out["classification"] = "FEASIBLE_NOT_PROVEN"
@@ -327,20 +337,117 @@ def verify(model: Dict[str, Any], model_status: str, res: Optional[Dict[str, Any
                 out["gap"] = str(abs(obj - Fraction(res["exact_bound"])))
         return out
     if res["solution_status"] == "infeasible_claimed":
-        out["level_reached"] = res["guarantee"]
-        out["classification"] = "PROVEN_INFEASIBLE" if GUARANTEE_RANK[res["guarantee"]] >= \
-            GUARANTEE_RANK[REQUIRED_LEVEL] else "UNKNOWN"
+        level = res["guarantee"]
+        out["level_reached"] = level
+        if GUARANTEE_RANK[level] >= GUARANTEE_RANK[required]:
+            out["classification"] = "PROVEN_INFEASIBLE"
+            out["proof"] = PROOF_LABEL[level]
+        else:
+            out["classification"] = "UNKNOWN"
+            out["evidence"] = [f"infeasibility established at {level}, below the required {required}"]
+        if res["info"].get("core") is not None:
+            out["conflict_set"] = res["info"]["core"]
+            out["conflict_set_minimal"] = "not proven"  # owner P-2: minimal only when proven
         return out
     out["classification"] = {"time_limit": "TIMEOUT", "memory_limit": "RESOURCE_LIMIT",
                              "resource_limit": "RESOURCE_LIMIT", "solver_error": "SOLVER_ERROR",
-                             "cancelled": "UNKNOWN", "not_run": "UNSUPPORTED_PROBLEM"}.get(term, "UNKNOWN")
+                             "cancelled": "CANCELLED", "not_run": "UNSUPPORTED_PROBLEM"}.get(term, "UNKNOWN")
     return out
 
 
 # ---------------------------------------------------------------------------- execution controller (C10, C11)
 
 
+IS_WINDOWS = sys.platform == "win32"
+
+
+class _Win:
+    """Minimal Windows job-object and memory API through ctypes (standard library)."""
+
+    def __init__(self) -> None:
+        import ctypes
+        from ctypes import wintypes
+        self.ctypes, self.wintypes = ctypes, wintypes
+        k = ctypes.WinDLL("kernel32", use_last_error=True)  # type: ignore[attr-defined]
+        self.k = k
+        H = wintypes.HANDLE
+        k.CreateJobObjectW.restype = H
+        k.CreateJobObjectW.argtypes = [ctypes.c_void_p, wintypes.LPCWSTR]
+        k.SetInformationJobObject.argtypes = [H, ctypes.c_int, ctypes.c_void_p, wintypes.DWORD]
+        k.AssignProcessToJobObject.argtypes = [H, H]
+        k.TerminateJobObject.argtypes = [H, wintypes.UINT]
+        k.OpenProcess.restype = H
+        k.OpenProcess.argtypes = [wintypes.DWORD, wintypes.BOOL, wintypes.DWORD]
+        k.CloseHandle.argtypes = [H]
+
+        class IoCounters(ctypes.Structure):
+            _fields_ = [(n, ctypes.c_ulonglong) for n in ("r", "w", "o", "rb", "wb", "ob")]
+
+        class Basic(ctypes.Structure):
+            _fields_ = [("PerProcessUserTimeLimit", ctypes.c_int64), ("PerJobUserTimeLimit", ctypes.c_int64),
+                        ("LimitFlags", wintypes.DWORD), ("MinimumWorkingSetSize", ctypes.c_size_t),
+                        ("MaximumWorkingSetSize", ctypes.c_size_t), ("ActiveProcessLimit", wintypes.DWORD),
+                        ("Affinity", ctypes.c_size_t), ("PriorityClass", wintypes.DWORD),
+                        ("SchedulingClass", wintypes.DWORD)]
+
+        class Extended(ctypes.Structure):
+            _fields_ = [("Basic", Basic), ("Io", IoCounters), ("ProcessMemoryLimit", ctypes.c_size_t),
+                        ("JobMemoryLimit", ctypes.c_size_t), ("PeakProcessMemoryUsed", ctypes.c_size_t),
+                        ("PeakJobMemoryUsed", ctypes.c_size_t)]
+
+        class Counters(ctypes.Structure):
+            _fields_ = [("cb", wintypes.DWORD), ("PageFaultCount", wintypes.DWORD)] + [
+                (n, ctypes.c_size_t) for n in ("PeakWorkingSetSize", "WorkingSetSize", "QuotaPeakPagedPoolUsage",
+                                               "QuotaPagedPoolUsage", "QuotaPeakNonPagedPoolUsage",
+                                               "QuotaNonPagedPoolUsage", "PagefileUsage", "PeakPagefileUsage")]
+        self.Extended, self.Counters = Extended, Counters
+        k.K32GetProcessMemoryInfo.argtypes = [H, ctypes.POINTER(Counters), wintypes.DWORD]
+
+    def job_for(self, pid: int, memory_mb: Optional[int]) -> Any:
+        """Job object that kills the whole tree on close; with a per-process committed-memory limit if asked."""
+        c = self.ctypes
+        job = self.k.CreateJobObjectW(None, None)
+        info = self.Extended()
+        info.Basic.LimitFlags = 0x2000  # JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE
+        if memory_mb:
+            info.Basic.LimitFlags |= 0x100  # JOB_OBJECT_LIMIT_PROCESS_MEMORY
+            info.ProcessMemoryLimit = memory_mb * 1024 * 1024
+        if not self.k.SetInformationJobObject(job, 9, c.byref(info), c.sizeof(info)):
+            raise OSError(c.get_last_error(), "SetInformationJobObject failed")  # type: ignore[attr-defined]
+        h = self.k.OpenProcess(0x0100 | 0x0001, False, pid)  # PROCESS_SET_QUOTA | PROCESS_TERMINATE
+        ok = self.k.AssignProcessToJobObject(job, h)
+        self.k.CloseHandle(h)
+        if not ok:
+            raise OSError(c.get_last_error(), "AssignProcessToJobObject failed")  # type: ignore[attr-defined]
+        return job
+
+    def rss_kb(self, pid: int) -> int:
+        h = self.k.OpenProcess(0x1000 | 0x0010, False, pid)  # QUERY_LIMITED_INFORMATION | VM_READ
+        if not h:
+            return 0
+        cnt = self.Counters()
+        cnt.cb = self.ctypes.sizeof(cnt)
+        ok = self.k.K32GetProcessMemoryInfo(h, self.ctypes.byref(cnt), cnt.cb)
+        self.k.CloseHandle(h)
+        return int(cnt.WorkingSetSize // 1024) if ok else 0
+
+
+WIN = _Win() if IS_WINDOWS else None
+
+
 def rss_kb(pid: int) -> int:
+    """Resident memory of a process, measured from outside it, on each platform."""
+    if WIN is not None:
+        return WIN.rss_kb(pid)
+    if sys.platform.startswith("linux"):
+        try:
+            with open(f"/proc/{pid}/status", encoding="ascii") as fh:
+                for line in fh:
+                    if line.startswith("VmRSS:"):
+                        return int(line.split()[1])
+        except OSError:
+            return 0
+        return 0
     try:
         out = subprocess.run(["ps", "-o", "rss=", "-p", str(pid)], capture_output=True, text=True, timeout=2).stdout
         return int(out.strip() or 0)
@@ -348,18 +455,42 @@ def rss_kb(pid: int) -> int:
         return 0
 
 
+def kill_tree(proc: "subprocess.Popen[str]", job: Any) -> str:
+    """Stops the child and everything it started: process group on POSIX, job object on Windows."""
+    if WIN is not None:
+        WIN.k.TerminateJobObject(job, 1)
+        proc.wait(timeout=10)
+        return "TerminateJobObject"
+    os.killpg(proc.pid, signal.SIGTERM)
+    try:
+        proc.wait(timeout=2)
+        return "SIGTERM to process group"
+    except subprocess.TimeoutExpired:
+        os.killpg(proc.pid, signal.SIGKILL)  # type: ignore[attr-defined]
+        proc.wait()
+        return "SIGKILL to process group"
+
+
 def run_isolated(job: Dict[str, Any], wall: float, memory_mb: int, cancel_after: Optional[float] = None,
-                 rlimit_mb: Optional[int] = None) -> Dict[str, Any]:
-    """Runs a job in a child process (own session); enforces wall clock and RSS from outside the solver."""
-    env = dict(os.environ, AIDW_TRIAL_RLIMIT=str(rlimit_mb) if rlimit_mb else "")
+                 os_limit_mb: Optional[int] = None) -> Dict[str, Any]:
+    """Runs a job in a child process; enforces wall clock and RSS from outside the solver.
+
+    os_limit_mb asks the operating system for a hard memory limit as well: POSIX RLIMIT_AS (set by the child before any
+    work) or a Windows job-object process memory limit (set by this controller before the job is sent).
+    """
+    env = dict(os.environ, AIDW_TRIAL_OSLIMIT=str(os_limit_mb) if os_limit_mb and not IS_WINDOWS else "")
     t0 = time.monotonic()
+    kw: Dict[str, Any] = {"creationflags": 0x00000200} if IS_WINDOWS else {"start_new_session": True}
     proc = subprocess.Popen([sys.executable, "-I", os.path.abspath(__file__), "--child"], stdin=subprocess.PIPE,
-                            stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, start_new_session=True,
-                            env=env)
+                            stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, env=env, **kw)
+    win_job, os_limit = None, None
+    if WIN is not None:
+        win_job = WIN.job_for(proc.pid, os_limit_mb)
+        os_limit = f"job object process memory limit {os_limit_mb} MB" if os_limit_mb else None
     assert proc.stdin is not None
     proc.stdin.write(json.dumps(job))
     proc.stdin.close()
-    reason, peak = None, 0
+    reason, peak, how = None, 0, None
     while proc.poll() is None:
         elapsed = time.monotonic() - t0
         peak = max(peak, rss_kb(proc.pid))
@@ -370,27 +501,25 @@ def run_isolated(job: Dict[str, Any], wall: float, memory_mb: int, cancel_after:
         elif peak > memory_mb * 1024:
             reason = "memory_limit"
         if reason:
-            os.killpg(proc.pid, signal.SIGTERM)
-            try:
-                proc.wait(timeout=2)
-            except subprocess.TimeoutExpired:
-                os.killpg(proc.pid, signal.SIGKILL)
-                proc.wait()
+            how = kill_tree(proc, win_job)
             break
         time.sleep(0.05)
     elapsed = round(time.monotonic() - t0, 3)
     stdout = proc.stdout.read() if proc.stdout else ""
     stderr = proc.stderr.read() if proc.stderr else ""
+    if win_job is not None and WIN is not None:
+        WIN.k.CloseHandle(win_job)
     result = None
     if reason is None and proc.returncode == 0 and stdout.strip():
         result = json.loads(stdout)
-    return {"killed_for": reason, "returncode": proc.returncode, "elapsed": elapsed, "peak_rss_mb": round(peak / 1024),
-            "result": result, "stderr_tail": stderr.strip().splitlines()[-1:] if stderr.strip() else []}
+    return {"killed_for": reason, "stopped_by": how, "returncode": proc.returncode, "elapsed": elapsed,
+            "peak_rss_mb": round(peak / 1024), "os_limit": os_limit, "result": result,
+            "stderr_tail": stderr.strip().splitlines()[-1:] if stderr.strip() else []}
 
 
 def child() -> None:
-    lim = os.environ.get("AIDW_TRIAL_RLIMIT")
-    rlimit_note = None
+    lim = os.environ.get("AIDW_TRIAL_OSLIMIT")
+    os_note = None
     if lim:
         import resource
         notes = []
@@ -402,21 +531,23 @@ def child() -> None:
                 notes.append(f"{rname} soft limit set")
             except (ValueError, OSError) as exc:
                 notes.append(f"{rname} setrlimit failed: {exc}")
-        rlimit_note = "; ".join(notes)
+        os_note = "; ".join(notes)
     job = json.loads(sys.stdin.read())
     if job["kind"] == "hog":
         blocks = []
         try:
             for _ in range(job["mb"]):
-                blocks.append(bytearray(1024 * 1024))
+                blocks.append(bytearray(b"\x01" * (1024 * 1024)))  # written, so the pages are really committed
                 time.sleep(job.get("delay", 0))
-            print(json.dumps({"allocated_mb": len(blocks), "rlimit": rlimit_note}))
+            print(json.dumps({"allocated_mb": len(blocks), "os_limit": os_note}))
         except MemoryError:
-            print(json.dumps({"memory_error_after_mb": len(blocks), "rlimit": rlimit_note}))
+            print(json.dumps({"memory_error_after_mb": len(blocks), "os_limit": os_note}))
         return
     if job["kind"] == "solve":
+        t0 = time.process_time()
         res = CpSatAdapter().solve(job["model"], job["limits"], overrides=job.get("overrides"))
-        res["rlimit"] = rlimit_note
+        res["child_cpu_s"] = round(time.process_time() - t0, 3)  # CPU of all threads of this process
+        res["os_limit"] = os_note
         print(json.dumps(res))
 
 
@@ -471,10 +602,11 @@ def market_split(seed: int, m: int, n: int, optimise: bool) -> Dict[str, Any]:
     return {"vars": vs, "constraints": cons, "objective": {"sense": "min", "terms": obj_terms, "constant": "0"}}
 
 
-def solve_verified(model: Dict[str, Any], adapter: str, limits: Dict[str, Any], **kw: Any) -> Dict[str, Any]:
+def solve_verified(model: Dict[str, Any], adapter: str, limits: Dict[str, Any], required: str = REQUIRED_LEVEL,
+                   **kw: Any) -> Dict[str, Any]:
     status, why = validate(model)
     res = ADAPTERS[adapter].solve(model, limits, **kw) if status == "valid" else None
-    v = verify(model, status, res)
+    v = verify(model, status, res, required)
     if why:
         v["why"] = why
     return {"raw": res, "verdict": v}
@@ -574,7 +706,7 @@ def t_overflow_and_floats() -> Dict[str, Any]:
 
 
 def t_infeasible() -> Dict[str, Any]:
-    """C10/ORE-I: contradictory constraints; agreement with enumeration; explanation core checked independently."""
+    """C10/ORE-I/P-2: contradictory constraints; G2 label; conflict set minimal only when proven."""
     model = {"vars": [{"name": "a", "lb": 0, "ub": 5}, {"name": "b", "lb": 0, "ub": 5}, {"name": "c", "lb": 0, "ub": 5}],
              "constraints": [
                  {"name": "budget", "terms": {"a": "1", "b": "1"}, "op": "<=", "rhs": "3", "assumption": True},
@@ -582,18 +714,53 @@ def t_infeasible() -> Dict[str, Any]:
                  {"name": "need_b", "terms": {"b": "1"}, "op": ">=", "rhs": "2", "assumption": True},
                  {"name": "c_small", "terms": {"c": "1"}, "op": "<=", "rhs": "4", "assumption": True}],
              "objective": {"sense": "max", "terms": {"a": "1", "b": "1", "c": "1"}, "constant": "0"}}
+
+    def subset(names: Any) -> Dict[str, Any]:
+        return dict(model, constraints=[k for k in model["constraints"] if k["name"] in names])
     c = solve_verified(model, "cpsat", STRICT)
     e = solve_verified(model, "enumerator", STRICT)
-    core = c["raw"]["info"].get("core") or []
-    sub = dict(model, constraints=[k for k in model["constraints"] if k["name"] in core])
-    core_check = solve_verified(sub, "enumerator", STRICT)["verdict"]["classification"]
-    minimal = all(solve_verified(dict(model, constraints=[k for k in sub["constraints"] if k["name"] != drop]),
-                                 "enumerator", STRICT)["verdict"]["classification"] != "PROVEN_INFEASIBLE"
-                  for drop in core)
-    return {"cpsat": c["verdict"]["classification"], "enumerator": e["verdict"]["classification"], "core": core,
-            "core_infeasible_by_enumeration": core_check == "PROVEN_INFEASIBLE", "core_minimal": minimal,
+    reported = list(c["raw"]["info"].get("core") or [])
+    # deletion filter with CP-SAT: drop a constraint while the rest stays infeasible
+    shrunk = list(reported)
+    for name in list(shrunk):
+        rest = [n for n in shrunk if n != name]
+        if solve_verified(subset(rest), "cpsat", STRICT)["verdict"]["classification"] == "PROVEN_INFEASIBLE":
+            shrunk = rest
+    # minimality proof: the set is infeasible (G2) and every set without one member has an exactly verified solution
+    set_infeasible = solve_verified(subset(shrunk), "cpsat", STRICT)["verdict"]["classification"] == "PROVEN_INFEASIBLE"
+    witnesses = {}
+    for name in shrunk:
+        v = solve_verified(subset([n for n in shrunk if n != name]), "cpsat", STRICT)["verdict"]
+        witnesses[name] = v["classification"] == "PROVEN_OPTIMAL" and v["problems"] == []
+    minimal_proven = set_infeasible and all(witnesses.values())
+    enum_shrunk = solve_verified(subset(shrunk), "enumerator", STRICT)["verdict"]["classification"]
+    return {"cpsat_verdict": c["verdict"], "enumerator": e["verdict"]["classification"],
+            "enumerator_proof": e["verdict"].get("proof"),
+            "reported_conflict_set": reported, "reported_set_minimal": len(shrunk) == len(reported) and minimal_proven,
+            "deletion_filter_set": shrunk, "deletion_filter_minimal_proven": minimal_proven,
+            "minimality_evidence": "set infeasible at G2; each set without one member has an exactly verified solution",
+            "deletion_filter_set_infeasible_by_enumeration_G3": enum_shrunk == "PROVEN_INFEASIBLE",
             "pass": c["verdict"]["classification"] == e["verdict"]["classification"] == "PROVEN_INFEASIBLE"
-            and core_check == "PROVEN_INFEASIBLE"}
+            and c["verdict"].get("proof") == PROOF_LABEL["G2"] and c["verdict"].get("conflict_set_minimal") == "not proven"
+            and minimal_proven and enum_shrunk == "PROVEN_INFEASIBLE"}
+
+
+def t_no_downgrade() -> Dict[str, Any]:
+    """R4/R5: a G2 result never satisfies a G3 requirement, and the requirement is never lowered automatically."""
+    small = {"vars": [{"name": "x", "lb": 0, "ub": 10}, {"name": "y", "lb": 0, "ub": 10}],
+             "constraints": [{"name": "cap", "terms": {"x": "1", "y": "2"}, "op": "<=", "rhs": "13"}],
+             "objective": {"sense": "max", "terms": {"x": "3/2", "y": "2"}, "constant": "1/3"}}
+    bad = dict(small, constraints=small["constraints"] + [
+        {"name": "big", "terms": {"x": "1", "y": "1"}, "op": ">=", "rhs": "30"}])
+    cp_g3 = solve_verified(small, "cpsat", STRICT, required="G3")["verdict"]
+    en_g3 = solve_verified(small, "enumerator", STRICT, required="G3")["verdict"]
+    cp_inf_g3 = solve_verified(bad, "cpsat", STRICT, required="G3")["verdict"]
+    return {"cpsat_required_G3": {k: cp_g3.get(k) for k in ("classification", "level_reached", "required_level")},
+            "enumerator_required_G3": {k: en_g3.get(k) for k in ("classification", "level_reached", "proof")},
+            "cpsat_infeasible_required_G3": {k: cp_inf_g3.get(k) for k in ("classification", "level_reached",
+                                                                            "evidence")},
+            "pass": cp_g3["classification"] == "FEASIBLE_NOT_PROVEN" and cp_g3["required_level"] == "G3"
+            and en_g3["classification"] == "PROVEN_OPTIMAL" and cp_inf_g3["classification"] == "UNKNOWN"}
 
 
 def t_limits_and_cancel() -> Dict[str, Any]:
@@ -620,18 +787,20 @@ def t_limits_and_cancel() -> Dict[str, Any]:
     r = solve_verified(opt, "cpsat", {"threads": 1, "time": 30}, stop_event=ev)
     out["cancel_in_process"] = {"status": r["raw"]["info"]["status"], "termination": r["raw"]["termination"],
                                 "classification": r["verdict"]["classification"],
+                                "feasible_solution_kept": "feasible_solution" in r["verdict"],
                                 "returned_after_s": round(time.monotonic() - t0, 3)}
     iso = run_isolated({"kind": "solve", "model": opt, "limits": {"threads": 1, "time": 600}}, wall=60,
                        memory_mb=2048, cancel_after=1.0)
-    out["cancel_process_group"] = {k: iso[k] for k in ("killed_for", "returncode", "elapsed", "peak_rss_mb")}
+    out["cancel_process_group"] = {k: iso[k] for k in ("killed_for", "stopped_by", "returncode", "elapsed", "peak_rss_mb")}
     iso = run_isolated({"kind": "solve", "model": opt, "limits": {"threads": 1, "time": 600}}, wall=1.5,
                        memory_mb=2048)
-    out["hard_wall_clock_kill"] = {k: iso[k] for k in ("killed_for", "returncode", "elapsed", "peak_rss_mb")}
+    out["hard_wall_clock_kill"] = {k: iso[k] for k in ("killed_for", "stopped_by", "returncode", "elapsed", "peak_rss_mb")}
     ok = (out["timeout_with_solution"]["classification"] == "FEASIBLE_NOT_PROVEN"
           and out["timeout_no_solution"]["classification"] == "TIMEOUT"
           and out["conflict_limit"]["classification"] in ("RESOURCE_LIMIT", "FEASIBLE_NOT_PROVEN")
           and out["invalid_model"]["classification"] == "INVALID_MODEL"
-          and out["cancel_in_process"]["termination"] == "cancelled"
+          and out["cancel_in_process"]["classification"] == "CANCELLED"
+          and out["cancel_in_process"]["feasible_solution_kept"]
           and out["cancel_process_group"]["killed_for"] == "cancelled"
           and out["hard_wall_clock_kill"]["killed_for"] == "time_limit")
     out["pass"] = ok
@@ -642,7 +811,7 @@ def t_memory() -> Dict[str, Any]:
     """C11: memory limits from outside the solver; what the OS and CP-SAT give on this platform."""
     out: Dict[str, Any] = {}
     watched = run_isolated({"kind": "hog", "mb": 2048, "delay": 0.002}, wall=60, memory_mb=300)
-    out["rss_watchdog_300mb"] = {k: watched[k] for k in ("killed_for", "returncode", "elapsed", "peak_rss_mb")}
+    out["rss_watchdog_300mb"] = {k: watched[k] for k in ("killed_for", "stopped_by", "returncode", "elapsed", "peak_rss_mb")}
     small = market_split(3, 2, 12, optimise=True)
     base = run_isolated({"kind": "solve", "model": small, "limits": {"threads": 1, "time": 5}}, wall=30,
                         memory_mb=4096)
@@ -658,27 +827,32 @@ def t_memory() -> Dict[str, Any]:
     return out
 
 
-def t_memory_rlimit() -> Dict[str, Any]:
-    """C11: does POSIX RLIMIT_AS (1 GB) stop a 2 GB allocation on this platform? (watchdog disabled)"""
-    r = run_isolated({"kind": "hog", "mb": 2048}, wall=60, memory_mb=100000, rlimit_mb=1024)
-    out = {k: r.get(k) for k in ("killed_for", "returncode", "elapsed", "peak_rss_mb", "result", "stderr_tail")}
-    out["enforced"] = bool(r["result"] and "memory_error_after_mb" in r["result"])
-    out["pass"] = None  # platform fact, not pass/fail
+def t_memory_os_limit() -> Dict[str, Any]:
+    """C11/R1: does the operating system stop a 2 GB allocation under a 1 GB limit? (RSS watchdog disabled)
+
+    POSIX: RLIMIT_AS soft limit set by the child; Windows: job-object process memory limit set by the controller.
+    """
+    r = run_isolated({"kind": "hog", "mb": 2048}, wall=120, memory_mb=100000, os_limit_mb=1024)
+    out = {k: r.get(k) for k in ("killed_for", "returncode", "elapsed", "peak_rss_mb", "os_limit", "result",
+                                 "stderr_tail")}
+    res = r["result"] or {}
+    stopped_early = "memory_error_after_mb" in res or (r["returncode"] not in (0, None) and r["killed_for"] is None)
+    out["enforced"] = stopped_early and res.get("allocated_mb") != 2048
+    out["platform"] = sys.platform
+    # a platform fact on macOS (setrlimit fails there); Linux and Windows are expected to enforce it
+    out["pass"] = None if sys.platform == "darwin" else out["enforced"]
     return out
 
 
 def t_threads_and_determinism() -> Dict[str, Any]:
     """C11: num_workers=1 really uses one core; identical runs are reproducible under a deterministic limit."""
-    import resource
     opt = market_split(7, 4, 30, optimise=True)
     cpu = {}
     for w in (1, 4):
-        before = resource.getrusage(resource.RUSAGE_CHILDREN)
-        iso = run_isolated({"kind": "solve", "model": opt, "limits": {"threads": w, "time": 3}}, wall=30, memory_mb=4096)
-        after = resource.getrusage(resource.RUSAGE_CHILDREN)
-        used = (after.ru_utime - before.ru_utime) + (after.ru_stime - before.ru_stime)
-        cpu[f"workers_{w}"] = {"cpu_s": round(used, 2), "wall_s": iso["elapsed"],
-                               "cpu_per_wall": round(used / iso["elapsed"], 2)}
+        iso = run_isolated({"kind": "solve", "model": opt, "limits": {"threads": w, "time": 3}}, wall=60, memory_mb=4096)
+        res = iso["result"] or {}
+        used, wall = res.get("child_cpu_s", 0.0), res.get("info", {}).get("wall_time", 0.0) or 1e-9
+        cpu[f"workers_{w}"] = {"cpu_s": used, "solver_wall_s": wall, "cpu_per_wall": round(used / wall, 2)}
     runs = []
     for _ in range(5):
         r = solve_verified(opt, "cpsat", {"threads": 1, "time": 60, "deterministic_time": 2.0})
@@ -696,11 +870,16 @@ def t_threads_and_determinism() -> Dict[str, Any]:
 
 
 def environment() -> Dict[str, Any]:
-    import ortools
     from importlib import metadata
     t0 = time.perf_counter()
+    import ortools
     from ortools.sat.python import cp_model  # noqa: F401
     imp = time.perf_counter() - t0
+    probe = "import time; t = time.perf_counter(); from ortools.sat.python import cp_model; print(time.perf_counter() - t)"
+    fresh = []
+    for _ in range(3):  # R2: later imports in new processes, to tell a one-off cold start from a steady cost
+        out = subprocess.run([sys.executable, "-I", "-c", probe], capture_output=True, text=True, timeout=600)
+        fresh.append(round(float(out.stdout.strip() or "nan"), 3))
     deps = {}
     for d in ("ortools", "numpy", "pandas", "protobuf", "absl-py", "immutabledict"):
         try:
@@ -709,7 +888,8 @@ def environment() -> Dict[str, Any]:
             deps[d] = None
     return {"python": platform.python_version(), "platform": platform.platform(terse=True),
             "machine": platform.machine(), "ortools": ortools.__version__, "dependencies": deps,
-            "cp_model_import_s": round(imp, 3)}
+            "cp_model_import_s": round(imp, 3), "cp_model_import_fresh_processes_s": fresh,
+            "bytecode_writing_disabled": bool(sys.flags.dont_write_bytecode or os.environ.get("PYTHONDONTWRITEBYTECODE"))}
 
 
 def main() -> int:
@@ -723,10 +903,11 @@ def main() -> int:
              ("C6 C7 C8 gap trap and strict gaps", t_gap_trap),
              ("C7 precision beyond 2^53", t_precision),
              ("C4 C7 overflow and floats", t_overflow_and_floats),
-             ("C10 infeasible and core", t_infeasible),
+             ("C10 P-2 infeasible and conflict set", t_infeasible),
+             ("R4 R5 no automatic downgrade", t_no_downgrade),
              ("C10 C11 limits and cancellation", t_limits_and_cancel),
              ("C11 memory", t_memory),
-             ("C11 memory RLIMIT_AS", t_memory_rlimit),
+             ("C11 R1 memory OS limit", t_memory_os_limit),
              ("C11 threads and determinism", t_threads_and_determinism)]
     for name, fn in tests:
         t0 = time.monotonic()
@@ -737,7 +918,10 @@ def main() -> int:
         results[name]["seconds"] = round(time.monotonic() - t0, 2)
         print(f"{name}: pass={results[name].get('pass')} ({results[name]['seconds']} s)", file=sys.stderr)
     print(json.dumps(results, indent=1, default=str))
-    return 0
+    failed = [name for name, r in results.items() if isinstance(r, dict) and r.get("pass") is False]
+    if failed:
+        print(f"FAILED: {failed}", file=sys.stderr)
+    return 1 if failed else 0
 
 
 if __name__ == "__main__":

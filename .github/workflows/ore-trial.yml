@@ -1,0 +1,58 @@
+name: ore-cpsat-trial
+
+# F6.0.2: the CP-SAT technical trial for D-037 on Linux, Windows and macOS with Python 3.9 and 3.13.
+# OR-Tools is installed only into a throwaway virtual environment with the pinned versions (owner decision P-3);
+# the core engine and its tests never install it (C2, R3).
+on:
+  push:
+    branches: ["phase-*/**"]
+    paths: ["docs/roadmap/ore/cpsat_trial/**", ".github/workflows/ore-trial.yml"]
+  workflow_dispatch:
+
+jobs:
+  trial:
+    name: CP-SAT trial · ${{ matrix.os }} · Python ${{ matrix.python }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, windows-latest, macos-latest]
+        python: ["3.9", "3.13"]
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Isolated environment with the pinned versions
+        shell: bash
+        run: |
+          python -m venv "$RUNNER_TEMP/ore"
+          if [ "$RUNNER_OS" = "Windows" ]; then PY="$RUNNER_TEMP/ore/Scripts/python.exe"; else PY="$RUNNER_TEMP/ore/bin/python"; fi
+          echo "ORE_PY=$PY" >> "$GITHUB_ENV"
+          V=$(python -c "import sys; print('%d%d' % sys.version_info[:2])")
+          "$PY" -m pip install --only-binary :all: -r "docs/roadmap/ore/cpsat_trial/requirements-py$V.txt"
+          "$PY" -m pip check
+      - name: Cold-start import, then two more (R2)
+        shell: bash
+        run: |
+          for i in 1 2 3; do
+            "$ORE_PY" -I -c "import time; t = time.perf_counter(); from ortools.sat.python import cp_model; print('cp_model import s', round(time.perf_counter() - t, 2))"
+          done
+      - name: The core engine loads no OR-Tools dependency even where OR-Tools is installed (C2, R3)
+        shell: bash
+        run: |
+          "$ORE_PY" -I -c "import sys; sys.path.insert(0, 'skills/ai-dev-workflow/scripts'); import workflow; bad = [m for m in ('numpy', 'pandas', 'ortools', 'google.protobuf', 'absl') if m in sys.modules]; print('heavy modules loaded by the engine:', bad); sys.exit(1 if bad else 0)"
+      - name: Trial
+        shell: bash
+        env:
+          AIDW_TRIAL_N: "1500"
+          AIDW_TRIAL_M: "150"
+        run: |
+          "$ORE_PY" -I docs/roadmap/ore/cpsat_trial/trial.py > "trial-${{ runner.os }}-py${{ matrix.python }}.json"
+      - name: Keep the results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: trial-${{ runner.os }}-py${{ matrix.python }}
+          path: trial-*.json

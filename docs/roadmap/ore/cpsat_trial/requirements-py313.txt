@@ -1,0 +1,11 @@
+# Exact versions tested in the F6.0.2 CP-SAT trial (owner decision P-3). Python 3.13.
+# Any change must pass compatibility, mathematical correctness, optimality and regression tests before approval.
+absl-py==2.5.1
+immutabledict==4.3.1
+numpy==2.5.5
+ortools==9.15.6755
+pandas==3.1.1
+protobuf==6.33.6
+python-dateutil==4.0.0
+typing_extensions==4.16.0
+tzdata==2026.6

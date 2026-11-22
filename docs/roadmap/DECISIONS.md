@@ -147,3 +147,28 @@ no claim of optimality.» The proof standard is never lowered to fit the solver.
 | C13 | The agreed proof criteria are not relaxed because the solver cannot meet them |
 
 Trial results and evidence: [ore/CPSAT_TRIAL.md](ore/CPSAT_TRIAL.md).
+
+**Owner's answers after part 1 of the trial (2026-11-22), quoted:**
+
+- «Push: Yes. Push the current branch and run the CI tests and CP-SAT trials on Linux and Windows.»
+- «P-1: Yes. Add CANCELLED as a distinct termination reason. Preserve any feasible solution found before
+  cancellation separately, without claiming optimality.»
+- «P-2: Yes. Accept CP-SAT’s infeasibility result at G2, provided it is explicitly labelled as proven by the solver
+  under the approved model, but not independently certified. Do not classify the reported conflict set as minimal
+  unless minimality has been proven.»
+- «P-3: Yes. Pin the tested OR-Tools version and compatible dependencies for each supported Python version. Future
+  upgrades must pass compatibility, mathematical correctness, optimality and regression tests before approval.»
+
+Additional requirements from the owner (R1–R6):
+
+| ID | Requirement |
+|---|---|
+| R1 | Verify that resource limits and external watchdog enforcement work correctly on Linux and Windows |
+| R2 | Keep the 46-second cold-start import documented and investigate whether it is reproducible |
+| R3 | Keep OR-Tools completely optional and isolated from the Core Engine |
+| R4 | Preserve the distinction between solver-proven results (G2) and independently certified results |
+| R5 | Never downgrade the required proof level automatically to obtain a successful result |
+| R6 | Do not mark untested platforms or unsupported mathematical models as verified |
+
+«D-037 remains approved in principle until the cross-platform validation is complete and the final evidence is
+presented for review.»
