@@ -359,6 +359,96 @@
       "status": "passed",
       "summary": "14 golden files; changed: ['run-output-before-late-refusal.txt']; unexpected: none",
       "fingerprint": "4e22081a9811c374f04ec5ca147b7e9b61fa388c4a68a9911b9c70f706957d29"
+    },
+    {
+      "id": "privacy",
+      "name": "Pre-publish secret and privacy scan",
+      "kind": "result",
+      "agent": "claude-code",
+      "at": "2026-11-22T12:35:54Z",
+      "counts": null,
+      "reason": null,
+      "command": "python3 tools/prepublish_check.py",
+      "duration_s": 0.4,
+      "exit_code": 0,
+      "status": "passed",
+      "summary": "Scanned 212 files: no findings.",
+      "fingerprint": "5c340c9124668639f7ce5a9bfc7ef85122895dae9ea6e6c3bdbedc18135ed8cd"
+    },
+    {
+      "id": "unit",
+      "name": "Unit, scenario and doc tests",
+      "kind": "result",
+      "agent": "claude-code",
+      "at": "2026-11-22T12:35:55Z",
+      "counts": null,
+      "reason": null,
+      "command": "python3 -m unittest discover -s tests",
+      "duration_s": 76.4,
+      "exit_code": 0,
+      "status": "passed",
+      "summary": "OK",
+      "fingerprint": "5c340c9124668639f7ce5a9bfc7ef85122895dae9ea6e6c3bdbedc18135ed8cd"
+    },
+    {
+      "id": "unit-py39",
+      "name": "unit-py39",
+      "kind": "result",
+      "agent": "claude-code",
+      "at": "2026-11-22T12:37:11Z",
+      "counts": null,
+      "reason": null,
+      "command": "/usr/bin/python3 -m unittest discover -s tests",
+      "duration_s": 57.6,
+      "exit_code": 0,
+      "status": "passed",
+      "summary": "OK",
+      "fingerprint": "5c340c9124668639f7ce5a9bfc7ef85122895dae9ea6e6c3bdbedc18135ed8cd"
+    },
+    {
+      "id": "ruff",
+      "name": "ruff",
+      "kind": "result",
+      "agent": "claude-code",
+      "at": "2026-11-22T12:38:09Z",
+      "counts": null,
+      "reason": null,
+      "command": ".venv/bin/ruff check .",
+      "duration_s": 0.0,
+      "exit_code": 0,
+      "status": "passed",
+      "summary": "All checks passed!",
+      "fingerprint": "5c340c9124668639f7ce5a9bfc7ef85122895dae9ea6e6c3bdbedc18135ed8cd"
+    },
+    {
+      "id": "mypy",
+      "name": "mypy",
+      "kind": "result",
+      "agent": "claude-code",
+      "at": "2026-11-22T12:38:09Z",
+      "counts": null,
+      "reason": null,
+      "command": ".venv/bin/mypy",
+      "duration_s": 0.2,
+      "exit_code": 0,
+      "status": "passed",
+      "summary": "Success: no issues found in 31 source files",
+      "fingerprint": "5c340c9124668639f7ce5a9bfc7ef85122895dae9ea6e6c3bdbedc18135ed8cd"
+    },
+    {
+      "id": "golden-byte-compare",
+      "name": "golden-byte-compare",
+      "kind": "result",
+      "agent": "claude-code",
+      "at": "2026-11-22T12:38:10Z",
+      "counts": null,
+      "reason": null,
+      "command": "python3 /private/tmp/claude-501/-Users-ahmedalhosani-Desktop-Ahmed-Zein-downloads-ZEIN-ORIGINALS/78554fc3-22ec-4f7b-b324-d53654d9842d/scratchpad/golden_compare.py tests/golden /private/tmp/claude-501/-Users-ahmedalhosani-Desktop-Ahmed-Zein-downloads-ZEIN-ORIGINALS/78554fc3-22ec-4f7b-b324-d53654d9842d/scratchpad/golden-before-td25 run-output-before-late-refusal.txt",
+      "duration_s": 0.0,
+      "exit_code": 0,
+      "status": "passed",
+      "summary": "14 golden files; changed: ['run-output-before-late-refusal.txt']; unexpected: none",
+      "fingerprint": "5c340c9124668639f7ce5a9bfc7ef85122895dae9ea6e6c3bdbedc18135ed8cd"
     }
   ],
   "checkpoints": [
@@ -811,6 +901,48 @@
       "agent": "claude-code",
       "step": "S7",
       "status": "done"
+    },
+    {
+      "at": "2026-11-22T12:35:55Z",
+      "event": "check",
+      "agent": "claude-code",
+      "check": "privacy",
+      "status": "passed"
+    },
+    {
+      "at": "2026-11-22T12:37:11Z",
+      "event": "check",
+      "agent": "claude-code",
+      "check": "unit",
+      "status": "passed"
+    },
+    {
+      "at": "2026-11-22T12:38:09Z",
+      "event": "check",
+      "agent": "claude-code",
+      "check": "unit-py39",
+      "status": "passed"
+    },
+    {
+      "at": "2026-11-22T12:38:09Z",
+      "event": "check",
+      "agent": "claude-code",
+      "check": "ruff",
+      "status": "passed"
+    },
+    {
+      "at": "2026-11-22T12:38:10Z",
+      "event": "check",
+      "agent": "claude-code",
+      "check": "mypy",
+      "status": "passed"
+    },
+    {
+      "at": "2026-11-22T12:38:10Z",
+      "event": "check",
+      "agent": "claude-code",
+      "check": "golden-byte-compare",
+      "status": "passed"
     }
   ],
   "baseline": {
@@ -850,7 +982,7 @@
       "captured_at": "2026-11-22T12:05:43Z"
     }
   },
-  "updated_at": "2026-11-22T12:17:20Z",
+  "updated_at": "2026-11-22T12:38:10Z",
   "last_checkpoint": {
     "at": "2026-11-22T12:17:20Z",
     "fingerprint": "4e22081a9811c374f04ec5ca147b7e9b61fa388c4a68a9911b9c70f706957d29",

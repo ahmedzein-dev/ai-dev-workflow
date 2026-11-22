@@ -240,10 +240,20 @@ def validate_task(repo: Path, cfg: Dict[str, Any], state: Dict[str, Any]) -> Tup
 
 # ------------------------------------------------------------------------------------- identity values (TD-25)
 
+def _assert_clean_value(value: str, where: str) -> None:
+    """The secret check for one identity value, over the value itself and its JSON form. `state.json` is scanned as
+    JSON, where a line break becomes `\\n`; scanning both forms means a value the later `state.json` check would refuse
+    is refused here, before anything runs or is written (audit F-1). The message never contains the value."""
+    assert_no_secrets(value + "\n" + json.dumps(value, ensure_ascii=False), where)
+
+
 def _check_agent(agent: str) -> None:
     """Refuse a secret-like agent name before anything runs or is written. The message names the field, never the
     value. Pattern-based detection: a credential in a format the scanner does not know is not recognised."""
-    assert_no_secrets(agent, "the agent name")
+    _assert_clean_value(agent, "the agent name")
+
+
+SESSION_FORMAT = "The session id must be 1–256 printable characters without spaces."
 
 
 def session_problem(session: Optional[str]) -> Optional[str]:
@@ -255,12 +265,14 @@ def session_problem(session: Optional[str]) -> Optional[str]:
     value = clean_session(session)
     if value is None:
         return None
+    if len(value) > 4096:  # far beyond any session id: refused before the regex scan, which is slow on huge input
+        return SESSION_FORMAT
     try:
-        assert_no_secrets(value, "the session id")
+        _assert_clean_value(value, "the session id")
     except WorkflowError as exc:
         return str(exc)
     if not (len(value) <= 256 and value.isprintable() and not any(ch.isspace() for ch in value)):
-        return "The session id must be 1–256 printable characters without spaces."
+        return SESSION_FORMAT
     return None
 
 
@@ -839,7 +851,7 @@ def run_check(*, repo: PathLike, task: str, check: str, agent: str, extra: Seque
 
     If anything fails after the command ran, the exception carries the output in its `output_tail` attribute."""
     _check_agent(agent)
-    assert_no_secrets(check, "the check name")
+    _assert_clean_value(check, "the check name")
     root, cfg, state = _task(repo, task)
     checks = {c["id"]: c for c in cfg.get("checks", [])}
     chosen = checks.get(check)
