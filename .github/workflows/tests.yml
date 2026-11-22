@@ -12,7 +12,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        # Ubuntu 24.04: setup-python has no Python 3.9 build for newer Ubuntu images (same fix as main ad5bfd3).
+        os: [ubuntu-24.04, macos-latest, windows-latest]
         python: ["3.9", "3.13"]
     steps:
       - uses: actions/checkout@v4
