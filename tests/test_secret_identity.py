@@ -393,7 +393,14 @@ class RecoveryTest(SecretIdentityCase):
         self.init()
         self.new_task()
         before = snapshot(self.repo)
-        with mock.patch.object(api, "save_state", side_effect=OSError("simulated disk failure")):
+        real_replace = os.replace
+
+        def fail_state_replace(src: str, dst: str) -> None:
+            if Path(dst).name == "state.json":
+                raise OSError("simulated disk failure after writing the temporary state")
+            real_replace(src, dst)
+
+        with mock.patch.object(os, "replace", side_effect=fail_state_replace):
             with self.assertRaises(OSError):
                 api.new_task(repo=str(self.repo), task="second", title="Second", task_type="feature",
                              invocation="/ai-dev-workflow second", agent="claude-code")
@@ -405,11 +412,14 @@ class RecoveryTest(SecretIdentityCase):
         self.new_task()
         folder = self.repo / ".ai-dev-workflow" / "tasks" / "second"
         foreign = folder / "notes-from-the-user.txt"
+        updated = folder / "spec.md"
+        message = "not written by the engine"
         real_write = api.write_text
 
         def write_then_fail(path: Path, text: str) -> None:
             if path.name == "plan.md":
-                foreign.write_text("not written by the engine", encoding="utf-8")
+                for candidate in (foreign, path, updated):
+                    candidate.write_text(message, encoding="utf-8")
                 raise OSError("simulated disk failure")
             real_write(path, text)
 
@@ -417,8 +427,9 @@ class RecoveryTest(SecretIdentityCase):
             with self.assertRaises(OSError):
                 api.new_task(repo=str(self.repo), task="second", title="Second", task_type="feature",
                              invocation="/ai-dev-workflow second", agent="claude-code")
-        self.assertTrue(foreign.exists(), "a file the engine did not write was deleted")
-        self.assertEqual(sorted(p.name for p in folder.iterdir()), ["notes-from-the-user.txt"])
+        self.assertEqual(sorted(p.name for p in folder.iterdir()), ["notes-from-the-user.txt", "plan.md", "spec.md"])
+        for candidate in (foreign, folder / "plan.md", updated):
+            self.assertEqual(candidate.read_text(encoding="utf-8"), message)
         self.assertEqual(self.state()["status"], "active")
 
     def test_failed_check_block_write_keeps_state_and_the_next_run_repairs_it(self) -> None:  # EC-13
@@ -518,7 +529,7 @@ class HookTest(SecretIdentityCase):
         self.new_task("--agent", "claude-code", "--session", "S1")
         self.assert_invalid_session_handled(token(), expect_deny=True, path=self.task / "spec.md")
 
-    def test_without_an_active_task_an_invalid_session_is_allowed_and_not_logged(self) -> None:  # EC-16
+    def test_without_an_active_task_an_invalid_session_is_allowed_with_redacted_log(self) -> None:  # EC-16
         with tempfile.TemporaryDirectory() as other:
             self.assert_invalid_session_handled(token(), expect_deny=False, path=Path(other) / "x.py")
         self.assert_invalid_session_handled(token(), expect_deny=False)  # repository without records

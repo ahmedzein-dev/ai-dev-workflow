@@ -16,11 +16,12 @@ The only environment input is `AI_DEV_WORKFLOW_HOME` (the user's template librar
 from __future__ import annotations
 
 import json
+from contextlib import contextmanager
 import os
 import re
 import shlex
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Sequence, Tuple, Union
+from typing import Any, Dict, Iterator, List, Optional, Sequence, Tuple, Union
 from aidw.constants import CODE_STAGES, DEP_GATES, INVOCATION_RE, NEXT, RECORDS, RECORD_FILES, REFERENCE, SLUG_RE, STAGES, TASK_TYPES
 from aidw.core.checks import analyzer_key, builtin_check, execute, last_line, parse_analyzer, regenerate_check_block
 from aidw.core.gates import approval_status, check_freshness, plan_steps, transition
@@ -456,15 +457,34 @@ def new_task(*, repo: PathLike, task: str, title: str, task_type: str, invocatio
         raise
 
 
-def _remove_partial_task(tdir: Path, written: Sequence[Path]) -> None:
-    """After a failed `new`: remove the files this call wrote (and their temporary files), then the folder only if
-    it is empty. Never removes anything else; a failed removal never hides the original error (TD-29)."""
-    for path in written:
-        for candidate in (path, path.with_name(f".{path.name}.{os.getpid()}.tmp")):  # write_text's temporary name
-            try:
-                candidate.unlink()
-            except OSError:
-                pass
+@contextmanager
+def _reserve_task_destination(path: Path) -> Iterator[None]:
+    if os.path.lexists(path):
+        raise FileExistsError(path)
+    # Reserve the shared writer's temp path exclusively so cleanup can prove ownership.
+    temporary = path.with_name(f".{path.name}.{os.getpid()}.tmp")
+    with temporary.open("xb") as handle:
+        original = os.fstat(handle.fileno())
+    try:
+        yield
+    finally:
+        try:
+            if os.path.samestat(temporary.lstat(), original):
+                temporary.unlink()
+        except OSError:
+            pass
+
+
+def _remove_partial_task(tdir: Path, written: Sequence[Tuple[Path, os.stat_result]]) -> None:
+    """Best-effort cleanup of records this call created and that have not changed since."""
+    for path, original in written:
+        try:
+            current = path.lstat()
+            if (os.path.samestat(current, original) and current.st_mtime_ns == original.st_mtime_ns
+                    and current.st_ctime_ns == original.st_ctime_ns and current.st_size == original.st_size):
+                path.unlink()
+        except OSError:
+            pass
     try:
         tdir.rmdir()
     except OSError:
@@ -486,14 +506,16 @@ def _create_task(root: Path, cfg: Dict[str, Any], task: str, title: str, task_ty
     invocation = redact(invocation.strip())[:500]
     assert_no_secrets(title, "the task title")
     tdir.mkdir(parents=True)  # refuses if the folder appeared meanwhile; nothing is cleaned up then
-    written: List[Path] = []
+    written: List[Tuple[Path, os.stat_result]] = []
     try:
         records = [("spec.md", read_text(tpl_path))]
         records += [(name, read_text(record_template(name)).replace("[Task title]", title))
                     for name in ("dependencies.md", "plan.md", "verification.md", "audit.md", "report.md")]
         for name, text in records:
-            written.append(tdir / name)
-            write_text(tdir / name, text)
+            path = tdir / name
+            with _reserve_task_destination(path):
+                write_text(path, text)
+                written.append((path, path.lstat()))
         state: Dict[str, Any] = {
             "schema": 1, "id": task, "title": title, "type": task_type,
             "created_at": now_iso(), "created_by": agent, "invocation": invocation,
@@ -505,8 +527,8 @@ def _create_task(root: Path, cfg: Dict[str, Any], task: str, title: str, task_ty
             "baseline": {"start": git_baseline(root)},
         }
         add_history(state, "created", agent, invocation=invocation)
-        written.append(state_path(root, task))
-        save_state(root, state)  # before activating: a failure here leaves ACTIVE and any other task untouched
+        with _reserve_task_destination(state_path(root, task)):
+            save_state(root, state)  # before activation, so failure leaves ACTIVE and other tasks untouched
     except BaseException:
         _remove_partial_task(tdir, written)
         raise

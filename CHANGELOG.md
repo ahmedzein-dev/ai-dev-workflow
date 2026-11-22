@@ -7,7 +7,8 @@
   reach `verification.md` or the local `ACTIVE` pointer before the secret check refused `state.json`, and a
   secret-like session id was stored and accepted. Refusal messages name the field, never the value. Values are checked
   as given and in their JSON form, as `state.json` is. Detection is pattern-based: a credential in a format the scanner
-  does not know is not recognised, nor a value split by U+0085 or U+2028.
+  does not know may go undetected. The scanner can also miss values containing U+0085 or U+2028 in the
+  documented cases. The session format check independently disallows those separators.
 - **Claude Code hooks:** the session id in a hook payload is treated as untrusted input. An invalid one (secret-like,
   malformed or not text) is never written to `ACTIVE` or the hook log, and inside an active task the edit is denied
   so it cannot bypass the gates. Without an active task the hooks behave as before.
