@@ -9,8 +9,8 @@ entries first. Feature statuses live in [roadmap-data.js](roadmap-data.js); this
 |---|---|
 | Phase | 1 — Foundations & universal technology support (in progress) |
 | Done in Phase 1 | F1.0.1 self-hosting setup · F1.0.2 dev tooling · F1.0.3 engine package (CI passed on 3 OSes × Python 3.9/3.13 at `3837bb2`) |
-| In progress | F1.0.4 engine API (task `engine-api-f1-0-4`): spec v1 and plan v1 ready |
-| Waiting on | The owner: approval of the F1.0.4 spec and plan |
+| In progress | F1.0.4 engine API (task `engine-api-f1-0-4`): spec `303f07fe` and plan `4e4b2a66` revised after the owner's review |
+| Waiting on | The owner: final approval of the revised F1.0.4 spec and plan |
 | Next action | F1.0.4 implementation after approval; then F1.0.5 (state schema, migration, locking) |
 | Blockers | None |
 
@@ -43,6 +43,14 @@ history in MASTER_ROADMAP §9.
 | 19 | 0 / 8 | Planned (checklist from v1.1) |
 
 ## Log
+
+### 2026-11-22 — F1.0.4 spec and plan revised after the owner's review
+
+- Owner approved the three technical decisions in principle (single `aidw/api.py`, keyword parameters, plain
+  dictionaries) and asked for seven points before final approval. Addressed in spec `303f07fe` and plan `4e4b2a66`:
+  scope JSON projection, `preflight --json` behaviour pinned (TD-24 recorded, not fixed), no hidden state with a
+  two-repository test, refusal golden file, signature-preserving wrappers for three names, internal API only, closed
+  F1.0.2/F1.0.3 reports untouched.
 
 ### 2026-11-22 — D-037 accepted; F6.0.2 closed; F1.0.4 started
 

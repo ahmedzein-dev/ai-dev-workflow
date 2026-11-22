@@ -31,6 +31,7 @@ some users · **Low** is cosmetic or rare.
 | TD-21 | Hand-maintained bilingual HTML guide (1,296 lines) | `index.html` | Every feature needs two-language edits; doc tests catch drift but not omissions | Medium | Keep the guide; generate the command reference from the engine's parser (P19); keep the roadmap HTML data-driven |
 | TD-22 | The CI harvesting reads only single-line `run:` commands | `ci_commands` L1982 | Multi-line CI steps are not suggested | Low | Read multi-line `run: |` blocks (P1 · E1.1) |
 | TD-23 | Task types are fixed | `TASK_TYPES` L42 | Research, docs, infrastructure and security tasks map poorly | Medium | Task types from config with templates per type (P1 · E1.5) |
+| TD-24 | `preflight --json` is not always pure JSON | `cmd_preflight` (aidw/cli/commands.py, about L632–645): after the JSON object it prints the unattributed-changes list and the analyzer baseline hint, outside the `if args.json` branch | A tool parsing `preflight --json` fails when either text block is printed | Medium | Found while specifying F1.0.4 (2026-11-22); kept unchanged and pinned by regression tests there; fix only as a separately approved change (owner: «do not silently change it during this refactoring») |
 
 ## Not debt (deliberate choices to keep)
 

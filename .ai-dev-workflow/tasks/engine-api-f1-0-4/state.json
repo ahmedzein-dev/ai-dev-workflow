@@ -34,31 +34,31 @@
   },
   "approvals": {},
   "spec_review": {
-    "spec_sha256": "f4dd406848131043a1378272bfb53ab20f35fcb2b06a9f0ff24a6b814a439447",
+    "spec_sha256": "303f07fe5a5e8db25b28509533d0e6ec54aca104313424de057889082c48afa3",
     "rules": {
       "J1": {
         "status": "pass",
         "note": "",
         "agent": "claude-code",
-        "at": "2026-11-22T07:55:59Z"
+        "at": "2026-11-22T08:02:12Z"
       },
       "J2": {
         "status": "pass",
         "note": "",
         "agent": "claude-code",
-        "at": "2026-11-22T07:55:59Z"
+        "at": "2026-11-22T08:02:12Z"
       },
       "J3": {
         "status": "pass",
-        "note": "The layer change follows TARGET_ARCHITECTURE section 2-3 (aidw/api.py between core and front ends) and the existing package layout and layer test from F1.0.3 (tests/test_package.py); functions move from aidw/cli/commands.py and aidw/cli/helpers.py; no new classes.",
+        "note": "The layer change follows TARGET_ARCHITECTURE section 2-3 (aidw/api.py between core and front ends) and the existing package layout and layer test from F1.0.3 (tests/test_package.py); functions move from aidw/cli/commands.py and aidw/cli/helpers.py; compatibility wrappers follow the existing re-export pattern in scripts/workflow.py; no new classes.",
         "agent": "claude-code",
-        "at": "2026-11-22T07:55:59Z"
+        "at": "2026-11-22T08:02:12Z"
       },
       "J4": {
         "status": "pass",
         "note": "",
         "agent": "claude-code",
-        "at": "2026-11-22T07:55:59Z"
+        "at": "2026-11-22T08:02:12Z"
       }
     },
     "map": {
@@ -72,7 +72,6 @@
       ],
       "FR-3": [
         "AC-1",
-        "EC-1",
         "EC-2",
         "EC-3",
         "EC-4",
@@ -87,13 +86,29 @@
       ],
       "FR-6": [
         "AC-6",
-        "AC-1"
+        "AC-10"
       ],
       "FR-7": [
-        "AC-5",
-        "EC-7"
+        "AC-5"
       ],
       "FR-8": [
+        "AC-11",
+        "EC-9"
+      ],
+      "FR-9": [
+        "AC-9",
+        "AC-12",
+        "EC-7"
+      ],
+      "FR-10": [
+        "AC-12",
+        "EC-10"
+      ],
+      "FR-11": [
+        "AC-8",
+        "EC-1"
+      ],
+      "FR-12": [
         "AC-2"
       ]
     },
@@ -174,6 +189,27 @@
       "agent": "claude-code",
       "from": "SPECIFICATION",
       "to": "SPEC_APPROVAL"
+    },
+    {
+      "at": "2026-11-22T08:01:20Z",
+      "event": "stage",
+      "agent": "claude-code",
+      "from": "SPEC_APPROVAL",
+      "to": "SPECIFICATION",
+      "reason": "owner review: address points 1-7 before final approval"
+    },
+    {
+      "at": "2026-11-22T08:02:12Z",
+      "event": "spec-review",
+      "agent": "claude-code",
+      "spec_sha256": "303f07fe"
+    },
+    {
+      "at": "2026-11-22T08:03:23Z",
+      "event": "stage",
+      "agent": "claude-code",
+      "from": "SPECIFICATION",
+      "to": "SPEC_APPROVAL"
     }
   ],
   "baseline": {
@@ -183,5 +219,5 @@
       "captured_at": "2026-11-22T07:52:10Z"
     }
   },
-  "updated_at": "2026-11-22T07:55:59Z"
+  "updated_at": "2026-11-22T08:03:23Z"
 }

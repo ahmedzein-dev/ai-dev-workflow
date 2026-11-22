@@ -9,7 +9,7 @@ window.ROADMAP = {
  "current": {
   "phase": 1,
   "next": {
-   "en": "D-037 accepted (final): CP-SAT is the first optional ORE solver within ore/1 v1. F6.0.2 closed after CI at 7e35018. Now: F1.0.4 (engine API) — spec and plan await the owner's approval.",
+   "en": "D-037 accepted (final): CP-SAT is the first optional ORE solver within ore/1 v1. F6.0.2 closed after CI at 7e35018. Now: F1.0.4 (engine API) — revised spec (303f07fe) and plan (4e4b2a66) await the owner's final approval.",
    "ar": "D-037 اتعتمد نهائيًا: CP-SAT أول solver اختياري في ORE ضمن ore/1 v1. F6.0.2 اتقفلت بعد CI على 7e35018. دلوقتي: F1.0.4 (الـ engine API)، المواصفات والخطة مستنيين موافقة صاحب المشروع."
   }
  },
@@ -227,7 +227,7 @@ window.ROADMAP = {
         "F1.0.3"
        ],
        "mvp": true,
-       "note": "Spec v1 and plan v1 ready; awaiting the owner's approval"
+       "note": "Owner review addressed (points 1–7): spec 303f07fe and plan 4e4b2a66 await final approval; TD-24 recorded"
       },
       {
        "id": "F1.0.5",
