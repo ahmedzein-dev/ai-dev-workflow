@@ -1,0 +1,460 @@
+{
+ "environment": {
+  "python": "3.13.2",
+  "platform": "macOS-26.3",
+  "machine": "arm64",
+  "ortools": "9.15.6755",
+  "dependencies": {
+   "ortools": "9.15.6755",
+   "numpy": "2.5.5",
+   "pandas": "3.1.1",
+   "protobuf": "6.33.6",
+   "absl-py": "2.5.1",
+   "immutabledict": "4.3.1"
+  },
+  "cp_model_import_s": 0.227
+ },
+ "C9 correctness vs enumeration": {
+  "models": 1500,
+  "by_classification": {
+   "PROVEN_OPTIMAL": 1225,
+   "PROVEN_INFEASIBLE": 275
+  },
+  "mismatches": 0,
+  "examples": [],
+  "pass": true,
+  "seconds": 0.83
+ },
+ "C9 correctness vs enumeration, medium models": {
+  "models": 150,
+  "by_classification": {
+   "PROVEN_INFEASIBLE": 34,
+   "PROVEN_OPTIMAL": 116
+  },
+  "mismatches": 0,
+  "examples": [],
+  "pass": true,
+  "seconds": 4.45
+ },
+ "C6 C7 C8 gap trap and strict gaps": {
+  "absolute_gap_50": {
+   "raw": {
+    "adapter": "cpsat",
+    "guarantee": "G2",
+    "termination": "completed",
+    "solution_status": "optimal_claimed",
+    "values": {
+     "x0": 1,
+     "x1": 0,
+     "x2": 0,
+     "x3": 1,
+     "x4": 0,
+     "x5": 0,
+     "x6": 0,
+     "x7": 1,
+     "x8": 0,
+     "x9": 0,
+     "x10": 0,
+     "x11": 0,
+     "x12": 0,
+     "x13": 1,
+     "x14": 0,
+     "x15": 1,
+     "x16": 1,
+     "x17": 1,
+     "x18": 0,
+     "x19": 0,
+     "x20": 0,
+     "x21": 1,
+     "x22": 1,
+     "x23": 1,
+     "x24": 0,
+     "x25": 1,
+     "x26": 1,
+     "x27": 1,
+     "x28": 0,
+     "x29": 0,
+     "p0": 0,
+     "q0": 5,
+     "p1": 0,
+     "q1": 19,
+     "p2": 0,
+     "q2": 23,
+     "p3": 3,
+     "q3": 0
+    },
+    "reported_objective": "50.0",
+    "exact_bound": "0",
+    "config": {
+     "absolute_gap_limit": 50.0,
+     "relative_gap_limit": 0.0,
+     "num_workers": 1,
+     "max_time_in_seconds": 10.0,
+     "random_seed": 0,
+     "max_memory_in_mb": 1024
+    },
+    "info": {
+     "status": "OPTIMAL",
+     "wall_time": 0.0081,
+     "deterministic_time": 0.0040148706345721165,
+     "branches": 525,
+     "conflicts": 53,
+     "solution_info": "main",
+     "best_bound_double": 0.0,
+     "objective_multiplier": 1,
+     "inner_lower_bound": 0
+    }
+   },
+   "verdict": {
+    "model_status": "valid",
+    "solver_claim": "optimal_claimed",
+    "verification": "feasibility_only",
+    "level_reached": "G0",
+    "problems": [],
+    "termination": "completed",
+    "exact_objective": "50",
+    "evidence": [
+     "gap limits not zero: configuration does not meet the strict policy",
+     "exact bound 0 != exact objective 50: gap 50"
+    ],
+    "classification": "FEASIBLE_NOT_PROVEN",
+    "gap": "50"
+   }
+  },
+  "relative_gap_0_99": {
+   "raw": {
+    "adapter": "cpsat",
+    "guarantee": "G2",
+    "termination": "time_limit",
+    "solution_status": "feasible",
+    "values": {
+     "x0": 1,
+     "x1": 1,
+     "x2": 0,
+     "x3": 1,
+     "x4": 0,
+     "x5": 0,
+     "x6": 1,
+     "x7": 1,
+     "x8": 1,
+     "x9": 1,
+     "x10": 1,
+     "x11": 1,
+     "x12": 0,
+     "x13": 0,
+     "x14": 0,
+     "x15": 0,
+     "x16": 1,
+     "x17": 0,
+     "x18": 0,
+     "x19": 0,
+     "x20": 0,
+     "x21": 0,
+     "x22": 1,
+     "x23": 0,
+     "x24": 0,
+     "x25": 1,
+     "x26": 1,
+     "x27": 0,
+     "x28": 0,
+     "x29": 0,
+     "p0": 0,
+     "q0": 0,
+     "p1": 0,
+     "q1": 0,
+     "p2": 1,
+     "q2": 0,
+     "p3": 0,
+     "q3": 0
+    },
+    "reported_objective": "1.0",
+    "exact_bound": "0",
+    "config": {
+     "absolute_gap_limit": 0.0,
+     "relative_gap_limit": 0.99,
+     "num_workers": 1,
+     "max_time_in_seconds": 10.0,
+     "random_seed": 0,
+     "max_memory_in_mb": 1024
+    },
+    "info": {
+     "status": "FEASIBLE",
+     "wall_time": 10.0003,
+     "deterministic_time": 22.272846374281595,
+     "branches": 306734,
+     "conflicts": 74681,
+     "solution_info": "main",
+     "best_bound_double": 0.0,
+     "objective_multiplier": 1,
+     "inner_lower_bound": 0
+    }
+   },
+   "verdict": {
+    "model_status": "valid",
+    "solver_claim": "feasible",
+    "verification": "feasibility_only",
+    "level_reached": "G0",
+    "problems": [],
+    "termination": "time_limit",
+    "exact_objective": "1",
+    "evidence": [],
+    "classification": "FEASIBLE_NOT_PROVEN",
+    "gap": "1"
+   }
+  },
+  "strict_small": {
+   "raw": {
+    "adapter": "cpsat",
+    "guarantee": "G2",
+    "termination": "completed",
+    "solution_status": "optimal_claimed",
+    "values": {
+     "x": 9,
+     "y": 2
+    },
+    "reported_objective": "35.0",
+    "exact_bound": "107/6",
+    "config": {
+     "absolute_gap_limit": 0.0,
+     "relative_gap_limit": 0.0,
+     "num_workers": 1,
+     "max_time_in_seconds": 20.0,
+     "random_seed": 0,
+     "max_memory_in_mb": 1024
+    },
+    "info": {
+     "status": "OPTIMAL",
+     "wall_time": 0.0002,
+     "deterministic_time": 1e-08,
+     "branches": 0,
+     "conflicts": 0,
+     "solution_info": "main",
+     "best_bound_double": 35.0,
+     "objective_multiplier": 2,
+     "inner_lower_bound": -35
+    }
+   },
+   "verdict": {
+    "model_status": "valid",
+    "solver_claim": "optimal_claimed",
+    "verification": "verified",
+    "level_reached": "G2",
+    "problems": [],
+    "termination": "completed",
+    "exact_objective": "107/6",
+    "evidence": [
+     "status OPTIMAL, gaps 0, exact bound == exact objective"
+    ],
+    "classification": "PROVEN_OPTIMAL"
+   }
+  },
+  "enumerator_small": {
+   "model_status": "valid",
+   "solver_claim": "optimal_claimed",
+   "verification": "verified",
+   "level_reached": "G3",
+   "problems": [],
+   "termination": "completed",
+   "exact_objective": "107/6",
+   "evidence": [
+    "exhaustive enumeration"
+   ],
+   "classification": "PROVEN_OPTIMAL"
+  },
+  "pass": true,
+  "seconds": 10.01
+ },
+ "C7 precision beyond 2^53": {
+  "exact_objective": "36028797018963969",
+  "solver_double": "3.602879701896397e+16",
+  "double_equals_exact": false,
+  "double_as_int": 36028797018963968,
+  "exact_bound": "36028797018963969",
+  "classification": "PROVEN_OPTIMAL",
+  "pass": true,
+  "seconds": 0.0
+ },
+ "C4 C7 overflow and floats": {
+  "lcd_overflow_precheck": {
+   "model_status": "numerical_uncertainty",
+   "solver_claim": null,
+   "verification": "not_verified",
+   "level_reached": null,
+   "problems": [],
+   "classification": "NUMERICAL_UNCERTAINTY",
+   "why": "scaled coefficients exceed the int64 headroom (never rounded)"
+  },
+  "float_input": {
+   "model_status": "invalid_model",
+   "solver_claim": null,
+   "verification": "not_verified",
+   "level_reached": null,
+   "problems": [],
+   "classification": "INVALID_MODEL",
+   "why": "floats are rejected, use an exact decimal string: 0.1"
+  },
+  "cpsat_overflow_status": "MODEL_INVALID",
+  "cpsat_api": {
+   "float in constraint": "TypeError: Linear constraints only accept integer values and coefficients: FloatA",
+   "2^63 coefficient": "TypeError: Linear constraints only accept integer values and coefficients: FloatA",
+   "float objective": "accepted silently as floating_point_objective"
+  },
+  "pass": true,
+  "seconds": 0.0
+ },
+ "C10 infeasible and core": {
+  "cpsat": "PROVEN_INFEASIBLE",
+  "enumerator": "PROVEN_INFEASIBLE",
+  "core": [
+   "budget",
+   "need_a",
+   "need_b",
+   "c_small"
+  ],
+  "core_infeasible_by_enumeration": true,
+  "core_minimal": false,
+  "pass": true,
+  "seconds": 0.0
+ },
+ "C10 C11 limits and cancellation": {
+  "timeout_with_solution": {
+   "status": "FEASIBLE",
+   "termination": "time_limit",
+   "classification": "FEASIBLE_NOT_PROVEN",
+   "gap": "2"
+  },
+  "timeout_no_solution": {
+   "status": "UNKNOWN",
+   "termination": "time_limit",
+   "classification": "TIMEOUT"
+  },
+  "conflict_limit": {
+   "status": "UNKNOWN",
+   "termination": "resource_limit",
+   "classification": "RESOURCE_LIMIT",
+   "conflicts": 2000
+  },
+  "invalid_model": {
+   "model_status": "invalid_model",
+   "solver_claim": null,
+   "verification": "not_verified",
+   "level_reached": null,
+   "problems": [],
+   "classification": "INVALID_MODEL",
+   "why": "variable x: empty domain 5..3"
+  },
+  "cancel_in_process": {
+   "status": "FEASIBLE",
+   "termination": "cancelled",
+   "classification": "FEASIBLE_NOT_PROVEN",
+   "returned_after_s": 0.511
+  },
+  "cancel_process_group": {
+   "killed_for": "cancelled",
+   "returncode": -15,
+   "elapsed": 1.016,
+   "peak_rss_mb": 99
+  },
+  "hard_wall_clock_kill": {
+   "killed_for": "time_limit",
+   "returncode": -15,
+   "elapsed": 1.513,
+   "peak_rss_mb": 99
+  },
+  "pass": true,
+  "seconds": 5.14
+ },
+ "C11 memory": {
+  "rss_watchdog_300mb": {
+   "killed_for": "memory_limit",
+   "returncode": -15,
+   "elapsed": 0.931,
+   "peak_rss_mb": 309
+  },
+  "cpsat_child_peak_rss_small_model": {
+   "peak_rss_mb": 80,
+   "elapsed": 0.381,
+   "status": "OPTIMAL"
+  },
+  "cpsat_max_memory_in_mb_64": {
+   "peak_rss_mb": 115,
+   "elapsed": 8.419,
+   "status": "FEASIBLE",
+   "termination": "time_limit"
+  },
+  "pass": true,
+  "seconds": 9.74
+ },
+ "C11 memory RLIMIT_AS": {
+  "killed_for": null,
+  "returncode": 0,
+  "elapsed": 0.306,
+  "peak_rss_mb": 1946,
+  "result": {
+   "allocated_mb": 2048,
+   "rlimit": "RLIMIT_AS setrlimit failed: current limit exceeds maximum limit; RLIMIT_DATA setrlimit failed: current limit exceeds maximum limit"
+  },
+  "stderr_tail": [],
+  "enforced": false,
+  "pass": null,
+  "seconds": 0.31
+ },
+ "C11 threads and determinism": {
+  "cpu": {
+   "workers_1": {
+    "cpu_s": 3.39,
+    "wall_s": 3.35,
+    "cpu_per_wall": 1.01
+   },
+   "workers_4": {
+    "cpu_s": 12.39,
+    "wall_s": 3.34,
+    "cpu_per_wall": 3.71
+   }
+  },
+  "deterministic_limit_identical_runs": true,
+  "deterministic_runs": [
+   {
+    "branches": 48235,
+    "conflicts": 13991,
+    "objective": "2"
+   },
+   {
+    "branches": 48235,
+    "conflicts": 13991,
+    "objective": "2"
+   },
+   {
+    "branches": 48235,
+    "conflicts": 13991,
+    "objective": "2"
+   },
+   {
+    "branches": 48235,
+    "conflicts": 13991,
+    "objective": "2"
+   },
+   {
+    "branches": 48235,
+    "conflicts": 13991,
+    "objective": "2"
+   }
+  ],
+  "wall_limit_runs": [
+   {
+    "branches": 44316,
+    "objective": "2"
+   },
+   {
+    "branches": 44304,
+    "objective": "2"
+   },
+   {
+    "branches": 44318,
+    "objective": "2"
+   }
+  ],
+  "pass": true,
+  "seconds": 15.21
+ }
+}

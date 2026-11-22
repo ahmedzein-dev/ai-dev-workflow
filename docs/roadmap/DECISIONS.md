@@ -59,7 +59,7 @@ presented; it will be presented separately.
 | D-034 | Strict optimality default | Guarantee levels G0–G3; default requirement `exact` (G2 or G3); tolerance-only results classified `FEASIBLE_NOT_PROVEN` | Fewer results called optimal; every such claim is defensible | **Accepted** |
 | D-035 | Result status model | Four recorded dimensions (model, termination, solution, verification) and a verifier-computed classification | More fields; no information lost (for example timeout plus feasible solution) | **Accepted** |
 | D-036 | Resource defaults | 60 s, 1 GB, 1 thread, 1 parallel run; exact search-space pre-check for enumeration; never raised automatically | Some problems need explicit higher limits | **Accepted** |
-| D-037 | First optional solver | **OR-Tools CP-SAT** for integer models (G2 under stated conditions), confirmed by the spike F6.0.2; Z3 as the independent exact cross-checker and HiGHS for LP with exact certificates later (Phase 10) — ore/SOLVER_COMPARISON.md §3 | Heavy optional dependencies (numpy, pandas, protobuf); no optimality certificate; memory limited at process level | Proposed |
+| D-037 | First optional solver | **OR-Tools CP-SAT** for integer models (G2 under stated conditions), confirmed by the spike F6.0.2; Z3 as the independent exact cross-checker and HiGHS for LP with exact certificates later (Phase 10) — ore/SOLVER_COMPARISON.md §3 | Heavy optional dependencies (numpy, pandas, protobuf); no optimality certificate; memory limited at process level | **Conditionally accepted** — final after the spike meets conditions C1–C13 (record below) |
 | D-038 | Model approval | Approved model as a new approval type (hash-bound), extending D-022 | One more approval for consequential optimization decisions | **Accepted** |
 | D-039 | ORE documents | Six design documents in `docs/roadmap/ore/` now (instead of 16 files); user docs in `docs/ore/` when features ship | Fewer, denser files | **Accepted** |
 | D-040 | Versions with ORE | v1.6 ORE v1; v2.0 modes and design, v2.1 specs/plans/traceability, v2.2 audit/evals/registry, v2.3 ORE advanced; v3.x, v4.x, v5.x as in MASTER_ROADMAP §5; MVP stays v1.5 without ORE | ORE arrives right after the MVP, not inside it | **Accepted** |
@@ -120,3 +120,30 @@ presented; it will be presented separately.
   reviewed.
 - **Recommendation.** Each feature (F-ID in the phase files) is one task with its own spec and plan approvals. The
   phase is closed by a phase review (summary, evidence, roadmap update) that the owner approves before the next phase.
+
+### D-037 — First optional solver: OR-Tools CP-SAT (conditional)
+
+**Conditionally approved by the owner on 2026-11-22:** «موافق مبدئيًا على D-037 واستخدام Google OR-Tools CP-SAT كأول
+Optional Solver داخل ORE، وموافق على تحميله وتجربته عمليًا في F6.0.2 داخل بيئة Python معزولة.» ("I approve D-037 in
+principle, using Google OR-Tools CP-SAT as the first optional solver in ORE, and I approve downloading it and trying it
+in practice in F6.0.2 inside an isolated Python environment.") Final adoption depends on the trial meeting every
+condition below; if it does not, alternatives are studied. The owner restated the principle: «No proof of optimality,
+no claim of optimality.» The proof standard is never lowered to fit the solver.
+
+| ID | Condition set by the owner |
+|---|---|
+| C1 | ORE is not tied to any solver: an extensible solver adapter architecture |
+| C2 | The core stays light; OR-Tools dependencies are never forced on users |
+| C3 | Version and dependencies compatible with Python 3.9 on macOS, Windows and Linux |
+| C4 | First version limited to integer models that can be verified exactly; no silent rounding |
+| C5 | Strict Optimality Mode: verify every constraint, the objective value, the best bound and the optimality gap |
+| C6 | Never rely on the `OPTIMAL` status alone (CP-SAT can return it when a gap limit is reached) |
+| C7 | Absolute and relative gap limits set to match the strict proof policy; numerical precision and integer overflow checked |
+| C8 | Solver-reported optimality and independently verified optimality are kept distinct |
+| C9 | Results compared with exhaustive enumeration on small problems with known solutions, to prove the adapter correct |
+| C10 | Cases tested: infeasible, feasible but not proven optimal, timeout, resource limit, invalid model, cancellation |
+| C11 | Real limits on time, memory and threads, not only solver settings where these give no sufficient guarantee |
+| C12 | CP-SAT limits, unsupported problem types and the proof level it can give are documented |
+| C13 | The agreed proof criteria are not relaxed because the solver cannot meet them |
+
+Trial results and evidence: [ore/CPSAT_TRIAL.md](ore/CPSAT_TRIAL.md).

@@ -9,8 +9,8 @@ window.ROADMAP = {
  "current": {
   "phase": 1,
   "next": {
-   "en": "F1.0.3 closed. Waiting on the owner: D-037 (OR-Tools CP-SAT recommended as the first optional ORE solver). Next feature: F1.0.4 or F1.0.5.",
-   "ar": "F1.0.3 اتقفلت. مستنيين صاحب المشروع في D-037 (OR-Tools CP-SAT مقترح كأول محرك حل اختياري). الخاصية الجاية: F1.0.4 أو F1.0.5."
+   "en": "F1.0.3 committed. D-037 conditionally approved; CP-SAT trial on macOS met the conditions with ORE controls. Waiting on the owner: policy questions P-1–P-3, Linux/Windows trial runs (push), final D-037. Next feature: F1.0.4 or F1.0.5.",
+   "ar": "F1.0.3 اتعملها commit. D-037 متوافق عليه بشروط، وتجربة CP-SAT على macOS حققت الشروط مع ضوابط ORE. مستنيين صاحب المشروع: أسئلة السياسة P-1–P-3، تشغيل التجربة على Linux وWindows (بعد الـ push)، والقرار النهائي في D-037. الخاصية الجاية: F1.0.4 أو F1.0.5."
   }
  },
  "phases": [
@@ -1354,10 +1354,11 @@ window.ROADMAP = {
        "t": "Hands-on spike: candidate solvers in a throwaway virtual environment, run scenarios ORE-A/I/J/K/L, confirm guarantees, status mapping and resource controls; decision record",
        "pri": "P0",
        "eff": "M",
-       "st": "planned",
+       "st": "in-progress",
        "dep": [
         "F6.0.1"
-       ]
+       ],
+       "note": "CP-SAT part run on macOS (Python 3.9, 3.13): conditions met with ORE controls; Linux/Windows runs and owner decisions pending (ore/CPSAT_TRIAL.md)"
       }
      ]
     },
@@ -3234,12 +3235,6 @@ window.ROADMAP = {
    "t": "state.json schema never checked on load"
   },
   {
-   "id": "TD-01",
-   "kind": "debt",
-   "sev": "high",
-   "t": "Single 3,458-line engine module (F1.0.3 next)"
-  },
-  {
    "id": "R-17",
    "kind": "risk",
    "sev": "high",
@@ -3305,6 +3300,12 @@ window.ROADMAP = {
    "date": "2026-11-22",
    "what": "F1.0.3: 156 tests on 3.13 and 3.9, ruff, mypy, privacy, golden byte-identical",
    "result": "All passed · code 9b5f860b53",
+   "ok": true
+  },
+  {
+   "date": "2026-11-22",
+   "what": "F6.0.2 CP-SAT trial: 1,650 models vs enumeration, gap trap, limits, cancellation, memory, threads (Python 3.13 and 3.9, macOS)",
+   "result": "0 mismatches · all checks as expected",
    "ok": true
   },
   {

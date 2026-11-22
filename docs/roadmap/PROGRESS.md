@@ -9,8 +9,8 @@ entries first. Feature statuses live in [roadmap-data.js](roadmap-data.js); this
 |---|---|
 | Phase | 1 — Foundations & universal technology support (in progress) |
 | Done in Phase 1 | F1.0.1 self-hosting setup · F1.0.2 dev tooling · F1.0.3 engine package (both Completed with Limitations: CI after the owner pushes) |
-| In progress | — |
-| Waiting on | The owner: D-037 (first optional solver, CP-SAT recommended); commit and push of F1.0.3 |
+| In progress | F6.0.2 CP-SAT trial (D-037): macOS part done — [ore/CPSAT_TRIAL.md](ore/CPSAT_TRIAL.md) |
+| Waiting on | The owner: policy questions P-1–P-3 and the final D-037 decision; a push so CI verifies F1.0.2/F1.0.3 and the trial can run on Linux and Windows |
 | Next action | F1.0.4 (engine API) or F1.0.5 (state schema, migration, locking) |
 | Blockers | None |
 
@@ -21,13 +21,13 @@ history in MASTER_ROADMAP §9.
 
 | Phase | Features done / total | Status |
 |---|---|---|
-| 0 | 15 / 15 | Done (D-037 waiting for the owner) |
+| 0 | 15 / 15 | Done |
 | 1 | 3 / 25 | In progress |
 | 2 | 0 / 20 | Planned |
 | 3 | 0 / 12 | Planned (MVP) |
 | 4 | 0 / 12 | Planned (MVP) |
 | 5 | 0 / 12 | Planned (MVP complete) |
-| 6 | 0 / 19 | Planned (ORE v1) |
+| 6 | 0 / 19 | Planned (ORE v1); F6.0.2 in progress, pulled forward for D-037 |
 | 7 | 0 / 15 | Planned |
 | 8 | 0 / 8 | Planned |
 | 9 | 0 / 8 | Planned |
@@ -43,6 +43,18 @@ history in MASTER_ROADMAP §9.
 | 19 | 0 / 8 | Planned (checklist from v1.1) |
 
 ## Log
+
+### 2026-11-22 — F1.0.3 committed; D-037 conditionally approved; CP-SAT trial (F6.0.2, part 1)
+
+- Owner: «Commit» — F1.0.3 committed (`7925fed`) with the roadmap updates (`97a63bd`); not pushed.
+- Owner conditionally approved D-037 and the download and trial of OR-Tools in an isolated environment, with
+  conditions C1–C13 (quoted in DECISIONS.md).
+- Trial on macOS, Python 3.13.2 and 3.9.6, `ortools` 9.15.6755: 0 mismatches against exhaustive enumeration in 1,650
+  models; the gap trap was reproduced (`OPTIMAL` with objective 50, bound 0 → `FEASIBLE_NOT_PROVEN`); doubles lose
+  precision above 2^53 (the exact path does not); `max_memory_in_mb` is not enforced and macOS `setrlimit` fails, while
+  the external RSS watchdog works; one worker uses one core; runs are identical under a deterministic time limit.
+- Verdict: conditions met on macOS with the ORE controls in CPSAT_TRIAL §4. Open: Linux/Windows runs, P-1–P-3,
+  final D-037.
 
 ### 2026-11-22 — F1.0.3 closed: Completed with Limitations; solver comparison done
 
