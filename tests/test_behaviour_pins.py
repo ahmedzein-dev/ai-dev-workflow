@@ -6,6 +6,7 @@ They are a baseline, not a convenience: never regenerate them to make a refactor
 - tests/golden/workflow-public-signatures.txt  — the call signature of every public function importable from workflow
 - tests/golden/refusals.json                   — refused commands: exit code, stdout, stderr (normalised)
 - tests/golden/preflight-json-*.txt            — `preflight --json` output, including today's trailing text (TD-24)
+- tests/golden/run-output-before-late-refusal.txt — the F-1 output, regenerated from fa6a676 for TD-25 (see LateRefusalTest)
 
 Every refusal test also compares the bytes of every file under .ai-dev-workflow/ before and after the refused
 command, inside the test itself, so record integrity is checked exactly and on every platform.
@@ -19,11 +20,14 @@ import json
 import os
 from pathlib import Path
 from typing import Callable, Dict, Tuple, Union
+from unittest import mock
 
 from helpers import EXAMPLE_TEMPLATE, FILLED_PLAN, FILLED_SPEC, PY, git
 from test_golden import GOLDEN, UPDATE_ENV, GoldenTestCase, normalize
 
 import workflow
+from aidw import api
+from aidw.errors import WorkflowError
 
 NAMES_FILE = GOLDEN / "workflow-public-names.txt"
 SIGNATURES_FILE = GOLDEN / "workflow-public-signatures.txt"
@@ -170,23 +174,38 @@ class RefusalsTest(GoldenTestCase):
 class LateRefusalTest(GoldenTestCase):
     """`run` prints the command's output before a refusal that comes after the command ran (audit F-1).
 
-    The scenario also writes the check id into verification.md before the refusal (pre-existing, TD-25), so record
-    integrity is not asserted here; only the output is pinned.
+    Why the scenario changed (TD-25, owner decision "Option A", 2026-11-22): the historical trigger was a check name
+    made of a token-like value, which the `state.json` secret check refused only after the command had run. That
+    is exactly the TD-25 vulnerability, which now refuses such a name before anything runs, so the old scenario can
+    no longer happen. The F-1 guarantee is kept with a controlled synthetic `WorkflowError` raised by `save_state`
+    after the command ran. The golden file was regenerated from the pre-fix engine fa6a676 with this scenario, never
+    from the fixed implementation. Secret-like check names are covered by tests/test_secret_identity.py.
     """
+
+    SCRIPT = ("from pathlib import Path\n"
+              "print('line-one')\n"
+              "print('token ' + 'ghp_' + 'A' * 36)\n"  # built when the script runs: no literal token in the repository
+              "print('line-two')\n"
+              "Path('ran.marker').write_text('ran')\n")
 
     def test_run_output_is_printed_before_a_late_refusal(self) -> None:
         # A script file instead of `python -c "…"`: an extra command with quotes is not portable to Windows.
-        self.write("two_lines.py", "print('line-one')\nprint('line-two')\n")
+        self.write("two_lines.py", self.SCRIPT)
         git(self.repo, "add", "-A")
         git(self.repo, "commit", "-q", "-m", "fixture")
         self.to_implementation()
-        name = "ghp_" + "a1B2c3D4e5F6g7H8i9J0k1L2m3N4o5P6q7R8"
         out, err = io.StringIO(), io.StringIO()
-        with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
+        late = WorkflowError("Synthetic late refusal after the command ran (test).")
+        with mock.patch.object(api, "save_state", side_effect=late), \
+                contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
             # --repo before the positionals: Python 3.9's argparse would treat it as part of the extra command.
-            code = workflow.main(["run", "--repo", str(self.repo), "favorites", name, "--", PY, "two_lines.py"])
-        self.assertNotEqual(code, 0)
-        self.assertIn("line-one", out.getvalue())
+            code = workflow.main(["run", "--repo", str(self.repo), "favorites", "smoke", "--", PY, "two_lines.py"])
+        self.assertTrue((self.repo / "ran.marker").exists(), "the command did not run before the refusal")
+        self.assertEqual(code, 1)
+        self.assertIn("token [REDACTED]", out.getvalue())
+        self.assertNotIn("ghp_" + "A" * 36, out.getvalue() + err.getvalue())
+        self.assertLess(out.getvalue().index("line-one"), out.getvalue().index("line-two"))
+        self.assertEqual(err.getvalue().strip(), "AIDevWorkflow: Synthetic late refusal after the command ran (test).")
         text = f"exit: {code}\n--- stdout ---\n{out.getvalue()}--- stderr ---\n{err.getvalue()}"
         path = GOLDEN / "run-output-before-late-refusal.txt"
         actual = normalize(text, self.tmp)

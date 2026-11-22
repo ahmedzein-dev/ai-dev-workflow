@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+- **Security (TD-25):** a secret-like agent name (`--agent` or `AI_DEV_WORKFLOW_AGENT`), session id (`--session`)
+  or check name (`run <task> <name>`) is now refused before anything runs or is written. Before, such a value could
+  reach `verification.md` or the local `ACTIVE` pointer before the secret check refused `state.json`, and a
+  secret-like session id was stored and accepted. Refusal messages name the field, never the value. Detection is
+  pattern-based: a credential in a format the scanner does not know is not recognised.
+- **Claude Code hooks:** the session id in a hook payload is treated as untrusted input. An invalid one (secret-like,
+  malformed or not text) is never written to `ACTIVE` or the hook log, and inside an active task the edit is denied
+  so it cannot bypass the gates. Without an active task the hooks behave as before.
+- **Session ids** must be 1–256 printable characters without spaces (Claude Code's UUIDs pass); other values are
+  refused with an explicit message. `${…}`, `none` and `null` are still treated as "no session".
+- A failed `new` no longer leaves a half-created task folder: it removes only the files it wrote. `run` now saves
+  `state.json` before rewriting the check block in `verification.md`. Updates that touch several files are still not
+  transactional (TD-29).
 - Guided first-time setup: `init --discover` now proposes a complete setup with plain-language explanations — your
   default template (`install.py add-template … --default`, `install.py default-template`), checks found from the
   project's own files (with what each does, why it was suggested, and whether its tool is installed), the commands

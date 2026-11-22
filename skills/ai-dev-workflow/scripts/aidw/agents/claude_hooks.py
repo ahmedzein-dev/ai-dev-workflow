@@ -8,7 +8,7 @@ import re
 import sys
 from pathlib import Path
 from typing import Any, Dict, Optional
-from aidw.api import status_line
+from aidw.api import session_problem, status_line
 from aidw.constants import CODE_STAGES, NEXT, RECORDS, REFERENCE, STAGES
 from aidw.core.gates import approval_status
 from aidw.errors import WorkflowError
@@ -42,6 +42,27 @@ def _deny(reason: str) -> int:
     print(json.dumps({"hookSpecificOutput": {"hookEventName": "PreToolUse", "permissionDecision": "deny",
                                              "permissionDecisionReason": reason}}))
     return 0
+
+
+def _session_rejected(raw: Any) -> bool:
+    """The payload session id is untrusted input (TD-25): refuse it when it is not text, looks like a secret or breaks
+    the session format. Missing ids and the placeholders `clean_session` drops are not rejected, as before."""
+    if raw is None:
+        return False
+    return not isinstance(raw, str) or session_problem(raw) is not None
+
+
+def _rejected_session_reason(repo: Path, active: Dict[str, Any]) -> Optional[str]:
+    """Deny inside an active task, whatever the binding, so an invalid session can never bypass the gates; without an
+    active task there is nothing to gate. The reason never contains the session id."""
+    if not (task_dir(repo, active["task"]) / "state.json").exists():
+        return None
+    state = load_state(repo, active["task"])
+    if state["status"] != "active":
+        return None
+    return (f"AIDevWorkflow: this session's id is not valid (it must be 1–256 printable characters without spaces and "
+            f"must not look like a credential), so this edit cannot be checked against task '{state['id']}'. "
+            f"Pause the task (`workflow.py pause {state['id']}`) for unrelated work.")
 
 
 def gate_decision(repo: Path, active: Dict[str, Any], target: Path, session: Optional[str]) -> Optional[str]:
@@ -90,17 +111,30 @@ def hook_claude_pre_edit(raw: str) -> int:
         file_path = tool_input.get("file_path") or tool_input.get("notebook_path") or tool_input.get("path")
         if not file_path:
             return 0
-        session = clean_session(data.get("session_id"))
+        rejected = _session_rejected(data.get("session_id"))
+        session = None if rejected else clean_session(data.get("session_id"))
+        flags: Dict[str, Any] = {"session_rejected": True} if rejected else {}
         target = Path(file_path)
         if not target.is_absolute():
             target = Path(data.get("cwd") or os.getcwd()) / target
         repo = _find_records(target.parent)
         if repo is None:
-            _hook_log("claude-pre-edit", session=session, file=str(target), decision="allow", why="no active task")
+            _hook_log("claude-pre-edit", session=session, file=str(target), decision="allow", why="no active task", **flags)
             return 0
         active = read_active(repo)
         if not active:
             return 0
+    except Exception:  # noqa: BLE001 - without an active task the hook must never interfere
+        return 0
+    if rejected:
+        try:
+            reason = _rejected_session_reason(repo, active)
+        except Exception as exc:  # noqa: BLE001 - inside an active task, fail closed
+            reason = f"AIDevWorkflow could not validate task '{active.get('task')}' ({type(exc).__name__}). Fix the records or pause the task."
+        _hook_log("claude-pre-edit", session=None, file=str(target), task=active.get("task"),
+                  decision="deny" if reason else "allow", why=reason or "no active task", **flags)
+        return _deny(reason) if reason else 0
+    try:
         bound = active.get("session")
         if bound and session and bound != session:
             _hook_log("claude-pre-edit", session=session, file=str(target), decision="allow", why="other session")
@@ -129,6 +163,8 @@ def hook_claude_pre_edit(raw: str) -> int:
 def hook_claude_prompt(raw: str) -> int:
     try:
         data = json.loads(raw or "{}")
+        if _session_rejected(data.get("session_id")):
+            return 0  # an invalid session gets no reminder and nothing is written (TD-25)
         session = clean_session(data.get("session_id"))
         repo = _find_records(Path(data.get("cwd") or os.getcwd()))
         if repo is None:

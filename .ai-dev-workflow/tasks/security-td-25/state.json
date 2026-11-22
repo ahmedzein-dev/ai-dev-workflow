@@ -1,0 +1,867 @@
+{
+  "schema": 1,
+  "id": "security-td-25",
+  "title": "TD-25: keep secret-like check ids and agent names out of task records",
+  "type": "bugfix",
+  "created_at": "2026-11-22T09:14:29Z",
+  "created_by": "claude-code",
+  "invocation": "عايزين نستخدم AIDevWorkflow نفسه لتطوير AIDevWorkflow بصورة تدريجية، باستخدام النسخة المستقرة المثبتة منه. — Before starting F1.0.5, open a separate task to investigate and fix TD-25, including both unredacted fields (check ID and agent name). Follow the normal Discovery → Specification → Approval → Planning → Approval workflow for that security fix. Do not implement it without approval.",
+  "stage": "IMPLEMENTATION",
+  "status": "active",
+  "outcome": null,
+  "template": {
+    "path": ".ai-dev-workflow/templates/spec-kit.md",
+    "sha256": "574d3677a6a4f773352e6ffadf959e794bd9c985e25dea0556c53f37b5296ffc",
+    "rules": ".ai-dev-workflow/templates/spec-kit.rules.json"
+  },
+  "discovery": {
+    "inspected": [
+      "skills/ai-dev-workflow/scripts/aidw/api.py",
+      "skills/ai-dev-workflow/scripts/aidw/core/checks.py",
+      "skills/ai-dev-workflow/scripts/aidw/store/state.py",
+      "skills/ai-dev-workflow/scripts/aidw/infra/secrets.py",
+      "skills/ai-dev-workflow/scripts/aidw/infra/text.py",
+      "skills/ai-dev-workflow/scripts/aidw/agents/claude_hooks.py",
+      "skills/ai-dev-workflow/scripts/aidw/cli/commands.py",
+      "skills/ai-dev-workflow/scripts/aidw/cli/main.py",
+      "skills/ai-dev-workflow/scripts/aidw/core/spec.py",
+      "skills/ai-dev-workflow/scripts/aidw/core/setup.py",
+      "docs/roadmap/TECHNICAL_DEBT.md",
+      ".ai-dev-workflow/tasks/engine-api-f1-0-4/audit.md",
+      "tests/test_behaviour_pins.py"
+    ],
+    "summary": "Goal: no secret-like value given on the command line as a check name, agent name or session id is written to any task record or the ACTIVE pointer; the command refuses before it runs anything or writes anything. Reproduced with a synthetic token on the current engine and on the pinned v1.0.0: run with such a check id or agent name writes it into the verification.md check block, then save_state refuses state.json; resume, preflight and new with such an agent name write it into ACTIVE (git-ignored but on disk) before the refusal, and new also leaves a task folder without state.json that blocks the name; a secret-like --session is written into ACTIVE and the command succeeds. Affected: api.py (entry validation, run_check order), store/state.py, tests. Out of scope: TD-24, TD-26, approve snapshotting an unscanned spec or plan, refusal messages that echo inputs to the terminal, check ids with | or newlines, the Claude hook's session from its own payload."
+  },
+  "approvals": {
+    "spec": {
+      "version": 2,
+      "sha256": "9cf6cec30b9d6be7a6817f5fead2ea5f0725046cc3850f5955743441a4003fc2",
+      "snapshot": "approved/spec.v2.md",
+      "approved_by": "user",
+      "evidence": "approve the spec and plan — I approve the revised TD-25 specification and implementation plan: Specification v2: 9cf6cec3. Implementation Plan v2: f1c2745d. Proceed with implementation according to the approved v2 documents.",
+      "recorded_by": "claude-code",
+      "recorded_at": "2026-11-22T12:05:29Z"
+    },
+    "plan": {
+      "version": 2,
+      "sha256": "f1c2745d49e817448798529d2096795e4e849d42e0aad333e8c6335a77ef859d",
+      "snapshot": "approved/plan.v2.md",
+      "approved_by": "user",
+      "evidence": "approve the spec and plan — I approve the revised TD-25 specification and implementation plan: Specification v2: 9cf6cec3. Implementation Plan v2: f1c2745d. Proceed with implementation according to the approved v2 documents.",
+      "recorded_by": "claude-code",
+      "recorded_at": "2026-11-22T12:05:43Z",
+      "spec_sha256": "9cf6cec30b9d6be7a6817f5fead2ea5f0725046cc3850f5955743441a4003fc2",
+      "spec_version": 2
+    }
+  },
+  "spec_review": {
+    "spec_sha256": "9cf6cec30b9d6be7a6817f5fead2ea5f0725046cc3850f5955743441a4003fc2",
+    "rules": {
+      "J1": {
+        "status": "pass",
+        "note": "",
+        "agent": "claude-code",
+        "at": "2026-11-22T10:22:00Z"
+      },
+      "J2": {
+        "status": "pass",
+        "note": "",
+        "agent": "claude-code",
+        "at": "2026-11-22T10:22:00Z"
+      },
+      "J3": {
+        "status": "pass",
+        "note": "No new classes or layers. The checks reuse assert_no_secrets (aidw/infra/secrets.py) as the existing call sites in api.py do and clean_session (aidw/infra/text.py); they sit at the start of the 15 API functions that take agent (F1.0.4 layering, api level 4). The hooks (agents, level 5) reuse the same session rule from aidw.api, as they already import status_line from it, and keep the existing fail-open/fail-closed split of claude_hooks.py. The run_check and new_task order changes stay inside api.py. Tests follow the byte-snapshot refusal pattern of tests/test_behaviour_pins.py, its golden-generation rule (AIDW_UPDATE_GOLDEN writes only a missing file, generated from the old engine) and the script-file extra command. The backport follows the v1.0.0 single-file engine as released.",
+        "agent": "claude-code",
+        "at": "2026-11-22T10:22:00Z"
+      },
+      "J4": {
+        "status": "pass",
+        "note": "",
+        "agent": "claude-code",
+        "at": "2026-11-22T10:22:00Z"
+      }
+    },
+    "map": {
+      "FR-1": [
+        "AC-1",
+        "AC-4",
+        "EC-3",
+        "EC-4",
+        "EC-5",
+        "EC-9"
+      ],
+      "FR-2": [
+        "AC-1",
+        "AC-4",
+        "EC-7",
+        "EC-8",
+        "EC-11"
+      ],
+      "FR-3": [
+        "AC-1",
+        "AC-2",
+        "EC-1",
+        "EC-2"
+      ],
+      "FR-4": [
+        "AC-1",
+        "AC-10",
+        "EC-3",
+        "EC-13"
+      ],
+      "FR-5": [
+        "AC-3",
+        "AC-9",
+        "EC-6",
+        "EC-12"
+      ],
+      "FR-6": [
+        "AC-1",
+        "EC-2"
+      ],
+      "FR-7": [
+        "AC-5",
+        "AC-7",
+        "EC-8",
+        "EC-9"
+      ],
+      "FR-8": [
+        "AC-1",
+        "AC-6",
+        "AC-8"
+      ],
+      "FR-9": [
+        "AC-11",
+        "EC-13"
+      ],
+      "FR-10": [
+        "AC-11"
+      ],
+      "FR-11": [
+        "AC-11",
+        "DW-7",
+        "DW-9"
+      ],
+      "FR-12": [
+        "AC-12",
+        "EC-14",
+        "EC-15",
+        "EC-16",
+        "EC-17"
+      ],
+      "FR-13": [
+        "AC-13",
+        "EC-18"
+      ],
+      "FR-14": [
+        "AC-14"
+      ]
+    },
+    "questions": {
+      "double-tap": "n/a: a CLI command runs once per invocation; a repeated refused command is refused again with nothing written",
+      "offline": "n/a: the engine makes no network calls",
+      "server-error": "n/a: no server is involved; local I/O failures are EC-12 and EC-13",
+      "empty-result": "EC-8",
+      "app-killed": "EC-12",
+      "concurrent-change": "n/a: unchanged by this task; locking is F1.0.5 (TD-29)",
+      "stale-data": "EC-10",
+      "lost-response": "n/a: a local CLI with no request/response channel"
+    },
+    "dismissed": {}
+  },
+  "progress": {
+    "S1": {
+      "status": "done",
+      "files": [
+        "tests/test_secret_identity.py"
+      ],
+      "note": "Unfixed engine: 20 of 23 tests fail (all DEP-2 scenarios); the 3 legitimate-value tests pass",
+      "agent": "claude-code",
+      "at": "2026-11-22T10:06:48Z"
+    },
+    "S2": {
+      "status": "done",
+      "files": [
+        "skills/ai-dev-workflow/scripts/aidw/api.py"
+      ],
+      "note": "_check_agent/_check_session first in the 15 functions; check name checked in run_check",
+      "agent": "claude-code",
+      "at": "2026-11-22T10:09:26Z"
+    },
+    "S3": {
+      "status": "done",
+      "files": [
+        "skills/ai-dev-workflow/scripts/aidw/api.py"
+      ],
+      "note": "run_check saves state.json before the check block; _create_task saves state before activate and removes only its own files on failure",
+      "agent": "claude-code",
+      "at": "2026-11-22T10:09:27Z"
+    },
+    "S4": {
+      "status": "done",
+      "files": [
+        "skills/ai-dev-workflow/scripts/aidw/agents/claude_hooks.py",
+        "skills/ai-dev-workflow/scripts/aidw/api.py",
+        "tests/test_secret_identity.py"
+      ],
+      "note": "HookTest first: 7 of 8 failed before the fix (current and fa6a676); session_problem shared rule; hooks deny inside an active task, never write or log an invalid session; 32/32 TD-25 tests pass",
+      "agent": "claude-code",
+      "at": "2026-11-22T12:08:28Z"
+    },
+    "S5": {
+      "status": "done",
+      "files": [
+        "tests/test_behaviour_pins.py",
+        "tests/golden/run-output-before-late-refusal.txt"
+      ],
+      "note": "LateRefusalTest re-triggered with a synthetic WorkflowError from save_state after the command ran; golden regenerated from fa6a676 with the final test is byte-identical; passes on fa6a676 and the fixed engine, Python 3.13 and 3.9",
+      "agent": "claude-code",
+      "at": "2026-11-22T12:09:42Z"
+    },
+    "S6": {
+      "status": "done",
+      "files": [
+        "CHANGELOG.md",
+        "docs/roadmap/TECHNICAL_DEBT.md"
+      ],
+      "note": "Checks at code 4e22081a98: privacy, unit, unit-py39, ruff, mypy, golden-byte-compare (only the approved FR-13 file changed); exposure check: 45 record files, 0 with secret-like values, ACTIVE clean; old engines: 5a7576a 22 fail/4 legitimate pass/6 API skip, fa6a676 28 fail/4 pass, fixed 32/32",
+      "agent": "claude-code",
+      "at": "2026-11-22T12:17:20Z"
+    },
+    "S7": {
+      "status": "done",
+      "files": [
+        "CHANGELOG.md"
+      ],
+      "note": "CHANGELOG security entry incl. hooks; TECHNICAL_DEBT TD-25 status and TD-30 (roadmap file, standing rule)",
+      "agent": "claude-code",
+      "at": "2026-11-22T12:17:20Z"
+    }
+  },
+  "checks": [
+    {
+      "id": "unit",
+      "name": "Unit, scenario and doc tests",
+      "kind": "result",
+      "agent": "claude-code",
+      "at": "2026-11-22T12:09:49Z",
+      "counts": null,
+      "reason": null,
+      "command": "python3 -m unittest discover -s tests",
+      "duration_s": 81.4,
+      "exit_code": 0,
+      "status": "passed",
+      "summary": "OK",
+      "fingerprint": "0e52a2c0bdf88613e968610dc6a37257933ed7e99b2088615277f92a897ab060"
+    },
+    {
+      "id": "unit-py39",
+      "name": "unit-py39",
+      "kind": "result",
+      "agent": "claude-code",
+      "at": "2026-11-22T12:11:11Z",
+      "counts": null,
+      "reason": null,
+      "command": "/usr/bin/python3 -m unittest discover -s tests",
+      "duration_s": 61.4,
+      "exit_code": 0,
+      "status": "passed",
+      "summary": "OK",
+      "fingerprint": "0e52a2c0bdf88613e968610dc6a37257933ed7e99b2088615277f92a897ab060"
+    },
+    {
+      "id": "privacy",
+      "name": "Pre-publish secret and privacy scan",
+      "kind": "result",
+      "agent": "claude-code",
+      "at": "2026-11-22T12:14:49Z",
+      "counts": null,
+      "reason": null,
+      "command": "python3 tools/prepublish_check.py",
+      "duration_s": 0.4,
+      "exit_code": 0,
+      "status": "passed",
+      "summary": "Scanned 212 files: no findings.",
+      "fingerprint": "4e22081a9811c374f04ec5ca147b7e9b61fa388c4a68a9911b9c70f706957d29"
+    },
+    {
+      "id": "unit",
+      "name": "Unit, scenario and doc tests",
+      "kind": "result",
+      "agent": "claude-code",
+      "at": "2026-11-22T12:14:50Z",
+      "counts": null,
+      "reason": null,
+      "command": "python3 -m unittest discover -s tests",
+      "duration_s": 79.0,
+      "exit_code": 0,
+      "status": "passed",
+      "summary": "OK",
+      "fingerprint": "4e22081a9811c374f04ec5ca147b7e9b61fa388c4a68a9911b9c70f706957d29"
+    },
+    {
+      "id": "unit-py39",
+      "name": "unit-py39",
+      "kind": "result",
+      "agent": "claude-code",
+      "at": "2026-11-22T12:16:09Z",
+      "counts": null,
+      "reason": null,
+      "command": "/usr/bin/python3 -m unittest discover -s tests",
+      "duration_s": 56.8,
+      "exit_code": 0,
+      "status": "passed",
+      "summary": "OK",
+      "fingerprint": "4e22081a9811c374f04ec5ca147b7e9b61fa388c4a68a9911b9c70f706957d29"
+    },
+    {
+      "id": "ruff",
+      "name": "ruff",
+      "kind": "result",
+      "agent": "claude-code",
+      "at": "2026-11-22T12:17:06Z",
+      "counts": null,
+      "reason": null,
+      "command": ".venv/bin/ruff check .",
+      "duration_s": 0.1,
+      "exit_code": 0,
+      "status": "passed",
+      "summary": "All checks passed!",
+      "fingerprint": "4e22081a9811c374f04ec5ca147b7e9b61fa388c4a68a9911b9c70f706957d29"
+    },
+    {
+      "id": "mypy",
+      "name": "mypy",
+      "kind": "result",
+      "agent": "claude-code",
+      "at": "2026-11-22T12:17:06Z",
+      "counts": null,
+      "reason": null,
+      "command": ".venv/bin/mypy",
+      "duration_s": 0.3,
+      "exit_code": 0,
+      "status": "passed",
+      "summary": "Success: no issues found in 31 source files",
+      "fingerprint": "4e22081a9811c374f04ec5ca147b7e9b61fa388c4a68a9911b9c70f706957d29"
+    },
+    {
+      "id": "golden-byte-compare",
+      "name": "golden-byte-compare",
+      "kind": "result",
+      "agent": "claude-code",
+      "at": "2026-11-22T12:17:06Z",
+      "counts": null,
+      "reason": null,
+      "command": "python3 /private/tmp/claude-501/-Users-ahmedalhosani-Desktop-Ahmed-Zein-downloads-ZEIN-ORIGINALS/78554fc3-22ec-4f7b-b324-d53654d9842d/scratchpad/golden_compare.py tests/golden /private/tmp/claude-501/-Users-ahmedalhosani-Desktop-Ahmed-Zein-downloads-ZEIN-ORIGINALS/78554fc3-22ec-4f7b-b324-d53654d9842d/scratchpad/golden-before-td25 run-output-before-late-refusal.txt",
+      "duration_s": 0.0,
+      "exit_code": 0,
+      "status": "passed",
+      "summary": "14 golden files; changed: ['run-output-before-late-refusal.txt']; unexpected: none",
+      "fingerprint": "4e22081a9811c374f04ec5ca147b7e9b61fa388c4a68a9911b9c70f706957d29"
+    }
+  ],
+  "checkpoints": [
+    {
+      "at": "2026-11-22T10:03:25Z",
+      "kind": "implementation-start",
+      "agent": "claude-code",
+      "fingerprint": "b931f2f6e803c67403b727eee8946605d8deb67c86f4d75d7ebfdd57a004541b",
+      "valid": true,
+      "changed_files": 0
+    },
+    {
+      "at": "2026-11-22T10:03:32Z",
+      "kind": "preflight",
+      "agent": "claude-code",
+      "fingerprint": "b931f2f6e803c67403b727eee8946605d8deb67c86f4d75d7ebfdd57a004541b",
+      "valid": true,
+      "changed_files": 0
+    },
+    {
+      "at": "2026-11-22T10:06:48Z",
+      "kind": "step",
+      "agent": "claude-code",
+      "fingerprint": "400d575ad232113b8239a74c5a36044ba4461574677616bb1c9581ee02d7ea02",
+      "valid": true,
+      "changed_files": 1,
+      "step": "S1"
+    },
+    {
+      "at": "2026-11-22T10:09:26Z",
+      "kind": "step",
+      "agent": "claude-code",
+      "fingerprint": "3951e0ec4e36795c14a0b9a708e7946fd3a313dd29c3b6e156f4cb3b30284430",
+      "valid": true,
+      "changed_files": 2,
+      "step": "S2"
+    },
+    {
+      "at": "2026-11-22T10:09:27Z",
+      "kind": "step",
+      "agent": "claude-code",
+      "fingerprint": "3951e0ec4e36795c14a0b9a708e7946fd3a313dd29c3b6e156f4cb3b30284430",
+      "valid": true,
+      "changed_files": 2,
+      "step": "S3"
+    },
+    {
+      "at": "2026-11-22T12:05:44Z",
+      "kind": "implementation-start",
+      "agent": "claude-code",
+      "fingerprint": "300315343dbfe4d146cdfe39a02a92ad37af9000a47533a23deab23da9f23b0c",
+      "valid": true,
+      "changed_files": 0
+    },
+    {
+      "at": "2026-11-22T12:05:44Z",
+      "kind": "preflight",
+      "agent": "claude-code",
+      "fingerprint": "300315343dbfe4d146cdfe39a02a92ad37af9000a47533a23deab23da9f23b0c",
+      "valid": true,
+      "changed_files": 0
+    },
+    {
+      "at": "2026-11-22T12:08:28Z",
+      "kind": "step",
+      "agent": "claude-code",
+      "fingerprint": "fa4690bbcdb12c537a62e233753441ccaf047391b4acba093cbfee49458e9550",
+      "valid": true,
+      "changed_files": 3,
+      "step": "S4"
+    },
+    {
+      "at": "2026-11-22T12:09:42Z",
+      "kind": "step",
+      "agent": "claude-code",
+      "fingerprint": "0e52a2c0bdf88613e968610dc6a37257933ed7e99b2088615277f92a897ab060",
+      "valid": true,
+      "changed_files": 5,
+      "step": "S5"
+    },
+    {
+      "at": "2026-11-22T12:17:20Z",
+      "kind": "step",
+      "agent": "claude-code",
+      "fingerprint": "4e22081a9811c374f04ec5ca147b7e9b61fa388c4a68a9911b9c70f706957d29",
+      "valid": true,
+      "changed_files": 7,
+      "step": "S6"
+    },
+    {
+      "at": "2026-11-22T12:17:20Z",
+      "kind": "step",
+      "agent": "claude-code",
+      "fingerprint": "4e22081a9811c374f04ec5ca147b7e9b61fa388c4a68a9911b9c70f706957d29",
+      "valid": true,
+      "changed_files": 7,
+      "step": "S7"
+    }
+  ],
+  "decisions": [
+    {
+      "text": "F-1 pin: Option A — keep LateRefusalTest with a controlled synthetic WorkflowError from save_state after the command ran; golden regenerated from the pre-fix commit fa6a676",
+      "evidence": "Test: Option A — Approved. Preserve the original F-1 regression coverage rather than deleting the test.",
+      "by": "user",
+      "recorded_by": "claude-code",
+      "at": "2026-11-22T12:05:29Z"
+    },
+    {
+      "text": "Hook: Option 1 — the Claude Code hook session is in TD-25 scope (validation before persisting or logging; fail closed inside an active task)",
+      "evidence": "Option 1: Extend TD-25 security validation to the Claude Code hook, including its session persistence and logging paths.",
+      "by": "user",
+      "recorded_by": "claude-code",
+      "at": "2026-11-22T12:05:29Z"
+    }
+  ],
+  "excluded": [
+    "docs/roadmap/**"
+  ],
+  "history": [
+    {
+      "at": "2026-11-22T09:14:29Z",
+      "event": "created",
+      "agent": "claude-code",
+      "invocation": "عايزين نستخدم AIDevWorkflow نفسه لتطوير AIDevWorkflow بصورة تدريجية، باستخدام النسخة المستقرة المثبتة منه. — Before starting F1.0.5, open a separate task to investigate and fix TD-25, including both unredacted fields (check ID and agent name). Follow the normal Discovery → Specification → Approval → Planning → Approval workflow for that security fix. Do not implement it without approval."
+    },
+    {
+      "at": "2026-11-22T09:16:28Z",
+      "event": "discovery",
+      "agent": "claude-code",
+      "inspected": 13
+    },
+    {
+      "at": "2026-11-22T09:16:28Z",
+      "event": "stage",
+      "agent": "claude-code",
+      "from": "DISCOVERY",
+      "to": "DEPENDENCIES"
+    },
+    {
+      "at": "2026-11-22T09:16:42Z",
+      "event": "stage",
+      "agent": "claude-code",
+      "from": "DEPENDENCIES",
+      "to": "SPECIFICATION"
+    },
+    {
+      "at": "2026-11-22T09:18:54Z",
+      "event": "spec-review",
+      "agent": "claude-code",
+      "spec_sha256": "c2337032"
+    },
+    {
+      "at": "2026-11-22T09:19:00Z",
+      "event": "stage",
+      "agent": "claude-code",
+      "from": "SPECIFICATION",
+      "to": "SPEC_APPROVAL"
+    },
+    {
+      "at": "2026-11-22T09:24:35Z",
+      "event": "stage",
+      "agent": "claude-code",
+      "from": "SPEC_APPROVAL",
+      "to": "SPECIFICATION",
+      "reason": "Owner's nine points (session format bound, new_task recovery, persistence limits, detection limits, patch release) change the spec"
+    },
+    {
+      "at": "2026-11-22T09:24:35Z",
+      "event": "spec-review",
+      "agent": "claude-code",
+      "spec_sha256": "9fbaf1ef"
+    },
+    {
+      "at": "2026-11-22T09:24:50Z",
+      "event": "spec-review",
+      "agent": "claude-code",
+      "spec_sha256": "2fdbc034"
+    },
+    {
+      "at": "2026-11-22T09:25:38Z",
+      "event": "stage",
+      "agent": "claude-code",
+      "from": "SPECIFICATION",
+      "to": "SPEC_APPROVAL"
+    },
+    {
+      "at": "2026-11-22T10:03:25Z",
+      "event": "approved",
+      "agent": "claude-code",
+      "document": "spec",
+      "version": 1,
+      "sha256": "2fdbc034"
+    },
+    {
+      "at": "2026-11-22T10:03:25Z",
+      "event": "stage",
+      "agent": "claude-code",
+      "from": "SPEC_APPROVAL",
+      "to": "PLANNING",
+      "reason": "spec approved"
+    },
+    {
+      "at": "2026-11-22T10:03:25Z",
+      "event": "stage",
+      "agent": "claude-code",
+      "from": "PLANNING",
+      "to": "PLAN_APPROVAL"
+    },
+    {
+      "at": "2026-11-22T10:03:25Z",
+      "event": "approved",
+      "agent": "claude-code",
+      "document": "plan",
+      "version": 1,
+      "sha256": "b60cd6f0"
+    },
+    {
+      "at": "2026-11-22T10:03:25Z",
+      "event": "stage",
+      "agent": "claude-code",
+      "from": "PLAN_APPROVAL",
+      "to": "IMPLEMENTATION",
+      "reason": "plan approved"
+    },
+    {
+      "at": "2026-11-22T10:03:32Z",
+      "event": "preflight",
+      "agent": "claude-code",
+      "valid": true
+    },
+    {
+      "at": "2026-11-22T10:06:48Z",
+      "event": "step",
+      "agent": "claude-code",
+      "step": "S1",
+      "status": "done"
+    },
+    {
+      "at": "2026-11-22T10:09:26Z",
+      "event": "step",
+      "agent": "claude-code",
+      "step": "S2",
+      "status": "done"
+    },
+    {
+      "at": "2026-11-22T10:09:27Z",
+      "event": "step",
+      "agent": "claude-code",
+      "step": "S3",
+      "status": "done"
+    },
+    {
+      "at": "2026-11-22T10:20:21Z",
+      "event": "stage",
+      "agent": "claude-code",
+      "from": "IMPLEMENTATION",
+      "to": "SPECIFICATION",
+      "reason": "Owner approved Option A (re-trigger the F-1 pin) and Option 1 in principle (hook in TD-25 scope); both change the approved spec and plan"
+    },
+    {
+      "at": "2026-11-22T10:21:04Z",
+      "event": "spec-review",
+      "agent": "claude-code",
+      "spec_sha256": "31973311"
+    },
+    {
+      "at": "2026-11-22T10:21:20Z",
+      "event": "stage",
+      "agent": "claude-code",
+      "from": "SPECIFICATION",
+      "to": "SPEC_APPROVAL"
+    },
+    {
+      "at": "2026-11-22T10:22:00Z",
+      "event": "stage",
+      "agent": "claude-code",
+      "from": "SPEC_APPROVAL",
+      "to": "SPECIFICATION",
+      "reason": "FR-11 revised: backport preparation in this task (owner's requirement 9)"
+    },
+    {
+      "at": "2026-11-22T10:22:00Z",
+      "event": "spec-review",
+      "agent": "claude-code",
+      "spec_sha256": "9cf6cec3"
+    },
+    {
+      "at": "2026-11-22T10:22:00Z",
+      "event": "stage",
+      "agent": "claude-code",
+      "from": "SPECIFICATION",
+      "to": "SPEC_APPROVAL"
+    },
+    {
+      "at": "2026-11-22T10:29:49Z",
+      "event": "paused",
+      "agent": "claude-code",
+      "reason": "Roadmap-only update (owner's strategic usability brief); TD-25 scope untouched, waiting for spec v2/plan v2 approval"
+    },
+    {
+      "at": "2026-11-22T12:03:12Z",
+      "event": "resumed",
+      "agent": "claude-code",
+      "previous": "paused"
+    },
+    {
+      "at": "2026-11-22T12:03:22Z",
+      "event": "scope-exclude",
+      "agent": "claude-code",
+      "files": [
+        "docs/roadmap/**"
+      ],
+      "reason": "Standing owner rule: roadmap files are outside task scope (brief-4 roadmap update made while TD-25 was paused)"
+    },
+    {
+      "at": "2026-11-22T12:05:29Z",
+      "event": "approved",
+      "agent": "claude-code",
+      "document": "spec",
+      "version": 2,
+      "sha256": "9cf6cec3"
+    },
+    {
+      "at": "2026-11-22T12:05:29Z",
+      "event": "stage",
+      "agent": "claude-code",
+      "from": "SPEC_APPROVAL",
+      "to": "PLANNING",
+      "reason": "spec approved"
+    },
+    {
+      "at": "2026-11-22T12:05:29Z",
+      "event": "decision",
+      "agent": "claude-code"
+    },
+    {
+      "at": "2026-11-22T12:05:29Z",
+      "event": "decision",
+      "agent": "claude-code"
+    },
+    {
+      "at": "2026-11-22T12:05:43Z",
+      "event": "stage",
+      "agent": "claude-code",
+      "from": "PLANNING",
+      "to": "PLAN_APPROVAL"
+    },
+    {
+      "at": "2026-11-22T12:05:43Z",
+      "event": "approved",
+      "agent": "claude-code",
+      "document": "plan",
+      "version": 2,
+      "sha256": "f1c2745d"
+    },
+    {
+      "at": "2026-11-22T12:05:43Z",
+      "event": "stage",
+      "agent": "claude-code",
+      "from": "PLAN_APPROVAL",
+      "to": "IMPLEMENTATION",
+      "reason": "plan approved"
+    },
+    {
+      "at": "2026-11-22T12:05:44Z",
+      "event": "preflight",
+      "agent": "claude-code",
+      "valid": true
+    },
+    {
+      "at": "2026-11-22T12:08:28Z",
+      "event": "step",
+      "agent": "claude-code",
+      "step": "S4",
+      "status": "done"
+    },
+    {
+      "at": "2026-11-22T12:09:42Z",
+      "event": "step",
+      "agent": "claude-code",
+      "step": "S5",
+      "status": "done"
+    },
+    {
+      "at": "2026-11-22T12:11:11Z",
+      "event": "check",
+      "agent": "claude-code",
+      "check": "unit",
+      "status": "passed"
+    },
+    {
+      "at": "2026-11-22T12:12:13Z",
+      "event": "check",
+      "agent": "claude-code",
+      "check": "unit-py39",
+      "status": "passed"
+    },
+    {
+      "at": "2026-11-22T12:14:50Z",
+      "event": "check",
+      "agent": "claude-code",
+      "check": "privacy",
+      "status": "passed"
+    },
+    {
+      "at": "2026-11-22T12:16:09Z",
+      "event": "check",
+      "agent": "claude-code",
+      "check": "unit",
+      "status": "passed"
+    },
+    {
+      "at": "2026-11-22T12:17:06Z",
+      "event": "check",
+      "agent": "claude-code",
+      "check": "unit-py39",
+      "status": "passed"
+    },
+    {
+      "at": "2026-11-22T12:17:06Z",
+      "event": "check",
+      "agent": "claude-code",
+      "check": "ruff",
+      "status": "passed"
+    },
+    {
+      "at": "2026-11-22T12:17:06Z",
+      "event": "check",
+      "agent": "claude-code",
+      "check": "mypy",
+      "status": "passed"
+    },
+    {
+      "at": "2026-11-22T12:17:06Z",
+      "event": "check",
+      "agent": "claude-code",
+      "check": "golden-byte-compare",
+      "status": "passed"
+    },
+    {
+      "at": "2026-11-22T12:17:20Z",
+      "event": "step",
+      "agent": "claude-code",
+      "step": "S6",
+      "status": "done"
+    },
+    {
+      "at": "2026-11-22T12:17:20Z",
+      "event": "step",
+      "agent": "claude-code",
+      "step": "S7",
+      "status": "done"
+    }
+  ],
+  "baseline": {
+    "start": {
+      "head": "deba846a9883867d6529d69308befee87eb4ecfa",
+      "dirty": {},
+      "captured_at": "2026-11-22T09:14:29Z"
+    },
+    "implementation": {
+      "head": "deba846a9883867d6529d69308befee87eb4ecfa",
+      "dirty": {
+        "CHANGELOG.md": "fe9b984ccc65f3b408e2ed4c7283f6c6813995c5",
+        "docs/roadmap/DECISIONS.md": "ae6146f621864bd828b60ea8f9cc1cc539790a89",
+        "docs/roadmap/ENGINEERING_INTELLIGENCE.md": "3213aa85511cb8aff83615017fba088bc284f1aa",
+        "docs/roadmap/MASTER_ROADMAP.md": "0f21e94664d6b7fadf8f5aecb31ce7e5bf01df63",
+        "docs/roadmap/PROGRESS.md": "2881f073870212505a079efe5594be2d4bbbea75",
+        "docs/roadmap/REQUIREMENTS_TRACEABILITY.md": "052203cd73ecdc8f2a57ee6e85a14fedf77fa9a6",
+        "docs/roadmap/RISK_REGISTER.md": "032623ebb99725273d029bc0048e719e2e58c8ab",
+        "docs/roadmap/TECHNICAL_DEBT.md": "5bce72c5f2903a6f8441bbfd4e77b4c63855fab6",
+        "docs/roadmap/phases/PHASE_01.md": "f728a0d2f6783bf8d53c2b782444328c2e332b39",
+        "docs/roadmap/phases/PHASE_03.md": "ba0666800d13a79834f3dcb90c5ade89af7c7ec3",
+        "docs/roadmap/phases/PHASE_04.md": "6af56e5ec15a20e841cd9692d0f859cf51926d81",
+        "docs/roadmap/phases/PHASE_05.md": "96d47d9a080277033792fb923449b50de61cd734",
+        "docs/roadmap/phases/PHASE_06.md": "8bec29b423355c142dda775e4b043b5b87d21490",
+        "docs/roadmap/phases/PHASE_09.md": "98bcbd3fc26bc2f847ebff71ce259f0bd26ffade",
+        "docs/roadmap/phases/PHASE_10.md": "e6097777ba74fb3b4817dc90782deaa9b6ce2279",
+        "docs/roadmap/phases/PHASE_11.md": "59267b21ab15f065f0c5c8ebdf0519105fd3a054",
+        "docs/roadmap/phases/PHASE_14.md": "75a03372fdf958a7ac177e5fdc80d154f1eb601e",
+        "docs/roadmap/phases/PHASE_16.md": "78e2eb202b407f347268d50e96732a21c1490d1d",
+        "docs/roadmap/phases/PHASE_17.md": "824761b88b5e8be14c5697fffda39e568efc024f",
+        "docs/roadmap/phases/PHASE_19.md": "3ad733e221052884859bed8984416026918f18bc",
+        "docs/roadmap/roadmap-data.js": "3c37436d0ba2161a5836b46af13fcacb6a5768a9",
+        "skills/ai-dev-workflow/scripts/aidw/api.py": "230919e05273ea63a6f17c012f33c802a81d8e14",
+        "docs/roadmap/PRODUCT_EXPERIENCE.md": "839d8f20a49e5cdbad6a52231df6b3a8bb608b48",
+        "tests/test_secret_identity.py": "c62aaacd24c2fbdd31bfbecbb897784005b68362"
+      },
+      "captured_at": "2026-11-22T12:05:43Z"
+    }
+  },
+  "updated_at": "2026-11-22T12:17:20Z",
+  "last_checkpoint": {
+    "at": "2026-11-22T12:17:20Z",
+    "fingerprint": "4e22081a9811c374f04ec5ca147b7e9b61fa388c4a68a9911b9c70f706957d29",
+    "changes": {
+      "CHANGELOG.md": "4ff58f45fbce23acb339a4e2dc53bb5004d1269b",
+      "docs/roadmap/TECHNICAL_DEBT.md": "1dee906f3d401334fa44f6a9e8a6d0c743c7d914",
+      "skills/ai-dev-workflow/scripts/aidw/agents/claude_hooks.py": "bd31f9dc3f3fe7b4321948aa0dc38ca87adb739f",
+      "skills/ai-dev-workflow/scripts/aidw/api.py": "dd7e144ca75a42286b824eac4ba30d46360251fb",
+      "tests/golden/run-output-before-late-refusal.txt": "0e24ccbc11c0815822325d7f4c323b67c090e95f",
+      "tests/test_behaviour_pins.py": "e4ff48cfe20d85a499a905c66bc408fa0f6c0311",
+      "tests/test_secret_identity.py": "2e36f2eab1151389111b44e3eceb6c84392ec48f"
+    }
+  }
+}

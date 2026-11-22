@@ -16,6 +16,7 @@ The only environment input is `AI_DEV_WORKFLOW_HOME` (the user's template librar
 from __future__ import annotations
 
 import json
+import os
 import re
 import shlex
 from pathlib import Path
@@ -35,7 +36,7 @@ from aidw.infra.text import bullet_list, clean_session, load_json, make_readonly
 from aidw.records.markdown import Doc
 from aidw.records.parsers import blocking_deps, parse_audit, parse_dependencies, parse_matrix, parse_report
 from aidw.store.config import config_path, library_dir, load_config, load_rules, record_template, records_dir, task_dir, template_path
-from aidw.store.state import activate, active_path, add_checkpoint, add_history, clear_active, list_tasks, load_state, read_active, save_state
+from aidw.store.state import activate, active_path, add_checkpoint, add_history, clear_active, list_tasks, load_state, read_active, save_state, state_path
 
 PathLike = Union[str, Path]
 
@@ -237,6 +238,39 @@ def validate_task(repo: Path, cfg: Dict[str, Any], state: Dict[str, Any]) -> Tup
     return errors, warnings
 
 
+# ------------------------------------------------------------------------------------- identity values (TD-25)
+
+def _check_agent(agent: str) -> None:
+    """Refuse a secret-like agent name before anything runs or is written. The message names the field, never the
+    value. Pattern-based detection: a credential in a format the scanner does not know is not recognised."""
+    assert_no_secrets(agent, "the agent name")
+
+
+def session_problem(session: Optional[str]) -> Optional[str]:
+    """Why a session id must be refused, or None when it passes or is a placeholder `clean_session` drops (empty,
+    `${…}`, `none`, `null`). One rule for the CLI and the Claude Code hooks; the message never contains the value.
+
+    The secret check is pattern-based detection; the format rule (1–256 printable characters without whitespace)
+    bounds structure only and does not detect secrets."""
+    value = clean_session(session)
+    if value is None:
+        return None
+    try:
+        assert_no_secrets(value, "the session id")
+    except WorkflowError as exc:
+        return str(exc)
+    if not (len(value) <= 256 and value.isprintable() and not any(ch.isspace() for ch in value)):
+        return "The session id must be 1–256 printable characters without spaces."
+    return None
+
+
+def _check_session(session: Optional[str]) -> None:
+    """Refuse a secret-like or malformed session id before anything runs or is written."""
+    problem = session_problem(session)
+    if problem:
+        raise WorkflowError(problem)
+
+
 # ------------------------------------------------------------------------------------------- loading a task
 
 def _root(repo: PathLike) -> Path:
@@ -284,6 +318,7 @@ def init_project(*, repo: PathLike, template: Optional[str], commit: Optional[st
                  without_check: Sequence[str] = (), add_check: Sequence[str] = ()) -> Dict[str, Any]:
     """Set up AIDevWorkflow in a repository. Returns `source_label`, `has_rules`, `commit`, `checks` (ids) and
     `exclude` (the git exclude file written for `config-only`/`none`)."""
+    _check_agent(agent)
     root = _root(repo)
     cfg_file = config_path(root)
     if cfg_file.exists():
@@ -347,6 +382,7 @@ def update_setup(*, repo: PathLike, agent: str, commit: Optional[str] = None, st
                  template: Optional[str] = None, rules: Optional[str] = None, no_rules: bool = False,
                  without_check: Sequence[str] = (), add_check: Sequence[str] = ()) -> Dict[str, Any]:
     """Change an existing setup. Returns `changed` (the list of changed settings)."""
+    _check_agent(agent)
     root = _root(repo)
     cfg = load_config(root)
     chosen = cfg.setdefault("setup", {}).setdefault("chosen", {})
@@ -389,6 +425,8 @@ def new_task(*, repo: PathLike, task: str, title: str, task_type: str, invocatio
     If the records commit mode was applied in this clone and anything later fails, the exception carries the
     message in its `notices` attribute, because it was already applied.
     """
+    _check_agent(agent)
+    _check_session(session)
     if not invocation or not INVOCATION_RE.search(invocation):
         raise WorkflowError(
             "Task files are created only when the user explicitly starts AIDevWorkflow. Pass the user's starting "
@@ -405,6 +443,21 @@ def new_task(*, repo: PathLike, task: str, title: str, task_type: str, invocatio
         raise
 
 
+def _remove_partial_task(tdir: Path, written: Sequence[Path]) -> None:
+    """After a failed `new`: remove the files this call wrote (and their temporary files), then the folder only if
+    it is empty. Never removes anything else; a failed removal never hides the original error (TD-29)."""
+    for path in written:
+        for candidate in (path, path.with_name(f".{path.name}.{os.getpid()}.tmp")):  # write_text's temporary name
+            try:
+                candidate.unlink()
+            except OSError:
+                pass
+    try:
+        tdir.rmdir()
+    except OSError:
+        pass
+
+
 def _create_task(root: Path, cfg: Dict[str, Any], task: str, title: str, task_type: str, invocation: str,
                  agent: str, session: Optional[str], notice: Optional[str]) -> Dict[str, Any]:
     if not SLUG_RE.match(task) or len(task) > 60:
@@ -419,23 +472,32 @@ def _create_task(root: Path, cfg: Dict[str, Any], task: str, title: str, task_ty
     title = title.strip()
     invocation = redact(invocation.strip())[:500]
     assert_no_secrets(title, "the task title")
-    tdir.mkdir(parents=True)
-    write_text(tdir / "spec.md", read_text(tpl_path))
-    for name in ("dependencies.md", "plan.md", "verification.md", "audit.md", "report.md"):
-        write_text(tdir / name, read_text(record_template(name)).replace("[Task title]", title))
-    state: Dict[str, Any] = {
-        "schema": 1, "id": task, "title": title, "type": task_type,
-        "created_at": now_iso(), "created_by": agent, "invocation": invocation,
-        "stage": "DISCOVERY", "status": "active", "outcome": None,
-        "template": {"path": cfg["spec_template"], "sha256": sha256_file(tpl_path), "rules": cfg.get("spec_rules")},
-        "discovery": {"inspected": [], "summary": ""},
-        "approvals": {}, "spec_review": {}, "progress": {}, "checks": [], "checkpoints": [],
-        "decisions": [], "excluded": [], "history": [],
-        "baseline": {"start": git_baseline(root)},
-    }
-    add_history(state, "created", agent, invocation=invocation)
+    tdir.mkdir(parents=True)  # refuses if the folder appeared meanwhile; nothing is cleaned up then
+    written: List[Path] = []
+    try:
+        records = [("spec.md", read_text(tpl_path))]
+        records += [(name, read_text(record_template(name)).replace("[Task title]", title))
+                    for name in ("dependencies.md", "plan.md", "verification.md", "audit.md", "report.md")]
+        for name, text in records:
+            written.append(tdir / name)
+            write_text(tdir / name, text)
+        state: Dict[str, Any] = {
+            "schema": 1, "id": task, "title": title, "type": task_type,
+            "created_at": now_iso(), "created_by": agent, "invocation": invocation,
+            "stage": "DISCOVERY", "status": "active", "outcome": None,
+            "template": {"path": cfg["spec_template"], "sha256": sha256_file(tpl_path), "rules": cfg.get("spec_rules")},
+            "discovery": {"inspected": [], "summary": ""},
+            "approvals": {}, "spec_review": {}, "progress": {}, "checks": [], "checkpoints": [],
+            "decisions": [], "excluded": [], "history": [],
+            "baseline": {"start": git_baseline(root)},
+        }
+        add_history(state, "created", agent, invocation=invocation)
+        written.append(state_path(root, task))
+        save_state(root, state)  # before activating: a failure here leaves ACTIVE and any other task untouched
+    except BaseException:
+        _remove_partial_task(tdir, written)
+        raise
     paused = activate(root, state, agent, session)
-    save_state(root, state)
     return {"task": task, "commit_mode_message": notice, "paused": paused,
             "preexisting": len(state["baseline"]["start"]["dirty"]), "next": NEXT["DISCOVERY"],
             "read": REFERENCE["DISCOVERY"]}
@@ -460,6 +522,7 @@ def record_discovery(*, repo: PathLike, task: str, agent: str, inspected: Sequen
                      summary: Optional[str] = None) -> Dict[str, Any]:
     """Record inspected paths and the discovery summary. Returns `inspected` (count), `summary_set` and `missing`
     (inspected paths that do not exist)."""
+    _check_agent(agent)
     root, _, state = _task(repo, task)
     discovery = state.setdefault("discovery", {"inspected": [], "summary": ""})
     missing = []
@@ -497,6 +560,7 @@ def review(*, repo: PathLike, task: str, agent: str, maps: Sequence[str] = (), q
            passes: Sequence[str] = ()) -> Dict[str, Any]:
     """Record the agent's spec review (mappings, question answers, dismissed flags, passed judgment rules). Returns
     `spec_check`: the fresh spec check after recording."""
+    _check_agent(agent)
     root, cfg, state = _task(repo, task)
     if state["stage"] not in ("SPECIFICATION", "SPEC_APPROVAL"):
         raise WorkflowError("The spec review is recorded in SPECIFICATION or SPEC_APPROVAL.")
@@ -573,6 +637,7 @@ def approve(*, repo: PathLike, task: str, document: str, evidence: Optional[str]
             by: Optional[str] = None) -> Dict[str, Any]:
     """Record the user's approval of the spec or the plan and freeze a snapshot. Returns `document`, `version`,
     `sha256`, `snapshot`, `stage` (after the approval) and `message`."""
+    _check_agent(agent)
     root, cfg, state = _task(repo, task)
     doc_name = document
     evidence = (evidence or "").strip()
@@ -637,6 +702,7 @@ def approve(*, repo: PathLike, task: str, document: str, evidence: Optional[str]
 
 def stage(*, repo: PathLike, task: str, stage: str, agent: str, reason: Optional[str] = None) -> Dict[str, Any]:
     """Move the task to another stage (the gates decide). Returns `task`, `stage`, `next`, `read`."""
+    _check_agent(agent)
     root, cfg, state = _task(repo, task)
     if reason:
         assert_no_secrets(reason, "the reason")
@@ -649,6 +715,8 @@ def stage(*, repo: PathLike, task: str, stage: str, agent: str, reason: Optional
 def resume(*, repo: PathLike, task: str, agent: str, session: Optional[str] = None) -> Dict[str, Any]:
     """Make the task active in this checkout. Returns `paused` (the task paused by this one, or None), `summary`
     (the detailed task summary) and `code_stage` (True in IMPLEMENTATION or FIXING)."""
+    _check_agent(agent)
+    _check_session(session)
     root, cfg, state = _task(repo, task)
     if state["status"] == "closed":
         raise WorkflowError(f"Task '{state['id']}' is closed ({state.get('outcome')}).")
@@ -663,6 +731,7 @@ def resume(*, repo: PathLike, task: str, agent: str, session: Optional[str] = No
 
 def pause(*, repo: PathLike, task: str, agent: str, reason: Optional[str] = None) -> Dict[str, Any]:
     """Pause the task. Returns `task`."""
+    _check_agent(agent)
     root, _, state = _task(repo, task)
     if state["status"] == "closed":
         raise WorkflowError("The task is closed.")
@@ -679,6 +748,8 @@ def preflight(*, repo: PathLike, task: str, agent: str, session: Optional[str] =
     """Revalidate the task before code edits and record a checkpoint. Returns `valid`, `problems`, `unattributed`
     (changes no recorded step explains), `task`, `stage` and `analyzer_hint` (the baseline reminder, or None).
     The CLI's `--json` output shows only `valid`, `problems` and `unattributed`."""
+    _check_agent(agent)
+    _check_session(session)
     root, _, state = _task(repo, task)
     session = clean_session(session)
     problems = []
@@ -730,6 +801,7 @@ def step(*, repo: PathLike, task: str, step: str, status: str, agent: str, files
          note: Optional[str] = None) -> Dict[str, Any]:
     """Record progress on a step of the approved plan. Returns `step`, `status`, `files` (attributed), `done` and
     `total` (steps)."""
+    _check_agent(agent)
     root, _, state = _task(repo, task)
     if state["stage"] not in CODE_STAGES or state["status"] != "active":
         raise WorkflowError("Steps are recorded during IMPLEMENTATION or FIXING on an active task.")
@@ -766,6 +838,8 @@ def run_check(*, repo: PathLike, task: str, check: str, agent: str, extra: Seque
     empty when nothing ran) and `recorded_on_purpose` (True for --blocked or --not-applicable).
 
     If anything fails after the command ran, the exception carries the output in its `output_tail` attribute."""
+    _check_agent(agent)
+    assert_no_secrets(check, "the check name")
     root, cfg, state = _task(repo, task)
     checks = {c["id"]: c for c in cfg.get("checks", [])}
     chosen = checks.get(check)
@@ -845,8 +919,10 @@ def run_check(*, repo: PathLike, task: str, check: str, agent: str, extra: Seque
         state["checks"].append(entry)
         del state["checks"][:-200]
         add_history(state, "check", agent, check=chosen["id"], status=entry["status"])
-        regenerate_check_block(root, state)
         save_state(root, state)
+        # The check block is a view of state.json, written after it: a refused or failed save changes no record. If
+        # this write fails, state.json is ahead until the next `run` rewrites the block (not a transaction, TD-29).
+        regenerate_check_block(root, state)
     except BaseException as exc:
         # The CLI printed the output before any later refusal; keep that by handing the tail to the caller.
         if output_tail:
@@ -860,6 +936,7 @@ def scope(*, repo: PathLike, task: str, agent: str, exclude: Sequence[str] = (),
     """Changes in the task's scope, optionally excluding unrelated files first. Returns exactly `baseline`
     ("implementation" or "task start"), `task_changes`, `unattributed`, `preexisting_modified`,
     `preexisting_untouched`, `excluded` and `notes`."""
+    _check_agent(agent)
     root, _, state = _task(repo, task)
     if exclude:
         if not reason:
@@ -884,6 +961,7 @@ def scope(*, repo: PathLike, task: str, agent: str, exclude: Sequence[str] = (),
 def decision(*, repo: PathLike, task: str, text: Optional[str], evidence: Optional[str], agent: str,
              by: Optional[str] = None) -> Dict[str, Any]:
     """Record a user decision with the user's own words. Returns `count` (decisions recorded in total)."""
+    _check_agent(agent)
     root, _, state = _task(repo, task)
     text, evidence = (text or "").strip(), (evidence or "").strip()
     if not text or not evidence:
@@ -926,6 +1004,7 @@ def outcome(*, repo: PathLike, task: str) -> Dict[str, Any]:
 
 def close(*, repo: PathLike, task: str, agent: str) -> Dict[str, Any]:
     """Close the task with the status written in report.md, if the evidence allows it. Returns `task`, `outcome`."""
+    _check_agent(agent)
     root, cfg, state = _task(repo, task)
     if state["status"] == "closed":
         raise WorkflowError("The task is already closed.")
