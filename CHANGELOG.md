@@ -15,7 +15,7 @@ Security patch for 1.0.0. It contains only the TD-25 fix: no features or restruc
 - On failure, `new` removes the files it wrote (best effort; a crash or a locked file can still leave them) and never
   removes anything else. `run` saves `state.json` before rewriting the check block. Multi-file updates are still not
   transactional.
-- Detection is pattern-based: a credential in a format the scanner does not know is not recognised.
+- Detection is pattern-based: a credential in a format the scanner does not know is not recognised, nor a value split by U+0085 or U+2028.
 - Affected: 1.0.0, and development versions before this fix. Mitigation until 1.0.1 is installed: never type
   credentials into `--agent`, `--session` or check names.
 

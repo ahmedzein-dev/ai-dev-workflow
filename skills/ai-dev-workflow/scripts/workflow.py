@@ -251,7 +251,8 @@ SESSION_FORMAT = "The session id must be 1–256 printable characters without sp
 def assert_clean_value(value: str, where: str) -> None:
     """The secret check for one identity value, over the value and its JSON form (state.json is scanned as JSON,
     where a line break becomes an escape), so nothing the later state.json check would refuse gets through."""
-    assert_no_secrets(value + "\n" + json.dumps(value, ensure_ascii=False), where)
+    assert_no_secrets(value, where)
+    assert_no_secrets(json.dumps(value, ensure_ascii=False), where)
 
 
 def session_problem(session: Optional[str]) -> Optional[str]:

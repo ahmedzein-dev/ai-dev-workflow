@@ -382,8 +382,8 @@ class HookTest(SecretIdentityCase):
         with tempfile.TemporaryDirectory() as other:
             self.assert_invalid_session_handled(token(), expect_deny=False, path=Path(other) / "x.py")
         self.assert_invalid_session_handled(token(), expect_deny=False)  # repository without records
-        self.implementation_task()  # paused: ACTIVE removed, the hook returns before logging (as before)
-        self.assert_invalid_session_handled(token(), expect_deny=False, expect_log=False)
+        self.implementation_task()  # paused: ACTIVE removed; the decision is still logged, without the value
+        self.assert_invalid_session_handled(token(), expect_deny=False)
 
     def test_paused_or_closed_task_with_an_active_pointer_allows_an_invalid_session(self) -> None:  # EC-16
         self.init()
