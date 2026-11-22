@@ -9,8 +9,8 @@ window.ROADMAP = {
  "current": {
   "phase": 1,
   "next": {
-   "en": "Branch pushed; CI green on Linux, Windows, macOS. CP-SAT trial met every condition on all three (with ORE controls). Waiting on the owner: final review of D-037. Next feature: F1.0.4 or F1.0.5.",
-   "ar": "الفرع اترفع والـ CI نجح على Linux وWindows وmacOS. تجربة CP-SAT حققت كل الشروط على الثلاثة (مع ضوابط ORE). مستنيين صاحب المشروع يراجع D-037 للقرار النهائي. الخاصية الجاية: F1.0.4 أو F1.0.5."
+   "en": "D-037 accepted (final): CP-SAT is the first optional ORE solver within ore/1 v1. F6.0.2 closed after CI at 7e35018. Now: F1.0.4 (engine API) — spec and plan await the owner's approval.",
+   "ar": "D-037 اتعتمد نهائيًا: CP-SAT أول solver اختياري في ORE ضمن ore/1 v1. F6.0.2 اتقفلت بعد CI على 7e35018. دلوقتي: F1.0.4 (الـ engine API)، المواصفات والخطة مستنيين موافقة صاحب المشروع."
   }
  },
  "phases": [
@@ -222,11 +222,12 @@ window.ROADMAP = {
        "t": "Engine API (aidw/api.py): commands return data; CLI only prints",
        "pri": "P0",
        "eff": "M",
-       "st": "planned",
+       "st": "review",
        "dep": [
         "F1.0.3"
        ],
-       "mvp": true
+       "mvp": true,
+       "note": "Spec v1 and plan v1 ready; awaiting the owner's approval"
       },
       {
        "id": "F1.0.5",
@@ -676,7 +677,7 @@ window.ROADMAP = {
       },
       {
        "id": "F2.5.2",
-       "t": "Process runner: new process group/session (job object on Windows), kill the group on timeout, stream output to a temp file or drain pipes while running (TD-11, TD-12; both failure modes reproduced on Windows by the F6.0.2 trial: a venv launcher child and a blocked 4 KB pipe)",
+       "t": "Process runner: new process group/session (job object on Windows), kill the group on timeout, stream output to a temp file or drain pipes while running (TD-11, TD-12; both failure modes reproduced on Windows by the F6.0.2 trial: a venv launcher child and a blocked 4 KB pipe; both kept as permanent regression tests, D-037 FA-3)",
        "pri": "P0",
        "eff": "M",
        "st": "planned",
@@ -1351,14 +1352,14 @@ window.ROADMAP = {
       },
       {
        "id": "F6.0.2",
-       "t": "Hands-on spike: candidate solvers in a throwaway virtual environment, run scenarios ORE-A/I/J/K/L, confirm guarantees, status mapping and resource controls; decision record. CP-SAT trial done 2026-11-22 on Linux, Windows and macOS, Python 3.9 and 3.13 ([ore/CPSAT_TRIAL.md](../ore/CPSAT_TRIAL.md)); Z3 and HiGHS checks remain (Phase 10)",
+       "t": "Hands-on spike: candidate solvers in a throwaway virtual environment, run scenarios ORE-A/I/J/K/L, confirm guarantees, status mapping and resource controls; decision record. Done 2026-11-22: CP-SAT trial on Linux, Windows and macOS, Python 3.9 and 3.13 ([ore/CPSAT_TRIAL.md](../ore/CPSAT_TRIAL.md)); D-037 accepted; Z3 and HiGHS hands-on checks deferred to Phase 10",
        "pri": "P0",
        "eff": "M",
-       "st": "in-progress",
+       "st": "done",
        "dep": [
         "F6.0.1"
        ],
-       "note": "CP-SAT trial complete on Linux, Windows, macOS × Python 3.9/3.13 (ore/CPSAT_TRIAL.md); D-037 awaits the owner's final review; Z3/HiGHS checks remain"
+       "note": "Done: CP-SAT trial on Linux, Windows, macOS × Python 3.9/3.13; D-037 accepted (final) within ore/1 v1; CI verified at 7e35018; Z3/HiGHS hands-on checks deferred to Phase 10"
       }
      ]
     },
@@ -1498,7 +1499,7 @@ window.ROADMAP = {
      "features": [
       {
        "id": "F6.4.1",
-       "t": "Execution controller: separate process, time, memory and thread limits, cancellation, termination reasons; memory over the whole process tree, OS limits where they exist (Linux RLIMIT_AS, Windows job objects), watchdog everywhere (CPSAT_TRIAL §4.7)",
+       "t": "Execution controller: separate process, time, memory and thread limits, cancellation, termination reasons; memory over the whole process tree, OS limits where they exist (Linux RLIMIT_AS, Windows job objects), watchdog everywhere; refuse runs that require a hard memory limit where none exists (macOS); the two Windows regression tests (CPSAT_TRIAL §4.7, D-037 FA-2, FA-3)",
        "pri": "P0",
        "eff": "M",
        "st": "planned",
@@ -3141,7 +3142,7 @@ window.ROADMAP = {
   {
    "id": "D-037",
    "t": "First optional solver",
-   "st": "proposed"
+   "st": "accepted"
   },
   {
    "id": "D-038",
@@ -3209,10 +3210,9 @@ window.ROADMAP = {
    "Reconsidered": 2
   },
   "B3": {
-   "Done": 6,
+   "Done": 7,
    "Planned": 25,
-   "Reconsidered": 2,
-   "In progress": 1
+   "Reconsidered": 2
   }
  },
  "issues": [
@@ -3311,6 +3311,12 @@ window.ROADMAP = {
   {
    "date": "2026-11-22",
    "what": "GitHub Actions tests at 3837bb2: lint + 6 test jobs (Linux, Windows, macOS × Python 3.9, 3.13)",
+   "result": "All passed",
+   "ok": true
+  },
+  {
+   "date": "2026-11-22",
+   "what": "CI at 7e35018 (D-037 accepted): tests 7/7, ore-cpsat-trial 6/6 including the FA-3 regression test",
    "result": "All passed",
    "ok": true
   },

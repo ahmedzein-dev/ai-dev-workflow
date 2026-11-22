@@ -1,0 +1,187 @@
+{
+  "schema": 1,
+  "id": "engine-api-f1-0-4",
+  "title": "F1.0.4 Engine API: commands return data, the CLI only prints",
+  "type": "refactor",
+  "created_at": "2026-11-22T07:52:10Z",
+  "created_by": "claude-code",
+  "invocation": "عايزين نستخدم AIDevWorkflow نفسه لتطوير AIDevWorkflow بصورة تدريجية، باستخدام النسخة المستقرة المثبتة منه. — continue implementing the approved roadmap in the agreed phase order",
+  "stage": "SPEC_APPROVAL",
+  "status": "active",
+  "outcome": null,
+  "template": {
+    "path": ".ai-dev-workflow/templates/spec-kit.md",
+    "sha256": "574d3677a6a4f773352e6ffadf959e794bd9c985e25dea0556c53f37b5296ffc",
+    "rules": ".ai-dev-workflow/templates/spec-kit.rules.json"
+  },
+  "discovery": {
+    "inspected": [
+      "skills/ai-dev-workflow/scripts/aidw/cli/commands.py",
+      "skills/ai-dev-workflow/scripts/aidw/cli/helpers.py",
+      "skills/ai-dev-workflow/scripts/aidw/cli/main.py",
+      "skills/ai-dev-workflow/scripts/aidw/agents/claude_hooks.py",
+      "skills/ai-dev-workflow/scripts/workflow.py",
+      "tests/test_package.py",
+      "tests/test_golden.py",
+      "tests/helpers.py",
+      "docs/roadmap/TARGET_ARCHITECTURE.md",
+      "docs/roadmap/phases/PHASE_01.md",
+      "docs/roadmap/TECHNICAL_DEBT.md",
+      "docs/roadmap/GAP_ANALYSIS.md",
+      ".ai-dev-workflow/PROJECT.md"
+    ],
+    "summary": "TD-15: all 26 cmd_* functions in aidw/cli/commands.py (937 lines) mix validation, record writes (save_state, save_json, write_text, activate, clear_active) and printing; helpers.py holds data builders (status_line, task_summary) next to print_summary; claude_hooks imports status_line from the CLI layer. Tests drive the engine through workflow.main() and golden outputs; tests reference only main, build_parser, __version__, PY_CMD, TEMPLATES_DIR, SKILL_DIR, REFERENCE, COMMIT_MODES, shutil and locale on workflow. Target (TARGET_ARCHITECTURE §2-3): aidw/api.py, functions taking a repo and arguments, returning data or raising WorkflowError; front ends never write records. No external dependency: owner decisions D-001/D-002 already cover the structure."
+  },
+  "approvals": {},
+  "spec_review": {
+    "spec_sha256": "f4dd406848131043a1378272bfb53ab20f35fcb2b06a9f0ff24a6b814a439447",
+    "rules": {
+      "J1": {
+        "status": "pass",
+        "note": "",
+        "agent": "claude-code",
+        "at": "2026-11-22T07:55:59Z"
+      },
+      "J2": {
+        "status": "pass",
+        "note": "",
+        "agent": "claude-code",
+        "at": "2026-11-22T07:55:59Z"
+      },
+      "J3": {
+        "status": "pass",
+        "note": "The layer change follows TARGET_ARCHITECTURE section 2-3 (aidw/api.py between core and front ends) and the existing package layout and layer test from F1.0.3 (tests/test_package.py); functions move from aidw/cli/commands.py and aidw/cli/helpers.py; no new classes.",
+        "agent": "claude-code",
+        "at": "2026-11-22T07:55:59Z"
+      },
+      "J4": {
+        "status": "pass",
+        "note": "",
+        "agent": "claude-code",
+        "at": "2026-11-22T07:55:59Z"
+      }
+    },
+    "map": {
+      "FR-1": [
+        "AC-4",
+        "AC-5"
+      ],
+      "FR-2": [
+        "AC-3",
+        "AC-4"
+      ],
+      "FR-3": [
+        "AC-1",
+        "EC-1",
+        "EC-2",
+        "EC-3",
+        "EC-4",
+        "EC-5"
+      ],
+      "FR-4": [
+        "AC-6",
+        "EC-6"
+      ],
+      "FR-5": [
+        "AC-6"
+      ],
+      "FR-6": [
+        "AC-6",
+        "AC-1"
+      ],
+      "FR-7": [
+        "AC-5",
+        "EC-7"
+      ],
+      "FR-8": [
+        "AC-2"
+      ]
+    },
+    "questions": {
+      "double-tap": "n/a: a CLI command runs once per invocation and this task changes no command semantics",
+      "offline": "n/a: the engine makes no network calls",
+      "server-error": "n/a: no server is involved; check commands keep their existing timeout handling",
+      "empty-result": "EC-5",
+      "app-killed": "n/a: writes keep the existing order and atomic save; crash safety and locking are F1.0.5",
+      "concurrent-change": "n/a: concurrent writers and locking are F1.0.5, outside this task",
+      "stale-data": "n/a: every command reloads state from disk on each call, unchanged",
+      "lost-response": "n/a: no request or response travels over a network"
+    },
+    "dismissed": {}
+  },
+  "progress": {},
+  "checks": [],
+  "checkpoints": [],
+  "decisions": [],
+  "excluded": [],
+  "history": [
+    {
+      "at": "2026-11-22T07:52:10Z",
+      "event": "created",
+      "agent": "claude-code",
+      "invocation": "عايزين نستخدم AIDevWorkflow نفسه لتطوير AIDevWorkflow بصورة تدريجية، باستخدام النسخة المستقرة المثبتة منه. — continue implementing the approved roadmap in the agreed phase order"
+    },
+    {
+      "at": "2026-11-22T07:53:28Z",
+      "event": "discovery",
+      "agent": "claude-code",
+      "inspected": 13
+    },
+    {
+      "at": "2026-11-22T07:53:28Z",
+      "event": "stage",
+      "agent": "claude-code",
+      "from": "DISCOVERY",
+      "to": "DEPENDENCIES"
+    },
+    {
+      "at": "2026-11-22T07:53:40Z",
+      "event": "stage",
+      "agent": "claude-code",
+      "from": "DEPENDENCIES",
+      "to": "SPECIFICATION"
+    },
+    {
+      "at": "2026-11-22T07:55:21Z",
+      "event": "spec-review",
+      "agent": "claude-code",
+      "spec_sha256": "b8812169"
+    },
+    {
+      "at": "2026-11-22T07:55:27Z",
+      "event": "stage",
+      "agent": "claude-code",
+      "from": "SPECIFICATION",
+      "to": "SPEC_APPROVAL"
+    },
+    {
+      "at": "2026-11-22T07:55:59Z",
+      "event": "stage",
+      "agent": "claude-code",
+      "from": "SPEC_APPROVAL",
+      "to": "SPECIFICATION",
+      "reason": "clarify FR-7/AC-5 for preflight --json before presenting"
+    },
+    {
+      "at": "2026-11-22T07:55:59Z",
+      "event": "spec-review",
+      "agent": "claude-code",
+      "spec_sha256": "f4dd4068"
+    },
+    {
+      "at": "2026-11-22T07:55:59Z",
+      "event": "stage",
+      "agent": "claude-code",
+      "from": "SPECIFICATION",
+      "to": "SPEC_APPROVAL"
+    }
+  ],
+  "baseline": {
+    "start": {
+      "head": "7e35018dd57bfc3e61ec4303c84c7e2ea1feed37",
+      "dirty": {},
+      "captured_at": "2026-11-22T07:52:10Z"
+    }
+  },
+  "updated_at": "2026-11-22T07:55:59Z"
+}

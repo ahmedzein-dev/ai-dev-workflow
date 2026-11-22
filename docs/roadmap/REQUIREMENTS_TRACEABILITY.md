@@ -136,7 +136,7 @@ Coverage check: 0 requirements without a home. Reconsidered items: 6 (all with r
 | B3-11 | Multi-objective: Pareto, lexicographic, approved weights, epsilon-constraint, frontier completeness labels | F6.5.3, F10.1.1 | Planned |
 | B3-12 | What-if, sensitivity, break-even, thresholds, robustness, reconsideration triggers | F10.2.1 | Planned |
 | B3-13 | Uncertainty handling; no false certainty | ore/STRICT_OPTIMALITY_POLICY §7; F10.2.1 | Planned |
-| B3-14 | Solver research and comparison from official sources | ore/SOLVER_COMPARISON; F6.0.1, F6.0.2 | In progress |
+| B3-14 | Solver research and comparison from official sources | ore/SOLVER_COMPARISON, ore/CPSAT_TRIAL; F6.0.1, F6.0.2 | Done (CP-SAT trialled, D-037 accepted; Z3/HiGHS hands-on in Phase 10) |
 | B3-15 | Internal architecture (logical responsibilities, not services); adapter contract; dependency isolation; local-first | ore/ORE_DESIGN §4; F6.2.1–F6.2.3 | Planned |
 | B3-16 | Security and trust (declarative models, no eval/exec, isolation, verifier-only classification) | ore/SECURITY_AND_THREAT_MODEL; F6.6.1 | Planned |
 | B3-17 | Mathematical decision evidence; re-verification instead of promised identical reproduction | ore/ORE_DESIGN §9; F6.5.1 | Planned |

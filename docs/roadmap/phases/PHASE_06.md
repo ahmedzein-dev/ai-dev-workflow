@@ -49,7 +49,7 @@ constraints), Phase 5 (ADRs, decision sets). D-032–D-038.
 |---|---|---|---|---|
 | E6.0 | **Research and feasibility** | | | |
 | F6.0.1 | Desk study: solver comparison from official sources (SOLVER_COMPARISON.md; done in Phase 0 as F0.4.2) | P0 | S | — |
-| F6.0.2 | Hands-on spike: candidate solvers in a throwaway virtual environment, run scenarios ORE-A/I/J/K/L, confirm guarantees, status mapping and resource controls; decision record. **CP-SAT trial done 2026-11-22 on Linux, Windows and macOS, Python 3.9 and 3.13 ([ore/CPSAT_TRIAL.md](../ore/CPSAT_TRIAL.md)); Z3 and HiGHS checks remain (Phase 10)** | P0 | M | F6.0.1 |
+| F6.0.2 | Hands-on spike: candidate solvers in a throwaway virtual environment, run scenarios ORE-A/I/J/K/L, confirm guarantees, status mapping and resource controls; decision record. **Done 2026-11-22: CP-SAT trial on Linux, Windows and macOS, Python 3.9 and 3.13 ([ore/CPSAT_TRIAL.md](../ore/CPSAT_TRIAL.md)); D-037 accepted; Z3 and HiGHS hands-on checks deferred to Phase 10** | P0 | M | F6.0.1 |
 | E6.1 | **Mathematical model foundation** | | | |
 | F6.1.1 | `ore/1` JSON Schema, allow-listed expression AST, safe parser | P0 | M | F2.7.1 |
 | F6.1.2 | Exact numbers (fractions), units algebra, data provenance classes | P0 | M | F6.1.1 |

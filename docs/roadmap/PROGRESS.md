@@ -9,9 +9,9 @@ entries first. Feature statuses live in [roadmap-data.js](roadmap-data.js); this
 |---|---|
 | Phase | 1 — Foundations & universal technology support (in progress) |
 | Done in Phase 1 | F1.0.1 self-hosting setup · F1.0.2 dev tooling · F1.0.3 engine package (CI passed on 3 OSes × Python 3.9/3.13 at `3837bb2`) |
-| In progress | F6.0.2: CP-SAT trial complete on Linux, Windows, macOS — [ore/CPSAT_TRIAL.md](ore/CPSAT_TRIAL.md); Z3/HiGHS checks remain (Phase 10) |
-| Waiting on | The owner: final review of D-037 (CP-SAT) on the cross-platform evidence |
-| Next action | F1.0.4 (engine API) or F1.0.5 (state schema, migration, locking) |
+| In progress | F1.0.4 engine API (task `engine-api-f1-0-4`): spec v1 and plan v1 ready |
+| Waiting on | The owner: approval of the F1.0.4 spec and plan |
+| Next action | F1.0.4 implementation after approval; then F1.0.5 (state schema, migration, locking) |
 | Blockers | None |
 
 ## Phase progress
@@ -27,7 +27,7 @@ history in MASTER_ROADMAP §9.
 | 3 | 0 / 12 | Planned (MVP) |
 | 4 | 0 / 12 | Planned (MVP) |
 | 5 | 0 / 12 | Planned (MVP complete) |
-| 6 | 0 / 19 | Planned (ORE v1); F6.0.2 in progress, pulled forward for D-037 |
+| 6 | 1 / 19 | Planned (ORE v1); F6.0.2 done early for D-037 |
 | 7 | 0 / 15 | Planned |
 | 8 | 0 / 8 | Planned |
 | 9 | 0 / 8 | Planned |
@@ -43,6 +43,17 @@ history in MASTER_ROADMAP §9.
 | 19 | 0 / 8 | Planned (checklist from v1.1) |
 
 ## Log
+
+### 2026-11-22 — D-037 accepted; F6.0.2 closed; F1.0.4 started
+
+- Owner: «Final approval granted for D-037» with conditions FA-1–FA-8 (DECISIONS.md). Recorded: policy rule refusing
+  runs that require a hard memory limit where none exists (macOS), support matrix, cold start as an observation, the
+  two Windows controller fixes as a named permanent regression test (trial workflow now also on `main` and pull
+  requests).
+- CI at `7e35018`: `tests` 7/7 and `ore-cpsat-trial` 6/6 (with the FA-3 regression test) passed, so F6.0.2 is closed
+  (FA-8). Z3 and HiGHS hands-on checks stay with Phase 10.
+- Next feature in the agreed order: F1.0.4 engine API, as task `engine-api-f1-0-4`; spec v1 (`f4dd4068`) and plan v1
+  (`6d7e2c07`) await the owner's approval.
 
 ### 2026-11-22 — Pushed; CI green; CP-SAT trial complete on three operating systems
 
