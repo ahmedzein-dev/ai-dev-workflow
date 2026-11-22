@@ -80,11 +80,15 @@ Checking that a solution is feasible never proves it is optimal; step 3 is alway
 | Control | Default proposal | Mechanism |
 |---|---|---|
 | Time limit | 60 s per run (policy) | solver time limit + wall-clock kill of the process group |
-| Memory | 1 GB | solver memory parameter where it exists; OS limit where available (POSIX `setrlimit`; Windows job objects later); otherwise wall-clock + monitoring |
+| Memory | 1 GB | OS hard limit where available (Linux `RLIMIT_AS`, Windows job object, both verified in F6.0.2) **plus** a watchdog over the whole process tree everywhere; on macOS the watchdog only (no OS limit is available: a sampled limit, not a guaranteed hard limit). The solver's own memory parameter is never relied on |
 | Threads | 1 by default (deterministic, light) | solver parameter |
 | Model size | variables, constraints, exact search-space size for enumeration | validator |
 | Parallel runs | 1 | execution controller |
 | Cancellation | user or agent request | process-group termination (Phase 2 process runner) |
+
+**Hard memory requirement (owner, D-037 FA-2).** A run whose approved policy requires an OS-enforced memory limit is
+refused on a platform that cannot provide one (today macOS), with the reason; it is never run under the watchdog alone
+while presented as hard-limited.
 
 Before running, ORE estimates difficulty honestly: the exact search-space size for enumeration, and problem-class
 indicators for other solvers; it does not pretend that the number of constraints predicts hardness. If a problem is

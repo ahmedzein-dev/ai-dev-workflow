@@ -69,7 +69,7 @@ See [TARGET_ARCHITECTURE.md §4.4–4.6](../TARGET_ARCHITECTURE.md).
 | F2.4.2 | Corruption detection and guided recovery (from git history or migration backups) | P1 | M | F2.4.1 |
 | E2.5 | **Evidence integrity** | | | |
 | F2.5.1 | Evidence v2: HEAD commit, OS, tool versions (from adapters), output SHA-256, optional redacted log file | P0 | M | E1.2 |
-| F2.5.2 | Process runner: new process group/session (job object on Windows), kill the group on timeout, stream output to a temp file or drain pipes while running (TD-11, TD-12; both failure modes reproduced on Windows by the F6.0.2 trial: a venv launcher child and a blocked 4 KB pipe) | P0 | M | E1.0 |
+| F2.5.2 | Process runner: new process group/session (job object on Windows), kill the group on timeout, stream output to a temp file or drain pipes while running (TD-11, TD-12; both failure modes reproduced on Windows by the F6.0.2 trial: a venv launcher child and a blocked 4 KB pipe; both kept as permanent regression tests, D-037 FA-3) | P0 | M | E1.0 |
 | F2.5.3 | Documented staleness rules; optional component-scoped staleness | P2 | S | F2.5.1 |
 | E2.6 | **Security** | | | |
 | F2.6.1 | Threat model document (assets, actors, entry points, prevented vs detected) | P0 | M | — |

@@ -936,6 +936,24 @@ def t_threads_and_determinism() -> Dict[str, Any]:
             "pass": det and cpu["workers_1"]["cpu_per_wall"] < 1.3}
 
 
+def t_regression_windows_controller() -> Dict[str, Any]:
+    """Permanent regression tests (D-037 FA-3) for the two controller defects the first CI runs found on Windows.
+
+    1. Memory must be measured over the whole process tree: a Windows virtual environment's python.exe is a launcher
+       whose child does the work, and a solver may start helpers. A grandchild allocating memory must be stopped.
+    2. Child output must be drained while the child runs: a Windows pipe holds about 4 KB, and a child writing more
+       blocked until the wall-clock kill. 1 MB of output must complete well inside the limit.
+    They run on every platform, not only Windows.
+    """
+    tree = run_isolated({"kind": "spawn", "job": {"kind": "hog", "mb": 2048, "delay": 0.002}}, wall=90, memory_mb=300)
+    big = run_isolated({"kind": "big_output", "bytes": 1_000_000}, wall=30, memory_mb=2048)
+    return {"process_tree_memory": {k: tree[k] for k in ("killed_for", "stopped_by", "elapsed", "peak_rss_mb")},
+            "pipe_drained_1mb": {"completed": big["result"] is not None and big["killed_for"] is None,
+                                 "elapsed": big["elapsed"]},
+            "pass": tree["killed_for"] == "memory_limit" and big["result"] is not None and big["killed_for"] is None
+            and big["elapsed"] < 20}
+
+
 def environment() -> Dict[str, Any]:
     from importlib import metadata
     t0 = time.perf_counter()
@@ -975,7 +993,8 @@ def main() -> int:
              ("C10 C11 limits and cancellation", t_limits_and_cancel),
              ("C11 memory", t_memory),
              ("C11 R1 memory OS limit", t_memory_os_limit),
-             ("C11 threads and determinism", t_threads_and_determinism)]
+             ("C11 threads and determinism", t_threads_and_determinism),
+             ("FA-3 regression: Windows controller fixes", t_regression_windows_controller)]
     for name, fn in tests:
         t0 = time.monotonic()
         try:

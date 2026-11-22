@@ -65,7 +65,7 @@ constraints), Phase 5 (ADRs, decision sets). D-032–D-038.
 | F6.3.2 | Exact re-verification of feasibility and objective; guarantee levels G0–G3; default policy | P0 | M | F6.3.1 |
 | F6.3.3 | Infeasibility explanations where the adapter provides them | P1 | S | F6.3.1 |
 | E6.4 | **Resource safety** | | | |
-| F6.4.1 | Execution controller: separate process, time, memory and thread limits, cancellation, termination reasons; memory over the whole process tree, OS limits where they exist (Linux RLIMIT_AS, Windows job objects), watchdog everywhere (CPSAT_TRIAL §4.7) | P0 | M | F2.5.2 |
+| F6.4.1 | Execution controller: separate process, time, memory and thread limits, cancellation, termination reasons; memory over the whole process tree, OS limits where they exist (Linux RLIMIT_AS, Windows job objects), watchdog everywhere; refuse runs that require a hard memory limit where none exists (macOS); the two Windows regression tests (CPSAT_TRIAL §4.7, D-037 FA-2, FA-3) | P0 | M | F2.5.2 |
 | E6.5 | **Evidence and decisions** | | | |
 | F6.5.1 | Run evidence records, fingerprints (model, data, solver), staleness | P0 | M | F6.3.2, F2.4.1 |
 | F6.5.2 | ADR integration (ORE result as decision evidence) and optimization topics in profiles and discovery | P0 | M | E5.1, F3.2.1 |

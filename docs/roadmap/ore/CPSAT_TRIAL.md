@@ -1,7 +1,10 @@
 # CP-SAT technical trial (F6.0.2) — final evidence for D-037
 
+**Outcome:** D-037 **accepted** by the owner on 2026-11-22, within `ore/1` v1 only, with conditions FA-1–FA-8
+(see DECISIONS.md).
+
 Trial of OR-Tools CP-SAT as the first optional ORE solver, against the owner's conditions **C1–C13**, answers
-**P-1–P-3** and requirements **R1–R6** (all quoted in [DECISIONS.md](../DECISIONS.md#d-037--first-optional-solver-or-tools-cp-sat-conditional)).
+**P-1–P-3** and requirements **R1–R6** (all quoted in [DECISIONS.md](../DECISIONS.md#d-037--first-optional-solver-or-tools-cp-sat-accepted)).
 Run on 2026-11-22 with `ortools==9.15.6755` and the pinned dependencies in
 [cpsat_trial/requirements-py39.txt](cpsat_trial/requirements-py39.txt) and
 [cpsat_trial/requirements-py313.txt](cpsat_trial/requirements-py313.txt), always in throwaway virtual environments.
@@ -31,11 +34,12 @@ integer/Boolean models with linear and (enforced) linear constraints, provided O
 The trial exposes no reason to lower the proof standard, and none was lowered (C13, R5).
 
 - **Recommendation:** final adoption of CP-SAT as the first optional ORE solver, for the `ore/1` v1 model scope only.
-- **Status:** D-037 stays *approved in principle* until the owner reviews this evidence.
+- **Status:** accepted by the owner on 2026-11-22 (final approval, conditions FA-1–FA-8).
 
 Two platform facts limit the claims:
 - **macOS memory:** macOS offers no operating-system memory limit for these processes (`setrlimit` fails), so there the
-  memory limit rests on ORE's watchdog alone.
+  memory limit rests on ORE's watchdog alone. That is a sampled limit, not a guaranteed hard limit; a run that requires
+  a hard limit is refused there (FA-2).
 - **Cold start:** the 38–42 s first import was reproduced on the owner's Mac only; its exact cause is not proven (§3.4).
 
 ## 2. Results by condition and requirement
@@ -121,8 +125,9 @@ which feasible solution it reports, differs between platforms. A verified optimu
 - **Follows new native-library files:** a copy of a warm environment is slow again, and loading `libortools` alone takes
   23 s.
 - **Signing:** the libraries are ad-hoc signed (`codesign`: `adhoc,linker-signed`).
-- **Most likely cause, not proven:** a security check on the owner's Mac when a newly written, unnotarised native
-  library is loaded for the first time.
+- **Status: a known observation.** The cause is **not confirmed**. One hypothesis, untested, is a security check on
+  the owner's Mac when a newly written, unnotarised native library is loaded for the first time. It is not stated as
+  fact anywhere (D-037 FA-7).
 - **Consequence for ORE:** the opt-in install (F6.2.3) warms the import once after installing, says so to the user, and
   never counts that time against a solve's time limit.
 
@@ -178,17 +183,43 @@ which feasible solution it reports, differs between platforms. A verified optimu
 | Platform support (wheels) | Linux needs glibc 2.27/2.28+ (no musl/Alpine); Windows x64 only (no Windows on Arm); macOS arm64 and x86_64 |
 | Python 3.9 | supported by OR-Tools 9.15 with numpy 2.0.2 (the last numpy for 3.9); a later OR-Tools may drop 3.9, so the pin matters |
 
-## 6. Not covered (not marked verified, R6)
+## 6. Support matrix (FA-5, R6)
 
-- **Models outside `ore/1` v1:**
-  - continuous variables (CP-SAT scales them approximately);
-  - float objectives;
-  - nonlinear or global constraints beyond enforced linear ones;
-  - native multi-objective (ORE runs lexicographic stages itself; not trialled yet);
-  - large or industrial-size models (only small and medium models were compared with enumeration).
-- **Platforms not tested:** Windows on Arm (no wheel), Linux on aarch64 (wheel exists, not run), Alpine/musl (no
-  wheel), macOS x86_64 (wheel exists, not run), Python 3.10–3.12 and 3.14 (wheels exist, not run).
-- **Memory limit on macOS:** no operating-system limit is available there; the watchdog samples every 50 ms, so a very
-  fast allocation can overshoot between samples. In the trial it overshot by at most 17 MB (300 MB limit).
+**Verified** means this trial ran there at runtime, on the pinned versions, and every check passed. Nothing else is
+marked verified.
+
+### Platforms and Python versions
+
+| Platform | Python 3.9 | Python 3.13 | Python 3.10–3.12, 3.14 |
+|---|---|---|---|
+| Linux x86_64, glibc 2.39 (GitHub `ubuntu-24.04`) | **Verified** | **Verified** | Untested (wheels exist) |
+| Windows x64 (GitHub `windows-latest`) | **Verified** | **Verified** | Untested (wheels exist) |
+| macOS arm64 (GitHub `macos-latest`, macOS 26.7; owner's Mac, macOS 26.3) | **Verified** | **Verified** | Untested (wheels exist) |
+| Linux aarch64; macOS x86_64 | Untested (wheels exist) | Untested (wheels exist) | Untested |
+| Windows on Arm; Linux musl (Alpine) | **Unsupported** (no wheel) | **Unsupported** | **Unsupported** |
+
+### Resource controls
+
+| Control | Linux | Windows | macOS |
+|---|---|---|---|
+| Wall-clock kill of the whole tree | Verified | Verified | Verified |
+| Cancellation | Verified | Verified | Verified |
+| One worker = one core | Verified | Verified | Verified |
+| OS hard memory limit | Verified (`RLIMIT_AS`) | Verified (job object) | **Not available**: a run that requires it is refused (FA-2) |
+| Memory watchdog over the process tree | Verified | Verified | Verified, sampled every 50 ms; **not a guaranteed hard limit** (overshoot up to 17 MB seen) |
+
+### Mathematical problem classes
+
+| Class | Status |
+|---|---|
+| Bounded integer and Boolean variables; linear `<=`, `>=`, `==` constraints with exact rational coefficients; enforced (conditional) linear constraints; one linear objective (min or max), exactly scaled to integers | **Verified** (`ore/1` v1 scope; small and medium models compared with exhaustive enumeration) |
+| Infeasibility with a conflict set; minimality only by the deletion-filter proof | **Verified** |
+| Larger models of the same class | Same class, so supported, but **beyond the size compared with enumeration**: G2 rests on the solver's proof plus ORE's exact re-check |
+| Multiple objectives (lexicographic stages run by ORE) | Untested; needs its own validation |
+| Continuous variables; float coefficients or objectives; nonlinear or global constraints beyond enforced linear ones | **Unsupported** in `ore/1` v1 (refused by validation). Not added without new validation and approval |
+
+## 7. Not covered (not marked verified, R6)
+
+- **Industrial-size models** (only small and medium models were compared with enumeration).
 - **Z3 and HiGHS** hands-on checks (Phase 10 candidates).
-- **Cold start:** the exact mechanism on the owner's Mac (§3.4).
+- **Cold start:** its exact mechanism on the owner's Mac (§3.4).

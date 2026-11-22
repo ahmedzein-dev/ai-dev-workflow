@@ -59,7 +59,7 @@ presented; it will be presented separately.
 | D-034 | Strict optimality default | Guarantee levels G0–G3; default requirement `exact` (G2 or G3); tolerance-only results classified `FEASIBLE_NOT_PROVEN` | Fewer results called optimal; every such claim is defensible | **Accepted** |
 | D-035 | Result status model | Four recorded dimensions (model, termination, solution, verification) and a verifier-computed classification | More fields; no information lost (for example timeout plus feasible solution) | **Accepted** |
 | D-036 | Resource defaults | 60 s, 1 GB, 1 thread, 1 parallel run; exact search-space pre-check for enumeration; never raised automatically | Some problems need explicit higher limits | **Accepted** |
-| D-037 | First optional solver | **OR-Tools CP-SAT** for integer models (G2 under stated conditions), confirmed by the spike F6.0.2; Z3 as the independent exact cross-checker and HiGHS for LP with exact certificates later (Phase 10) — ore/SOLVER_COMPARISON.md §3 | Heavy optional dependencies (numpy, pandas, protobuf); no optimality certificate; memory limited at process level | **Approved in principle** — cross-platform evidence complete ([ore/CPSAT_TRIAL.md](ore/CPSAT_TRIAL.md)); awaiting the owner's final review |
+| D-037 | First optional solver | **OR-Tools CP-SAT** for integer models (G2 under stated conditions), confirmed by the spike F6.0.2; Z3 as the independent exact cross-checker and HiGHS for LP with exact certificates later (Phase 10) — ore/SOLVER_COMPARISON.md §3 | Heavy optional dependencies (numpy, pandas, protobuf); no optimality certificate; memory limited at process level | **Accepted** (final, 2026-11-22) — within `ore/1` v1 only; conditions FA-1–FA-8 in the record below |
 | D-038 | Model approval | Approved model as a new approval type (hash-bound), extending D-022 | One more approval for consequential optimization decisions | **Accepted** |
 | D-039 | ORE documents | Six design documents in `docs/roadmap/ore/` now (instead of 16 files); user docs in `docs/ore/` when features ship | Fewer, denser files | **Accepted** |
 | D-040 | Versions with ORE | v1.6 ORE v1; v2.0 modes and design, v2.1 specs/plans/traceability, v2.2 audit/evals/registry, v2.3 ORE advanced; v3.x, v4.x, v5.x as in MASTER_ROADMAP §5; MVP stays v1.5 without ORE | ORE arrives right after the MVP, not inside it | **Accepted** |
@@ -121,7 +121,7 @@ presented; it will be presented separately.
 - **Recommendation.** Each feature (F-ID in the phase files) is one task with its own spec and plan approvals. The
   phase is closed by a phase review (summary, evidence, roadmap update) that the owner approves before the next phase.
 
-### D-037 — First optional solver: OR-Tools CP-SAT (conditional)
+### D-037 — First optional solver: OR-Tools CP-SAT (accepted)
 
 **Conditionally approved by the owner on 2026-11-22:** «موافق مبدئيًا على D-037 واستخدام Google OR-Tools CP-SAT كأول
 Optional Solver داخل ORE، وموافق على تحميله وتجربته عمليًا في F6.0.2 داخل بيئة Python معزولة.» ("I approve D-037 in
@@ -172,3 +172,24 @@ Additional requirements from the owner (R1–R6):
 
 «D-037 remains approved in principle until the cross-platform validation is complete and the final evidence is
 presented for review.»
+
+**Final approval by the owner on 2026-11-22**, after the cross-platform evidence
+([ore/CPSAT_TRIAL.md](ore/CPSAT_TRIAL.md); CI `ore-cpsat-trial` and `tests` green at `3837bb2` and `6188b29`):
+
+> «Final approval granted for D-037. Google OR-Tools CP-SAT is officially approved as the first optional ORE solver,
+> strictly within the supported ore/1 v1 scope and subject to all documented verification, security, resource-control
+> and optimality requirements.»
+
+| ID | Condition of the final approval (owner's words, condensed) | Where it is enforced |
+|---|---|---|
+| FA-1 | Keep G2 solver-proven and G3 independently certified results distinct; never downgrade the required level automatically | STRICT_OPTIMALITY_POLICY §3 labels; verifier (F6.3.2) |
+| FA-2 | macOS memory enforcement is documented as watchdog-based, not a guaranteed hard limit; a problem that requires strict OS-level memory enforcement where it is unavailable is refused | STRICT_OPTIMALITY_POLICY §5; execution controller (F6.4.1) |
+| FA-3 | Both Windows controller fixes stay as permanent regression tests | `ore-cpsat-trial` workflow (also on `main` and pull requests); acceptance criteria of F2.5.2 and F6.4.1 |
+| FA-4 | The tested solver version stays pinned; any upgrade is revalidated before approval | `cpsat_trial/requirements-py*.txt`; F6.2.3 |
+| FA-5 | Verified platforms, Python versions and problem classes are clearly separated from untested or unsupported ones | CPSAT_TRIAL §6 support matrix |
+| FA-6 | OR-Tools stays optional and isolated from the core engine | D-032; CI check in `ore-cpsat-trial` |
+| FA-7 | The cold-start delay is a known observation; its suspected cause is not presented as fact | CPSAT_TRIAL §3.4 |
+| FA-8 | The latest CI run is verified before closing validation tasks | Done for F6.0.2 (run of `6188b29`) |
+
+The supported mathematical scope is **not** expanded without new validation and approval: bounded integer/Boolean
+variables, linear and enforced linear constraints, one integer objective (after exact scaling).

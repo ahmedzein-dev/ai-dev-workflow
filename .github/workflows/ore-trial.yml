@@ -3,9 +3,13 @@ name: ore-cpsat-trial
 # F6.0.2: the CP-SAT technical trial for D-037 on Linux, Windows and macOS with Python 3.9 and 3.13.
 # OR-Tools is installed only into a throwaway virtual environment with the pinned versions (owner decision P-3);
 # the core engine and its tests never install it (C2, R3).
+# It also carries the permanent regression tests for the two Windows controller fixes (D-037 FA-3), so it runs on main,
+# on phase branches and on pull requests that touch the trial or this workflow.
 on:
   push:
-    branches: ["phase-*/**"]
+    branches: [main, "phase-*/**"]
+    paths: ["docs/roadmap/ore/cpsat_trial/**", ".github/workflows/ore-trial.yml"]
+  pull_request:
     paths: ["docs/roadmap/ore/cpsat_trial/**", ".github/workflows/ore-trial.yml"]
   workflow_dispatch:
 
