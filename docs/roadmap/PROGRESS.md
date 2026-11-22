@@ -8,10 +8,10 @@ entries first. Feature statuses live in [roadmap-data.js](roadmap-data.js); this
 | | |
 |---|---|
 | Phase | 1 — Foundations & universal technology support (in progress) |
-| Done in Phase 1 | F1.0.1 self-hosting setup · F1.0.2 dev tooling · F1.0.3 engine package (CI passed on 3 OSes × Python 3.9/3.13 at `3837bb2`) |
-| In progress | F1.0.4 engine API (task `engine-api-f1-0-4`): spec `303f07fe` and plan `4e4b2a66` revised after the owner's review |
-| Waiting on | The owner: final approval of the revised F1.0.4 spec and plan |
-| Next action | F1.0.4 implementation after approval; then F1.0.5 (state schema, migration, locking) |
+| Done in Phase 1 | F1.0.1 self-hosting setup · F1.0.2 dev tooling · F1.0.3 engine package · F1.0.4 engine API (closed Completed with Limitations; CI 7/7 at `fa6a676`) |
+| In progress | TD-25 security fix (unredacted check id and agent name in records): discovery and specification only |
+| Waiting on | The owner: review and approval of the TD-25 scope and specification |
+| Next action | TD-25 plan after spec approval, then implementation after plan approval; F1.0.5 (state schema, migration, locking) after TD-25 |
 | Blockers | None |
 
 ## Phase progress
@@ -22,7 +22,7 @@ history in MASTER_ROADMAP §9.
 | Phase | Features done / total | Status |
 |---|---|---|
 | 0 | 15 / 15 | Done |
-| 1 | 3 / 25 | In progress |
+| 1 | 4 / 25 | In progress |
 | 2 | 0 / 20 | Planned |
 | 3 | 0 / 12 | Planned (MVP) |
 | 4 | 0 / 12 | Planned (MVP) |
@@ -43,6 +43,23 @@ history in MASTER_ROADMAP §9.
 | 19 | 0 / 8 | Planned (checklist from v1.1) |
 
 ## Log
+
+### 2026-11-22 — F1.0.4 closed (Completed with Limitations); TD-25 task opened
+
+- Owner: «Approved. Close F1.0.4 with the status Completed with Limitations.» Closed with the engine's `close`
+  after `outcome` allowed at most Completed with Limitations. The only reason it is not Completed is the accepted
+  Important finding F-7, recorded as **TD-25** (pre-existing, security-sensitive).
+- Evidence (tested commit `fa6a676`, code fingerprint `23f78e988f`):
+  - CI run 45005422565: lint + Linux, Windows, macOS × Python 3.9/3.13, 7/7 passed;
+  - the records-only commit `4bb3cd9` passed too (run 45006054918, 7/7);
+  - independent audit in three rounds (cea2e9f, b2f5b8e, fa6a676), final verdict GO;
+  - 27 refusal scenarios, the late-refusal output and the public signatures pinned from the pre-refactor engine
+    `5a7576a`, passing on both engines with Python 3.13 and 3.9;
+  - the 9 pre-existing golden files are byte-identical; 173 tests.
+- Records: `.ai-dev-workflow/tasks/engine-api-f1-0-4/` (spec v1 `303f07fe`, plan v1 `4e4b2a66`, verification,
+  audit F-1–F-19, report).
+- Owner's next priority: TD-25 before F1.0.5, through Discovery → Specification → Approval → Planning → Approval,
+  with no implementation before approval. TD-24 and TD-26 stay separate tracked defects.
 
 ### 2026-11-22 — F1.0.4 spec and plan revised after the owner's review
 

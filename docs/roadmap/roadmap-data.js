@@ -9,8 +9,8 @@ window.ROADMAP = {
  "current": {
   "phase": 1,
   "next": {
-   "en": "D-037 accepted (final): CP-SAT is the first optional ORE solver within ore/1 v1. F6.0.2 closed after CI at 7e35018. Now: F1.0.4 (engine API) — revised spec (303f07fe) and plan (4e4b2a66) await the owner's final approval.",
-   "ar": "D-037 اتعتمد نهائيًا: CP-SAT أول solver اختياري في ORE ضمن ore/1 v1. F6.0.2 اتقفلت بعد CI على 7e35018. دلوقتي: F1.0.4 (الـ engine API)، المواصفات والخطة مستنيين موافقة صاحب المشروع."
+   "en": "F1.0.4 (engine API) closed as Completed with Limitations: CI 7/7 at fa6a676, independent audit GO. Now: TD-25 security fix (unredacted check id and agent name in records) — discovery and specification awaiting the owner's review; F1.0.5 after it.",
+   "ar": "F1.0.4 (الـ engine API) اتقفلت بحالة Completed with Limitations: الـ CI نجح 7 من 7 على fa6a676 والمراجعة المستقلة GO. دلوقتي: إصلاح أمني TD-25 (اسم الـ check واسم الـ agent بيتكتبوا في السجلات من غير إخفاء)، الاستكشاف والمواصفات مستنيين مراجعة صاحب المشروع، وبعده F1.0.5."
   }
  },
  "phases": [
@@ -222,12 +222,12 @@ window.ROADMAP = {
        "t": "Engine API (aidw/api.py): commands return data; CLI only prints",
        "pri": "P0",
        "eff": "M",
-       "st": "review",
+       "st": "done",
        "dep": [
         "F1.0.3"
        ],
        "mvp": true,
-       "note": "Owner review addressed (points 1–7): spec 303f07fe and plan 4e4b2a66 await final approval; TD-24 recorded"
+       "note": "Completed with Limitations (accepted F-7 = TD-25); CI 7/7 at fa6a676; independent audit GO; 27 refusals pinned from 5a7576a"
       },
       {
        "id": "F1.0.5",
@@ -3217,6 +3217,12 @@ window.ROADMAP = {
  },
  "issues": [
   {
+   "id": "TD-25",
+   "kind": "security",
+   "sev": "high",
+   "t": "Unredacted check id and agent name reach verification.md before the secret check refuses (priority; own task)"
+  },
+  {
    "id": "TD-03",
    "kind": "debt",
    "sev": "high",
@@ -3306,6 +3312,12 @@ window.ROADMAP = {
    "date": "2026-11-22",
    "what": "F6.0.2 CP-SAT trial: 1,650 models vs enumeration, gap trap, limits, cancellation, memory, threads (Python 3.13 and 3.9, macOS)",
    "result": "0 mismatches · all checks as expected",
+   "ok": true
+  },
+  {
+   "date": "2026-11-22",
+   "what": "F1.0.4 at fa6a676: 173 tests on 3.13 and 3.9, 27 refusal pins from 5a7576a, golden byte-identical; CI lint + Linux, Windows, macOS × 3.9/3.13",
+   "result": "7/7 passed · audit GO",
    "ok": true
   },
   {
