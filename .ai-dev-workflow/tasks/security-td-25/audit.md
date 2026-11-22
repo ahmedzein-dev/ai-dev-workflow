@@ -8,6 +8,9 @@ implementer's conclusions.
 - Round 1 on the working tree, byte-identical to commit `a346300`, plus the backport `056ac73`/`7f3a2ae`. Verdict
   NO-GO, one Important finding.
 - Round 2 on the fixes (`49ba40a`, backport `d8efe25`). Code and tests: GO; records: NO-GO (F-8), fixed.
+- Codex handover review on `c072342` and `0951ed0`, by a separate read-only reviewer. The review confirmed the
+  round-2 code changes and found an Important rollback ownership gap (F-13), plus stale or imprecise evidence
+  (F-14). Its initial verdict was NO-GO.
 
 **Reviewed scope:**
 - `aidw/api.py`, `aidw/agents/claude_hooks.py`, `tests/test_secret_identity.py`;
@@ -66,10 +69,12 @@ No standards files are configured (`standards: []`). Spec constraints:
 | F-6 | Minor | I | The CHANGELOG said `new` "no longer leaves a half-created task folder", which is absolute. A crash, a locked file or a foreign file can still leave it, and an empty `tasks/` folder can remain after a failed first `new` | CHANGELOG (both branches) | Fixed | Reworded to best effort; the residual cases are under TD-29 |
 | F-7 | Minor | A | TD-29 omitted that `pause` and `close` delete ACTIVE, and `approve` writes the snapshot, before `save_state` | TECHNICAL_DEBT TD-29 | Fixed | Added to TD-29 (pre-existing, no value leak; not fixed here) |
 | F-8 | Important | A | verification.md marked AC-11, AC-14, EC-10 and DW-9 as Passed citing report.md, which was still the empty template; the matrix was also stale (tested commit, fingerprints, counts) | verification.md, audit.md F-2 note | Fixed | report.md written (status, implementation, compliance, tests, audit, limits incl. the centralised-check assessment and the trust boundary, release proposal); the matrix refreshed with final commits, fingerprints and counts |
-| F-9 | Minor | D | A value split by U+0085 or U+2028 passes every check and reaches state.json, ACTIVE and verification.md, and `run --` executes; the `state.json` check misses it too, so it predates TD-25 (a detection limit, FR-10) | `find_secrets` line splitting | Deferred | Documented in TD-25 limits, the CHANGELOG (both branches), verification.md Limitations and report.md §6. Not fixed: the spec excludes changes to the scanner, and normalising separators would be a detection change for a separate decision |
+| F-9 | Minor | D | The scanner can miss the identified U+0085 and U+2028 cases, including in the existing state.json scan. The independent session format rejects these separators. This is a detection limit under FR-10. | `find_secrets` line splitting | Deferred | Documented in TD-25 limits, the CHANGELOG (both branches), verification.md Limitations and report.md §6. Not fixed: the spec excludes changes to the scanner, and normalising separators would be a detection change for a separate decision |
 | F-10 | Minor | G | A test comment wrongly said the hook does not log after a pause, and the test passed `expect_log=False`, weakening the assertion | `tests/test_secret_identity.py` (both branches) | Fixed | Comment corrected; the log line is now asserted |
 | F-11 | Minor | C | Scanning the value and its JSON form as one string reported a plain token twice and gave line numbers inside the internal combined string | `_assert_clean_value` / backport `assert_clean_value` | Fixed | The two forms are scanned separately: a token is reported once, as "(line 1)" |
 | F-12 | Minor | A | Stale numbers in verification.md (DW-7 28/24, AC-12 counts); DW-7 marked Passed despite the noted Windows failures | verification.md | Fixed | Counts recomputed from the final test file; DW-7 status reads "Passed (with 2 pre-existing Windows failures noted)" |
+| F-13 | Important | I, G | Failed task creation registered destinations for cleanup before confirming it had written them. This could remove a foreign file at a failed destination. | `api.py` and backport `workflow.py`, `RecoveryTest` | Fixed | The revisions reserve temporary names exclusively and clean up only files they own. Both RecoveryTest paths passed locally and in CI. The separate reviewer rechecked both revisions and confirmed the fix. Concurrent changes remain TD-29. |
+| F-14 | Minor | A, G | Round-2 documents cited older CI as final, used an unsupported DW-7 status, and overstated F-9. The report omitted the fsync and false-positive limitations. One hook test name contradicted its assertion. | verification.md, report.md, technical debt and changelogs, hook regression | Fixed | Evidence now identifies exact commits and CI, uses a canonical DW-7 status, explains scanner and persistence limits, and names the hook test according to its actual assertion. |
 
 ## Remediation log
 
@@ -92,4 +97,8 @@ No standards files are configured (`standards: []`). Spec constraints:
   - F-10 and F-11 in the tests and the code (both branches);
   - F-9 documented and deferred;
   - F-12: numbers refreshed.
+- **Handover follow-up:** The separate reviewer rechecked the ownership change on the development and release
+  worktrees. Verdict: GO for the correction. The recovered records passed Codex’s consistency review. See
+  verification.md for the final local and CI evidence. The first two review rounds covered the hook path and the
+  F-1 pin. Codex reran the historical control test in a separate export and compared the unchanged golden.
 - **Re-run checks and CI:** recorded in verification.md.

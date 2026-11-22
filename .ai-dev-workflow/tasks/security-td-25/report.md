@@ -33,7 +33,9 @@ Approval history:
   - Without an active task, and for valid sessions, nothing changes.
 - **Write order:**
   - `run` saves `state.json` before rewriting the check block.
-  - `new` saves the new task before activating it, and on failure removes only the files it wrote (best effort).
+  - `new` saves the task before activating it. The handover audit found a cleanup path that could remove a foreign
+    file. Cleanup now reserves temporary names exclusively, tracks successful writes, and preserves foreign or
+    changed records. Tests cover both a failed state replacement and files created or changed outside the write.
   - This repairs two orderings. **It is not multi-file atomicity** (TD-29).
 - **F-1 regression pin (owner decision Option A):**
   - `LateRefusalTest` keeps its purpose with a synthetic `WorkflowError` raised by `save_state` after the command ran.
@@ -62,40 +64,36 @@ FR-1–FR-14, EC-1–EC-18 and AC-1–AC-14 are met (verification.md). The docum
 
 ## 4. Testing Results
 
-- **Engine checks on the final code:** `unit` (Python 3.13), `unit-py39` (3.9.6), `privacy`, `ruff`, `mypy`,
-  `golden-byte-compare`. Every golden file is byte-identical except the approved FR-13 file. The 27 refusal pins, the
-  signature and name pins, the TD-24 pins and the existing hook tests are unchanged and passing.
-- **Tests failing on the vulnerable engines:**
-
-  | Engine | Fail | Pass | Skipped |
-  |---|---|---|---|
-  | `5a7576a` | 25 + 1 error | 4 (legitimate values, valid UUID hook) | 6 (no `aidw.api`) |
-  | `fa6a676` | 31 + 1 error | 4 | 0 |
-  | `a346300` (before the audit fixes) | 2 (multi-line values, huge session) | 34 | 0 |
-  | Final code | 0 | 36 | 0 |
-- **Exposure check (counts only):** 45 record files, 0 with secret-like values; this repository's ACTIVE not flagged.
-- **CI, development branch:** `a346300` run 45021516859 and `49ba40a` run 45023454467, each 7/7 (lint, plus Linux,
-  Windows and macOS × Python 3.9/3.13). The final records commit gets its own run.
-- **Backport:**
-  - the adapted tests pass 32/32; on pristine v1.0.0, 27 fail, 1 errors, and the 4 legitimate-value tests pass;
-  - the full v1.0.0 suite passes locally on 3.13 and 3.9.
-  - CI `d8efe25` run 45023456456: Linux and macOS 4/4. On Windows, 2 failures out of 150 tests:
-    `test_infos_alone_do_not_fail_when_only_errors_and_warnings_count` and `test_line_endings_do_not_change_the_hash`.
-    - Both failures are pre-existing. The CI run on the `v1.0.0` tag itself (43175463889) failed with exactly these
-      two.
-    - They were fixed on `main` after the release: `ad5bfd3` (analyzer separator regex and a test) and `0bd5a6c`
-      (decoding command output with a Windows code-page fallback).
-    - They are not ported, because they are outside the TD-25 scope. That is a decision for the release proposal
-      (§8).
+- **Development `c0f5800519e0934e30184142e7f92cbcabbb45f4`:** local engine fingerprint `fd10d4edf94522f066af80d764f0aeb5d3929edfcc8c8a9fc9085a61c364379d`. 209/209 passed on
+  each of Python 3.13 and 3.9.6, including 36 TD-25 tests and the existing legacy compatibility suite.
+  Ruff, Mypy, the privacy scan and the golden comparison passed. The F-1 test also matched the approved golden
+  on a separate export of `fa6a676` with both interpreters. [Development CI 45036934864](https://github.com/ahmedzein-dev/ai-dev-workflow/actions/runs/45036934864) passed 7/7.
+- **Release `095c511aacc0923d735a8d9b3e8d9ee04cee35dd`:** 150/150 passed locally on each Python version, including 32 TD-25 tests.
+  The privacy scan found no issues. [Release CI 45036741638](https://github.com/ahmedzein-dev/ai-dev-workflow/actions/runs/45036741638) passed both Linux and both macOS jobs. Each
+  Windows job passed 148/150, including all 32 TD-25 tests. The two Windows jobs are failed overall.
+- **Windows baseline:** the same two tests failed on both Python versions in
+  [the original CI at the v1.0.0 commit](https://github.com/ahmedzein-dev/ai-dev-workflow/actions/runs/43175463889). The analyzer test's output separators were misinterpreted
+  on Windows. The other test converted a file that already had CRLF by blindly adding a carriage return to each
+  LF. `ad5bfd3` corrected the CRLF test and broadened separator parsing. The analyzer test still failed in that
+  run. `0bd5a6c` added locale-aware fallback decoding, and [the later run passed 6/6](https://github.com/ahmedzein-dev/ai-dev-workflow/actions/runs/43179376215).
+  The two patches await the owner's decision for the backport.
+- **Original v1.0.0 suite:** Codex reran the 118 original tests on macOS with both Python versions. Both passed.
+- **Historical security reproduction:** Claude Code's pre-fix results on `5a7576a`, `fa6a676`, `a346300`
+  and pristine v1.0.0 are retained in verification.md and the task history. Codex confirmed the patched regression
+  suites and did not repeat the old secret persistence scenario.
+- **Exposure check (counts only):** 38 task record files; 0 flagged; ACTIVE present=True, flagged=False.
+- **Installed engine:** the local installed engine identifies as v1.0.0. Its engine file has the same Git blob
+  hash as the engine at the original v1.0.0 tag.
 
 ## 5. Code Audit
 
-An independent, security-focused, read-only subagent reviewed the work in two rounds.
+The initial independent reviewer audited the implementation in two rounds. A separate read-only reviewer audited the Codex handover.
 
 | Round | Verdict | Findings |
 |---|---|---|
 | 1 | NO-GO | F-1 Important: a line separator inside an agent or check name passed the early check while `state.json` still caught it, so the ordering bug came back. Six Minor: F-2 to F-7 |
 | 2 | Code GO; records NO-GO | F-8 Important: verification.md cited this report before it was written. Four Minor: F-9 to F-12 |
+| Handover | Initial NO-GO, then GO for the rollback correction | F-13 Important: rollback ownership, fixed in both branches. F-14 Minor: evidence and wording, fixed. |
 
 All findings are fixed except F-9, which is Deferred and documented (details in audit.md). No existing secret check,
 gate, approval rule or refusal was weakened.
@@ -103,12 +101,14 @@ gate, approval rule or refusal was weakened.
 ## 6. Edge Cases and Regression Risks
 
 - **Detection limits (FR-10):**
-  - `assert_no_secrets` is pattern-based: credentials in unknown formats pass. So does a value split by U+0085 or
-    U+2028, which the `state.json` check misses too (audit F-9).
-  - The session format rule bounds structure, not secrecy.
+  - `assert_no_secrets` uses patterns. Unknown credential formats and the documented U+0085 and U+2028 cases can
+    escape the secret scan, including in `state.json` (audit F-9).
+  - The independent session format check rejects those separators and bounds the session ID structure.
   - Agent names stay free text.
 - **Persistence limits (FR-9, TD-29):**
-  - Single files are replaced atomically; multi-file updates are not transactional.
+  - The writer replaces each file atomically with `os.replace`. It does not use fsync. A failure can still
+    leave a temporary file (for example if cleanup is interrupted or refused by the file system).
+  - Updates that span several files have no transaction or lock (TD-29).
   - `resume`, `preflight` and pausing another task write ACTIVE or the other task's `state.json` first. `pause` and
     `close` delete ACTIVE, and `approve` writes the snapshot, before `save_state`.
   - The check block can lag `state.json` after a failed write, until the next `run`.
@@ -118,8 +118,8 @@ gate, approval rule or refusal was weakened.
   - Direct Python calls to the exported writers (`activate`, `save_state`, `save_json`, `write_text`, `add_history`,
     `regenerate_check_block`) bypass the API checks. No protection is claimed for them.
   - **A centralised persistence check was assessed, not built.** A secret scan of every write under
-    `.ai-dev-workflow/` would catch future regressions and most misuse at small cost. But a refusal in the middle of
-    a multi-file write could create new partial states, so it should come with the F1.0.5 storage work, as a
+    `.ai-dev-workflow/` could catch future regressions and misuse at small scanning cost. A legitimate record that matches a secret
+    pattern could be rejected. Refusal in the middle of a multi-file write could also create new partial states, so it should come with the F1.0.5 storage work, as a
     separately approved task, with the API checks staying primary.
 - **Hook strictness:** a malformed payload session inside an active task now blocks edits. Claude Code sends UUIDs,
   so this needs a broken or tampered payload. The denial says how to continue.
@@ -130,6 +130,8 @@ gate, approval rule or refusal was weakened.
 - **Owner approval of the v1.0.1 release actions (§8).** Until they are done, installed copies, including this
   project's managing engine v1.0.0, remain affected.
 - **Owner decision** on porting the two pre-existing Windows fixes into 1.0.1.
+- **Repository visibility:** GitHub currently reports this repository as public. The handover evidence is kept local
+  pending the owner's direction on visibility and publishing the records.
 
 ## 8. Next Actions
 
@@ -137,7 +139,7 @@ gate, approval rule or refusal was weakened.
 
 | Step | Action | Gate |
 |---|---|---|
-| R0 | Decide whether 1.0.1 also carries the two pre-existing Windows fixes from `main` (`ad5bfd3` regex and test, `0bd5a6c` output decoding). Recommended, so that the release's CI is green on Windows. They are small and already validated on `main` and the development branch, but outside the TD-25 scope | Owner decision |
+| R0 | Decide whether 1.0.1 also carries the two pre-existing Windows fixes from `main` (`ad5bfd3` regex and test, `0bd5a6c` output decoding). Recommended, so that the release's CI is green on Windows. Bring over only the Windows changes and their tests, then verify all six jobs on the resulting branch. The alternative is to retain the security-only candidate and explicitly accept the two failing Windows jobs | Owner decision |
 | R1 | Tag `v1.0.1` on the final tested `release/1.0.x` commit and push the tag | Owner approval |
 | R2 | Publish GitHub release notes: affected versions (1.0.0 and development versions before this fix), impact, fix, mitigation, limits; no secret values. A security advisory is optional | Owner approval |
 | R3 | Bring the fix to `main` (merge `release/1.0.x`, or port it) | Owner approval |

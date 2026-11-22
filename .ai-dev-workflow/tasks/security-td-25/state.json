@@ -6,7 +6,7 @@
   "created_at": "2026-11-22T09:14:29Z",
   "created_by": "claude-code",
   "invocation": "عايزين نستخدم AIDevWorkflow نفسه لتطوير AIDevWorkflow بصورة تدريجية، باستخدام النسخة المستقرة المثبتة منه. — Before starting F1.0.5, open a separate task to investigate and fix TD-25, including both unredacted fields (check ID and agent name). Follow the normal Discovery → Specification → Approval → Planning → Approval workflow for that security fix. Do not implement it without approval.",
-  "stage": "IMPLEMENTATION",
+  "stage": "FINAL_REPORT",
   "status": "active",
   "outcome": null,
   "template": {
@@ -254,6 +254,17 @@
       "note": "release/1.0.x from v1.0.0 in a worktree: 056ac73, 7f3a2ae, d8efe25 and round-2 commit; adapted tests 32/32, pristine v1.0.0 27 fail + 1 error; full v1.0.0 suite 3.13/3.9; CI Linux+macOS green, Windows 2 pre-existing v1.0.0 failures; no tag",
       "agent": "claude-code",
       "at": "2026-11-22T12:56:03Z"
+    },
+    "S10": {
+      "status": "done",
+      "files": [
+        ".ai-dev-workflow/tasks/security-td-25/report.md",
+        ".ai-dev-workflow/tasks/security-td-25/verification.md",
+        ".ai-dev-workflow/tasks/security-td-25/audit.md"
+      ],
+      "note": "Owner review is prepared. Development c0f5800 CI 7/7. Release 095c511 CI 4/6 with only the two independently confirmed legacy Windows failures. F-13 fixed after separate read-only review. F-9 deferred. Release actions await separate approval.",
+      "agent": "codex",
+      "at": "2026-11-22T15:16:30Z"
     }
   },
   "checks": [
@@ -556,6 +567,336 @@
       "status": "passed",
       "summary": "14 golden files; changed: ['run-output-before-late-refusal.txt']; unexpected: none",
       "fingerprint": "081041ee0e41cf7202dfe3a5d7798c4564154f87d547397509ebd31d12abf909"
+    },
+    {
+      "id": "unit",
+      "name": "Unit, scenario and doc tests",
+      "kind": "result",
+      "agent": "codex",
+      "at": "2026-11-22T15:04:28Z",
+      "counts": null,
+      "reason": null,
+      "command": "python3 -m unittest discover -s tests",
+      "duration_s": 80.2,
+      "exit_code": 0,
+      "status": "passed",
+      "summary": "OK",
+      "fingerprint": "081041ee0e41cf7202dfe3a5d7798c4564154f87d547397509ebd31d12abf909"
+    },
+    {
+      "id": "unit-py39",
+      "name": "unit-py39",
+      "kind": "result",
+      "agent": "codex",
+      "at": "2026-11-22T15:05:48Z",
+      "counts": null,
+      "reason": null,
+      "command": "/usr/bin/python3 -m unittest discover -s tests",
+      "duration_s": 58.6,
+      "exit_code": 0,
+      "status": "passed",
+      "summary": "OK",
+      "fingerprint": "081041ee0e41cf7202dfe3a5d7798c4564154f87d547397509ebd31d12abf909"
+    },
+    {
+      "id": "ruff",
+      "name": "ruff",
+      "kind": "result",
+      "agent": "codex",
+      "at": "2026-11-22T15:06:47Z",
+      "counts": null,
+      "reason": null,
+      "command": ".venv/bin/ruff check .",
+      "duration_s": 0.0,
+      "exit_code": 0,
+      "status": "passed",
+      "summary": "All checks passed!",
+      "fingerprint": "081041ee0e41cf7202dfe3a5d7798c4564154f87d547397509ebd31d12abf909"
+    },
+    {
+      "id": "mypy",
+      "name": "mypy",
+      "kind": "result",
+      "agent": "codex",
+      "at": "2026-11-22T15:06:47Z",
+      "counts": null,
+      "reason": null,
+      "command": ".venv/bin/mypy",
+      "duration_s": 0.2,
+      "exit_code": 0,
+      "status": "passed",
+      "summary": "Success: no issues found in 31 source files",
+      "fingerprint": "081041ee0e41cf7202dfe3a5d7798c4564154f87d547397509ebd31d12abf909"
+    },
+    {
+      "id": "privacy",
+      "name": "Pre-publish secret and privacy scan",
+      "kind": "result",
+      "agent": "codex",
+      "at": "2026-11-22T15:06:47Z",
+      "counts": null,
+      "reason": null,
+      "command": "python3 tools/prepublish_check.py",
+      "duration_s": 0.4,
+      "exit_code": 0,
+      "status": "passed",
+      "summary": "Scanned 212 files: no findings.",
+      "fingerprint": "081041ee0e41cf7202dfe3a5d7798c4564154f87d547397509ebd31d12abf909"
+    },
+    {
+      "id": "td25-regression",
+      "name": "td25-regression",
+      "kind": "result",
+      "agent": "codex",
+      "at": "2026-11-22T15:06:48Z",
+      "counts": null,
+      "reason": null,
+      "command": "/opt/homebrew/bin/python3.13 -m unittest discover -s tests -p test_secret_identity.py",
+      "duration_s": 15.3,
+      "exit_code": 0,
+      "status": "passed",
+      "summary": "OK",
+      "fingerprint": "081041ee0e41cf7202dfe3a5d7798c4564154f87d547397509ebd31d12abf909"
+    },
+    {
+      "id": "golden-byte-compare",
+      "name": "golden-byte-compare",
+      "kind": "result",
+      "agent": "codex",
+      "at": "2026-11-22T15:07:03Z",
+      "counts": null,
+      "reason": null,
+      "command": "/opt/homebrew/bin/python3.13 -c 'import subprocess; result=subprocess.check_output([\"git\",\"diff\",\"--name-only\",\"deba846\",\"--\",\"tests/golden\"],text=True).splitlines(); expected=[\"tests/golden/run-output-before-late-refusal.txt\"]; assert result==expected,result; assert not subprocess.check_output([\"git\",\"diff\",\"HEAD\",\"--\",\"tests/golden\"]); print(\"Only the approved late-refusal golden differs from deba846.\")'",
+      "duration_s": 0.1,
+      "exit_code": 0,
+      "status": "passed",
+      "summary": "Only the approved late-refusal golden differs from deba846.",
+      "fingerprint": "081041ee0e41cf7202dfe3a5d7798c4564154f87d547397509ebd31d12abf909"
+    },
+    {
+      "id": "td25-regression",
+      "name": "td25-regression",
+      "kind": "result",
+      "agent": "codex",
+      "at": "2026-11-22T15:07:41Z",
+      "counts": null,
+      "reason": null,
+      "command": "/opt/homebrew/bin/python3.13 -m unittest discover -s tests -p test_secret_identity.py",
+      "duration_s": 15.3,
+      "exit_code": 0,
+      "status": "passed",
+      "summary": "OK",
+      "fingerprint": "65f25bdcb4161d62a4bfb7efa213f0b72d14c87b468519bf40dad5149e2a5a63"
+    },
+    {
+      "id": "unit",
+      "name": "Unit, scenario and doc tests",
+      "kind": "result",
+      "agent": "codex",
+      "at": "2026-11-22T15:07:56Z",
+      "counts": null,
+      "reason": null,
+      "command": "python3 -m unittest discover -s tests",
+      "duration_s": 77.6,
+      "exit_code": 0,
+      "status": "passed",
+      "summary": "OK",
+      "fingerprint": "65f25bdcb4161d62a4bfb7efa213f0b72d14c87b468519bf40dad5149e2a5a63"
+    },
+    {
+      "id": "unit-py39",
+      "name": "unit-py39",
+      "kind": "result",
+      "agent": "codex",
+      "at": "2026-11-22T15:09:14Z",
+      "counts": null,
+      "reason": null,
+      "command": "/usr/bin/python3 -m unittest discover -s tests",
+      "duration_s": 63.0,
+      "exit_code": 0,
+      "status": "passed",
+      "summary": "OK",
+      "fingerprint": "65f25bdcb4161d62a4bfb7efa213f0b72d14c87b468519bf40dad5149e2a5a63"
+    },
+    {
+      "id": "ruff",
+      "name": "ruff",
+      "kind": "result",
+      "agent": "codex",
+      "at": "2026-11-22T15:10:17Z",
+      "counts": null,
+      "reason": null,
+      "command": ".venv/bin/ruff check .",
+      "duration_s": 0.0,
+      "exit_code": 0,
+      "status": "passed",
+      "summary": "All checks passed!",
+      "fingerprint": "65f25bdcb4161d62a4bfb7efa213f0b72d14c87b468519bf40dad5149e2a5a63"
+    },
+    {
+      "id": "mypy",
+      "name": "mypy",
+      "kind": "result",
+      "agent": "codex",
+      "at": "2026-11-22T15:10:17Z",
+      "counts": null,
+      "reason": null,
+      "command": ".venv/bin/mypy",
+      "duration_s": 0.2,
+      "exit_code": 0,
+      "status": "passed",
+      "summary": "Success: no issues found in 31 source files",
+      "fingerprint": "65f25bdcb4161d62a4bfb7efa213f0b72d14c87b468519bf40dad5149e2a5a63"
+    },
+    {
+      "id": "privacy",
+      "name": "Pre-publish secret and privacy scan",
+      "kind": "result",
+      "agent": "codex",
+      "at": "2026-11-22T15:10:18Z",
+      "counts": null,
+      "reason": null,
+      "command": "python3 tools/prepublish_check.py",
+      "duration_s": 0.4,
+      "exit_code": 0,
+      "status": "passed",
+      "summary": "Scanned 212 files: no findings.",
+      "fingerprint": "65f25bdcb4161d62a4bfb7efa213f0b72d14c87b468519bf40dad5149e2a5a63"
+    },
+    {
+      "id": "golden-byte-compare",
+      "name": "golden-byte-compare",
+      "kind": "result",
+      "agent": "codex",
+      "at": "2026-11-22T15:10:18Z",
+      "counts": null,
+      "reason": null,
+      "command": "/opt/homebrew/bin/python3.13 -c 'import subprocess; result=subprocess.check_output([\"git\",\"diff\",\"--name-only\",\"deba846\",\"--\",\"tests/golden\"],text=True).splitlines(); expected=[\"tests/golden/run-output-before-late-refusal.txt\"]; assert result==expected,result; assert not subprocess.check_output([\"git\",\"diff\",\"HEAD\",\"--\",\"tests/golden\"]); print(\"Only the approved late-refusal golden differs from deba846.\")'",
+      "duration_s": 0.1,
+      "exit_code": 0,
+      "status": "passed",
+      "summary": "Only the approved late-refusal golden differs from deba846.",
+      "fingerprint": "65f25bdcb4161d62a4bfb7efa213f0b72d14c87b468519bf40dad5149e2a5a63"
+    },
+    {
+      "id": "td25-regression",
+      "name": "td25-regression",
+      "kind": "result",
+      "agent": "codex",
+      "at": "2026-11-22T15:10:55Z",
+      "counts": null,
+      "reason": null,
+      "command": "/opt/homebrew/bin/python3.13 -m unittest discover -s tests -p test_secret_identity.py",
+      "duration_s": 17.3,
+      "exit_code": 0,
+      "status": "passed",
+      "summary": "OK",
+      "fingerprint": "fd10d4edf94522f066af80d764f0aeb5d3929edfcc8c8a9fc9085a61c364379d"
+    },
+    {
+      "id": "unit",
+      "name": "Unit, scenario and doc tests",
+      "kind": "result",
+      "agent": "codex",
+      "at": "2026-11-22T15:11:13Z",
+      "counts": null,
+      "reason": null,
+      "command": "python3 -m unittest discover -s tests",
+      "duration_s": 85.2,
+      "exit_code": 0,
+      "status": "passed",
+      "summary": "OK",
+      "fingerprint": "fd10d4edf94522f066af80d764f0aeb5d3929edfcc8c8a9fc9085a61c364379d"
+    },
+    {
+      "id": "unit-py39",
+      "name": "unit-py39",
+      "kind": "result",
+      "agent": "codex",
+      "at": "2026-11-22T15:12:38Z",
+      "counts": null,
+      "reason": null,
+      "command": "/usr/bin/python3 -m unittest discover -s tests",
+      "duration_s": 61.5,
+      "exit_code": 0,
+      "status": "passed",
+      "summary": "OK",
+      "fingerprint": "fd10d4edf94522f066af80d764f0aeb5d3929edfcc8c8a9fc9085a61c364379d"
+    },
+    {
+      "id": "ruff",
+      "name": "ruff",
+      "kind": "result",
+      "agent": "codex",
+      "at": "2026-11-22T15:13:40Z",
+      "counts": null,
+      "reason": null,
+      "command": ".venv/bin/ruff check .",
+      "duration_s": 0.0,
+      "exit_code": 0,
+      "status": "passed",
+      "summary": "All checks passed!",
+      "fingerprint": "fd10d4edf94522f066af80d764f0aeb5d3929edfcc8c8a9fc9085a61c364379d"
+    },
+    {
+      "id": "mypy",
+      "name": "mypy",
+      "kind": "result",
+      "agent": "codex",
+      "at": "2026-11-22T15:13:40Z",
+      "counts": null,
+      "reason": null,
+      "command": ".venv/bin/mypy",
+      "duration_s": 0.1,
+      "exit_code": 0,
+      "status": "passed",
+      "summary": "Success: no issues found in 31 source files",
+      "fingerprint": "fd10d4edf94522f066af80d764f0aeb5d3929edfcc8c8a9fc9085a61c364379d"
+    },
+    {
+      "id": "privacy",
+      "name": "Pre-publish secret and privacy scan",
+      "kind": "result",
+      "agent": "codex",
+      "at": "2026-11-22T15:13:40Z",
+      "counts": null,
+      "reason": null,
+      "command": "python3 tools/prepublish_check.py",
+      "duration_s": 0.3,
+      "exit_code": 0,
+      "status": "passed",
+      "summary": "Scanned 212 files: no findings.",
+      "fingerprint": "fd10d4edf94522f066af80d764f0aeb5d3929edfcc8c8a9fc9085a61c364379d"
+    },
+    {
+      "id": "golden-byte-compare",
+      "name": "golden-byte-compare",
+      "kind": "result",
+      "agent": "codex",
+      "at": "2026-11-22T15:13:41Z",
+      "counts": null,
+      "reason": null,
+      "command": "/opt/homebrew/bin/python3.13 -c 'import subprocess; result=subprocess.check_output([\"git\",\"diff\",\"--name-only\",\"deba846\",\"--\",\"tests/golden\"],text=True).splitlines(); expected=[\"tests/golden/run-output-before-late-refusal.txt\"]; assert result==expected,result; assert not subprocess.check_output([\"git\",\"diff\",\"HEAD\",\"--\",\"tests/golden\"]); print(\"Only the approved late-refusal golden differs from deba846.\")'",
+      "duration_s": 0.1,
+      "exit_code": 0,
+      "status": "passed",
+      "summary": "Only the approved late-refusal golden differs from deba846.",
+      "fingerprint": "fd10d4edf94522f066af80d764f0aeb5d3929edfcc8c8a9fc9085a61c364379d"
+    },
+    {
+      "id": "records-exposure",
+      "name": "records-exposure",
+      "kind": "result",
+      "agent": "codex",
+      "at": "2026-11-22T15:13:41Z",
+      "counts": null,
+      "reason": null,
+      "command": "/opt/homebrew/bin/python3.13 -c 'import runpy; from pathlib import Path; scan=runpy.run_path(str(Path.home()/\".agents/skills/ai-dev-workflow/scripts/workflow.py\"))[\"find_secrets\"]; base=Path(\".ai-dev-workflow\"); paths=[p for p in (base/\"tasks\").rglob(\"*\") if p.is_file()]; n=sum(bool(scan(p.read_text(encoding=\"utf-8\"))) for p in paths); active=base/\"ACTIVE\"; flagged=active.is_file() and bool(scan(active.read_text(encoding=\"utf-8\"))); print(f\"{len(paths)} task record files; {n} flagged; ACTIVE present={active.is_file()}, flagged={flagged}.\"); raise SystemExit(bool(n or flagged))'",
+      "duration_s": 0.1,
+      "exit_code": 0,
+      "status": "passed",
+      "summary": "38 task record files; 0 flagged; ACTIVE present=True, flagged=False.",
+      "fingerprint": "fd10d4edf94522f066af80d764f0aeb5d3929edfcc8c8a9fc9085a61c364379d"
     }
   ],
   "checkpoints": [
@@ -671,6 +1012,23 @@
       "valid": true,
       "changed_files": 7,
       "step": "S9"
+    },
+    {
+      "at": "2026-11-22T15:04:00Z",
+      "kind": "preflight",
+      "agent": "codex",
+      "fingerprint": "081041ee0e41cf7202dfe3a5d7798c4564154f87d547397509ebd31d12abf909",
+      "valid": true,
+      "changed_files": 7
+    },
+    {
+      "at": "2026-11-22T15:16:31Z",
+      "kind": "step",
+      "agent": "codex",
+      "fingerprint": "fd10d4edf94522f066af80d764f0aeb5d3929edfcc8c8a9fc9085a61c364379d",
+      "valid": true,
+      "changed_files": 7,
+      "step": "S10"
     }
   ],
   "decisions": [
@@ -1124,6 +1482,200 @@
       "agent": "claude-code",
       "step": "S9",
       "status": "done"
+    },
+    {
+      "at": "2026-11-22T15:04:00Z",
+      "event": "resumed",
+      "agent": "codex",
+      "previous": "active"
+    },
+    {
+      "at": "2026-11-22T15:04:00Z",
+      "event": "preflight",
+      "agent": "codex",
+      "valid": true
+    },
+    {
+      "at": "2026-11-22T15:05:48Z",
+      "event": "check",
+      "agent": "codex",
+      "check": "unit",
+      "status": "passed"
+    },
+    {
+      "at": "2026-11-22T15:06:47Z",
+      "event": "check",
+      "agent": "codex",
+      "check": "unit-py39",
+      "status": "passed"
+    },
+    {
+      "at": "2026-11-22T15:06:47Z",
+      "event": "check",
+      "agent": "codex",
+      "check": "ruff",
+      "status": "passed"
+    },
+    {
+      "at": "2026-11-22T15:06:47Z",
+      "event": "check",
+      "agent": "codex",
+      "check": "mypy",
+      "status": "passed"
+    },
+    {
+      "at": "2026-11-22T15:06:48Z",
+      "event": "check",
+      "agent": "codex",
+      "check": "privacy",
+      "status": "passed"
+    },
+    {
+      "at": "2026-11-22T15:07:03Z",
+      "event": "check",
+      "agent": "codex",
+      "check": "td25-regression",
+      "status": "passed"
+    },
+    {
+      "at": "2026-11-22T15:07:04Z",
+      "event": "check",
+      "agent": "codex",
+      "check": "golden-byte-compare",
+      "status": "passed"
+    },
+    {
+      "at": "2026-11-22T15:07:56Z",
+      "event": "check",
+      "agent": "codex",
+      "check": "td25-regression",
+      "status": "passed"
+    },
+    {
+      "at": "2026-11-22T15:09:14Z",
+      "event": "check",
+      "agent": "codex",
+      "check": "unit",
+      "status": "passed"
+    },
+    {
+      "at": "2026-11-22T15:10:17Z",
+      "event": "check",
+      "agent": "codex",
+      "check": "unit-py39",
+      "status": "passed"
+    },
+    {
+      "at": "2026-11-22T15:10:17Z",
+      "event": "check",
+      "agent": "codex",
+      "check": "ruff",
+      "status": "passed"
+    },
+    {
+      "at": "2026-11-22T15:10:18Z",
+      "event": "check",
+      "agent": "codex",
+      "check": "mypy",
+      "status": "passed"
+    },
+    {
+      "at": "2026-11-22T15:10:18Z",
+      "event": "check",
+      "agent": "codex",
+      "check": "privacy",
+      "status": "passed"
+    },
+    {
+      "at": "2026-11-22T15:10:18Z",
+      "event": "check",
+      "agent": "codex",
+      "check": "golden-byte-compare",
+      "status": "passed"
+    },
+    {
+      "at": "2026-11-22T15:11:13Z",
+      "event": "check",
+      "agent": "codex",
+      "check": "td25-regression",
+      "status": "passed"
+    },
+    {
+      "at": "2026-11-22T15:12:38Z",
+      "event": "check",
+      "agent": "codex",
+      "check": "unit",
+      "status": "passed"
+    },
+    {
+      "at": "2026-11-22T15:13:40Z",
+      "event": "check",
+      "agent": "codex",
+      "check": "unit-py39",
+      "status": "passed"
+    },
+    {
+      "at": "2026-11-22T15:13:40Z",
+      "event": "check",
+      "agent": "codex",
+      "check": "ruff",
+      "status": "passed"
+    },
+    {
+      "at": "2026-11-22T15:13:40Z",
+      "event": "check",
+      "agent": "codex",
+      "check": "mypy",
+      "status": "passed"
+    },
+    {
+      "at": "2026-11-22T15:13:41Z",
+      "event": "check",
+      "agent": "codex",
+      "check": "privacy",
+      "status": "passed"
+    },
+    {
+      "at": "2026-11-22T15:13:41Z",
+      "event": "check",
+      "agent": "codex",
+      "check": "golden-byte-compare",
+      "status": "passed"
+    },
+    {
+      "at": "2026-11-22T15:13:41Z",
+      "event": "check",
+      "agent": "codex",
+      "check": "records-exposure",
+      "status": "passed"
+    },
+    {
+      "at": "2026-11-22T15:16:31Z",
+      "event": "step",
+      "agent": "codex",
+      "step": "S10",
+      "status": "done"
+    },
+    {
+      "at": "2026-11-22T15:16:31Z",
+      "event": "stage",
+      "agent": "codex",
+      "from": "IMPLEMENTATION",
+      "to": "TESTING"
+    },
+    {
+      "at": "2026-11-22T15:16:31Z",
+      "event": "stage",
+      "agent": "codex",
+      "from": "TESTING",
+      "to": "AUDIT"
+    },
+    {
+      "at": "2026-11-22T15:16:31Z",
+      "event": "stage",
+      "agent": "codex",
+      "from": "AUDIT",
+      "to": "FINAL_REPORT"
     }
   ],
   "baseline": {
@@ -1163,18 +1715,18 @@
       "captured_at": "2026-11-22T12:05:43Z"
     }
   },
-  "updated_at": "2026-11-22T12:56:03Z",
+  "updated_at": "2026-11-22T15:16:31Z",
   "last_checkpoint": {
-    "at": "2026-11-22T12:56:03Z",
-    "fingerprint": "081041ee0e41cf7202dfe3a5d7798c4564154f87d547397509ebd31d12abf909",
+    "at": "2026-11-22T15:16:31Z",
+    "fingerprint": "fd10d4edf94522f066af80d764f0aeb5d3929edfcc8c8a9fc9085a61c364379d",
     "changes": {
-      "CHANGELOG.md": "b0b4a3911bc74776adc675aeea890424fbec753d",
-      "docs/roadmap/TECHNICAL_DEBT.md": "3441fadca35038d48c7b559608fa7e16407974d1",
+      "CHANGELOG.md": "1b97efbee0fcc94f9fa3bccf4eeba80b9a7f3c1a",
+      "docs/roadmap/TECHNICAL_DEBT.md": "c4a7aad516f1b5365d41ce223f5a150598650902",
       "skills/ai-dev-workflow/scripts/aidw/agents/claude_hooks.py": "bd31f9dc3f3fe7b4321948aa0dc38ca87adb739f",
-      "skills/ai-dev-workflow/scripts/aidw/api.py": "58a6ca4ba9de2117ee5a05fe4547be68321f5245",
+      "skills/ai-dev-workflow/scripts/aidw/api.py": "51b1e72932a914ac48c955da334fb96ec29d8823",
       "tests/golden/run-output-before-late-refusal.txt": "0e24ccbc11c0815822325d7f4c323b67c090e95f",
       "tests/test_behaviour_pins.py": "e4ff48cfe20d85a499a905c66bc408fa0f6c0311",
-      "tests/test_secret_identity.py": "2118f9a4edb96fad553d8714d4793724ce2cdb71"
+      "tests/test_secret_identity.py": "c8121546588604dfe8398463af0c254d4c39ed2b"
     }
   }
 }

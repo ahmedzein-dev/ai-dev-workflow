@@ -1,6 +1,10 @@
 # Verification: TD-25: keep secret-like check ids and agent names out of task records
 
-Tested commit: final round-2 commit (code fingerprint 081041ee0e; after audit rounds 1 and 2), CI run recorded below; round-1 commit 49ba40a (CI run 45023454467, 7/7). First implementation commit a346300 (CI run 45021516859, 7/7). Backport: release/1.0.x d8efe25 (port 056ac73, CI runner pin 7f3a2ae, audit fixes) — CI run 45023456456.
+Development code commit: `c0f5800519e0934e30184142e7f92cbcabbb45f4`, [CI 45036934864](https://github.com/ahmedzein-dev/ai-dev-workflow/actions/runs/45036934864), 7/7. Local tests used the same TD-25 files. The local engine fingerprint `fd10d4edf94522f066af80d764f0aeb5d3929edfcc8c8a9fc9085a61c364379d` includes the pre-existing uncommitted roadmap edits. The committed code fingerprint is `bafffcdf17229af827e11c1f2f7a9019abe59833aaa376ab562c427dead61dee` (git tree checked using the installed engine's fingerprint rules).
+
+Release code commit: `095c511aacc0923d735a8d9b3e8d9ee04cee35dd`, [CI 45036741638](https://github.com/ahmedzein-dev/ai-dev-workflow/actions/runs/45036741638), 4/6. The release code fingerprint is `eee45da5f92683fb7b6bb75431aa595bc4824519be732ad03afba555fcbdd7eb`.
+
+Historical development runs: `c072342` 45024827167, `49ba40a` 45023454467 and `a346300` 45021516859 all passed 7/7. Historical release runs: `0951ed0` 45024829613 and `d8efe25` 45023456456, both 4/6 with the same pre-existing Windows failures.
 Approved documents: spec v2 `9cf6cec3`, plan v2 `f1c2745d`.
 
 **Approval history (condition 4 of the v2 approval).**
@@ -22,12 +26,14 @@ Written by `workflow.py run`; do not edit between the markers.
 <!-- aidw:checks:start -->
 | Check | Status | Summary | Code fingerprint | When | Agent |
 |---|---|---|---|---|---|
-| golden-byte-compare | passed | 14 golden files; changed: ['run-output-before-late-refusal.txt']; unexpected: none | `081041ee0e` | 2026-11-22T12:54:11Z | claude-code |
-| mypy | passed | Success: no issues found in 31 source files | `081041ee0e` | 2026-11-22T12:54:10Z | claude-code |
-| privacy | passed | Scanned 212 files: no findings. | `081041ee0e` | 2026-11-22T12:51:49Z | claude-code |
-| ruff | passed | All checks passed! | `081041ee0e` | 2026-11-22T12:54:10Z | claude-code |
-| unit | passed | OK | `081041ee0e` | 2026-11-22T12:51:50Z | claude-code |
-| unit-py39 | passed | OK | `081041ee0e` | 2026-11-22T12:53:09Z | claude-code |
+| golden-byte-compare | passed | Only the approved late-refusal golden differs from deba846. | `fd10d4edf9` | 2026-11-22T15:13:41Z | codex |
+| mypy | passed | Success: no issues found in 31 source files | `fd10d4edf9` | 2026-11-22T15:13:40Z | codex |
+| privacy | passed | Scanned 212 files: no findings. | `fd10d4edf9` | 2026-11-22T15:13:40Z | codex |
+| records-exposure | passed | 38 task record files; 0 flagged; ACTIVE present=True, flagged=False. | `fd10d4edf9` | 2026-11-22T15:13:41Z | codex |
+| ruff | passed | All checks passed! | `fd10d4edf9` | 2026-11-22T15:13:40Z | codex |
+| td25-regression | passed | OK | `fd10d4edf9` | 2026-11-22T15:10:55Z | codex |
+| unit | passed | OK | `fd10d4edf9` | 2026-11-22T15:11:13Z | codex |
+| unit-py39 | passed | OK | `fd10d4edf9` | 2026-11-22T15:12:38Z | codex |
 <!-- aidw:checks:end -->
 
 ## Acceptance matrix
@@ -43,14 +49,14 @@ for Blocked and Not Verified it says why. A check that did not run is never Pass
 | AC-3 | Passed | test_new_with_a_secret_like_agent_name_while_another_task_is_active: no folder, other task and ACTIVE byte-identical, later `new` succeeds |
 | AC-4 | Passed | ApiRefusalTest: all 15 functions with a secret-like agent; new_task/resume/preflight with 2 secret-like and 5 malformed sessions; AI_DEV_WORKFLOW_AGENT via CLI and a subprocess |
 | AC-5 | Passed | LegitimateValuesTest (UUID, `${CLAUDE_SESSION_ID}`, 256-character id, placeholder-like agent, `smoke test` check name, existing refusal order); the 3 value tests also pass on 5a7576a and fa6a676 |
-| AC-6 | Passed | Final test file (36 tests: 3 API, 15 CLI, 11 hook, 4 legitimate, 3 recovery) on old engines: 5a7576a 25 fail + 1 error / 4 pass (legitimate values, valid UUID hook) / 6 skip (no aidw.api); fa6a676 31 fail + 1 error / 4 pass; a346300 (before audit fixes) 2 fail (multi-line values, huge session); final code 36/36 |
-| AC-7 | Passed | `unit` (Python 3.13) and `unit-py39` (3.9.6) at 4e22081a98; `golden-byte-compare`: 14 golden files, only run-output-before-late-refusal.txt changed (the approved FR-13 file); 27 refusal pins and signature pin unchanged and passing |
+| AC-6 | Passed | Claude Code pre-fix evidence from the then-current regression suite: 5a7576a 25 failures and 1 error / 4 passes / 6 skips; fa6a676 31 failures and 1 error / 4 passes; a346300 2 failures. Codex reran the final 36 tests on the fixed development code. The earlier evidence was retained and the old secret persistence scenario was not repeated. |
+| AC-7 | Passed | 209/209 under each of Python 3.13 and 3.9.6 (local fingerprint `fd10d4edf9`). The existing 27 refusal pins, signature pin and TD-24 pins passed. 14 goldens checked against `deba846`; only the FR-13 golden differs. |
 | AC-8 | Passed | checks `ruff`, `mypy` (31 files), `privacy` (212 files); token-pattern grep over the repository: 0 literal values (synthetic values are concatenated at run time) |
-| AC-9 | Passed | RecoveryTest.test_failed_new_removes_only_its_own_folder_and_leaves_the_active_task; test_failed_new_never_deletes_a_file_it_did_not_write (a foreign file in the new folder survives) |
+| AC-9 | Passed | RecoveryTest injects state replacement failure after the temporary state is written. The task folder is removed, the original error is raised and prior records are byte-identical. The separate foreign-file case preserves files at a failed destination and a changed earlier record, with matching release tests. |
 | AC-10 | Passed | RecoveryTest.test_failed_check_block_write_keeps_state_and_the_next_run_repairs_it (OSError propagates with output_tail; state.json has the entry; next run rewrites the block) |
 | AC-11 | Passed | report.md Limitations (FR-9 persistence, FR-10 detection); TECHNICAL_DEBT TD-25 status "fixed on the development branch; installed copies still affected", TD-27, TD-28, TD-29 rows; release proposal in report.md |
 | AC-12 | Passed | HookTest (11 tests, hook log enabled): active task bound/unbound/other agent/records path, non-text and multi-line sessions, huge session, no records, paused, paused/closed with ACTIVE, prompt hook, valid UUID; all 10 invalid-session tests fail on 5a7576a and fa6a676 (the huge-session test errors there), the valid-UUID test passes everywhere; existing test_preflight_and_hooks unchanged and passing |
-| AC-13 | Passed | LateRefusalTest passes on fa6a676 and the fixed engine, Python 3.13 and 3.9; golden regenerated in an export of fa6a676 with the final test is byte-identical (`cmp`); asserts marker, `token [REDACTED]`, order, stderr, exit code 1 |
+| AC-13 | Passed | Codex checked LateRefusalTest in a temporary export of fa6a676 and on the fixed engine, under Python 3.13 and 3.9. The test ran the command and checked marker, redaction, stdout and stderr, order, and exit code 1 against the unchanged approved golden. |
 | AC-14 | Passed | TECHNICAL_DEBT TD-30 (exported writers trust boundary, centralised check assessed, not built); report.md section on the trust boundary |
 | EC-1 | Passed | test_run_with_a_secret_like_check_name_and_an_extra_command |
 | EC-2 | Passed | test_run_with_a_secret_like_unknown_check_name |
@@ -70,26 +76,26 @@ for Blocked and Not Verified it says why. A check that did not run is never Pass
 | EC-16 | Passed | HookTest.test_without_an_active_task…; test_paused_or_closed_task_with_an_active_pointer… |
 | EC-17 | Passed | HookTest.test_prompt_hook_is_silent_for_an_invalid_session |
 | EC-18 | Passed | LateRefusalTest (AC-13) |
-| DW-1 | Passed | All FR-1–FR-14 implemented (S1–S7 recorded with `step`) |
+| DW-1 | Passed | FR-1–FR-14 implemented. S1–S9 recorded in state.json. S10 records the owner review and keeps the task open for release decisions. |
 | DW-2 | Passed | EC-1–EC-18 rows above |
-| DW-3 | Passed | checks `unit`, `unit-py39`, `privacy`, `ruff`, `mypy` and `golden-byte-compare` at 5c340c9124 (final code), earlier at 4e22081a98 |
-| DW-4 | Passed | CI run 45023454467 on 49ba40a (final code): lint + Linux, Windows, macOS × Python 3.9/3.13, 7/7 success; earlier run 45021516859 on a346300, 7/7 |
-| DW-5 | Passed | Independent security audit, 2 rounds (audit.md): round 1 NO-GO (F-1 Important + 6 Minor, all fixed); round 2 code GO, records NO-GO (F-8 Important: report cited before written; fixed by writing report.md and refreshing this matrix) + F-9–F-12 Minor (F-9 deferred and documented, others fixed); no existing check or gate weakened |
-| DW-6 | Passed | Exposure check (counts only): 45 record files, 0 with secret-like values; ACTIVE present, not flagged; no value printed |
-| DW-7 | Passed (with 2 pre-existing Windows failures noted) | release/1.0.x (056ac73 port, 7f3a2ae Ubuntu 24.04 runner pin, d8efe25 and the round-2 commit for audit fixes), tested in a separate worktree: adapted tests 32/32 pass; on pristine v1.0.0 27 fail + 1 error / 4 pass (legitimate values); full v1.0.0 suite passes locally on 3.13 and 3.9; CI run 45023456456 on d8efe25 (150 tests): Linux and macOS 4/4, Windows 2 failures that are pre-existing in v1.0.0 (identical in CI run 43175463889 on the v1.0.0 tag; fixed on main by ad5bfd3/0bd5a6c, not ported: outside TD-25 scope, owner decision R0); all TD-25 tests pass on Windows; no tag, release or install |
+| DW-3 | Passed | Engine checks unit (209/209), unit-py39 (209/209), privacy, ruff, mypy and golden-byte-compare passed at `fd10d4edf9`. TD-25 targeted suite 36/36. |
+| DW-4 | Passed | [CI 45036934864](https://github.com/ahmedzein-dev/ai-dev-workflow/actions/runs/45036934864) on `c0f5800`: lint and all six Linux/macOS/Windows jobs for Python 3.9 and 3.13 passed. |
+| DW-5 | Passed | Independent audit rounds and Codex handover review in audit.md. The handover reviewer confirmed the correction for F-13. F-9 remains Deferred. No known Important finding remains open and no existing check or gate was weakened. |
+| DW-6 | Passed | 38 task record files; 0 flagged; ACTIVE present=True, flagged=False. |
+| DW-7 | Passed | Backport preparation and testing on `095c511`: 150/150 locally on each Python version, including 32 TD-25 tests. [Release CI](https://github.com/ahmedzein-dev/ai-dev-workflow/actions/runs/45036741638) completed with four passing jobs and two Windows jobs failing the same two legacy tests as [CI on the v1.0.0 commit](https://github.com/ahmedzein-dev/ai-dev-workflow/actions/runs/43175463889). All 32 TD-25 tests passed in both Windows jobs. Baseline macOS suites 118/118 on each version. The pre-fix TD-25 reproduction is inherited from Claude Code. Windows backport is pending the owner decision R0. |
 | DW-8 | Passed | Both audit rounds covered the hook path (invalid, non-text, multi-line sessions; logging; fail-closed inside an active task) and the FR-13 pin (golden regenerated by the auditor from fa6a676, byte-identical) |
 | DW-9 | Passed | TECHNICAL_DEBT TD-25 marked "fixed on the development branch; installed copies still affected"; release proposal in report.md for the owner's separate approval; F1.0.4 records untouched |
 
 ## Behavioral checks
 
-- Reproduction before the fix (DEP-2) with a synthetic token in a scratch repository: check name and agent name in the verification.md check block, ACTIVE written by resume/new/preflight, orphan task folder after `new`, secret-like `--session` stored and accepted.
+- Claude Code’s recorded reproduction before the fix (DEP-2) used a synthetic token in a scratch repository: check name and agent name in the verification.md check block, ACTIVE written by resume/new/preflight, orphan task folder after `new`, secret-like `--session` stored and accepted.
 - After the fix, the same commands are refused with the field named and nothing written (CliRefusalTest asserts this per command).
 - Existing features exercised unchanged: the full suite (all pre-existing tests, 27 refusal pins, signature pin, TD-24 pins, hook tests, API separation tests).
 
 ## Limitations
 
-- **Detection is pattern-based (FR-10):** a credential in a format the scanner does not know is not refused, and a value split by U+0085 or U+2028 passes every check (as it passes the `state.json` check; audit F-9). The session format rule bounds structure, not secrecy. Agent names keep free text.
+- **Detection is pattern-based (FR-10):** unknown credential formats and the documented U+0085 and U+2028 cases can escape the secret scan, including the scan of `state.json` (audit F-9). The independent session format rejects those separators and bounds structure. Agent names keep free text.
 - **Persistence (FR-9, TD-29):** single files are replaced atomically; multi-file updates are not transactional. `resume`, `preflight` and pausing another task still write ACTIVE or another task's state.json before the task's own. The check block can lag state.json until the next `run` after a failed write (tested, EC-13).
 - **Trust boundary (TD-30):** direct Python calls to the exported writers (`activate`, `save_state`, …) bypass the API checks; no protection is claimed for them.
 - **Installed copies:** the installed v1.0.0 engine is still affected until v1.0.1 is approved, released and installed.
-- **Backport on Windows:** two pre-existing v1.0.0 test failures (analyzer output decoding on the Windows code page; a line-ending test). They are identical on the v1.0.0 tag's own CI, fixed on `main` after the release (ad5bfd3, 0bd5a6c), and not ported (outside the TD-25 scope; owner decision pending).
+- **Backport on Windows:** two pre-existing v1.0.0 test failures (analyzer output decoding on the Windows code page; a line-ending test). They are identical in the original CI run on the commit tagged v1.0.0 and were fixed on `main` after the release (ad5bfd3, 0bd5a6c), and not ported (outside the TD-25 scope; owner decision pending).
