@@ -4,6 +4,44 @@ Development code commit: `c0f5800519e0934e30184142e7f92cbcabbb45f4`, [CI 4503693
 
 Release code commit: `6a7cba0da146421e51988edf386fbfb3adda5f20`, [CI 45038409846](https://github.com/ahmedzein-dev/ai-dev-workflow/actions/runs/45038409846), 6/6. The release code fingerprint is `fc9a168e7ab37d45271025f603fe9ff3c63c18a5815bb45b6b03519d820cc4d2`. This commit includes the security backport at `095c511` and the owner-approved Windows compatibility fixes from `ad5bfd3` and `0bd5a6c` (only relevant code and tests).
 
+## Closure verification (after the original checks)
+
+- The annotated `v1.0.1` tag and [published release](https://github.com/ahmedzein-dev/ai-dev-workflow/releases/tag/v1.0.1)
+  resolve to release commit `6a7cba0da146421e51988edf386fbfb3adda5f20`.
+- [PR #1](https://github.com/ahmedzein-dev/ai-dev-workflow/pull/1) merged the approved integration head
+  `49c1395a0032ad91edfa2fd284018b0c335ed485` into `main` at
+  `a964cadd22347872034bdb82f4e8cecfbea7a111`. The merge tree matches the reviewed head and changes only the
+  seven approved integration files. [Post-merge CI](https://github.com/ahmedzein-dev/ai-dev-workflow/actions/runs/45068051262)
+  passed all six Ubuntu/macOS/Windows × Python 3.9/3.13 jobs, including unit and privacy steps. The independent
+  read-only integration audit reported GO on the final head and CI.
+- The accessible user-level installation was backed up privately and updated from a clean checkout of the exact
+  v1.0.1 tag. Before update, its 18 installed files matched v1.0.0 and its manifest matched the files. Dry-run
+  proposed replacement of only the canonical copy; Claude Code and Antigravity symlinks were already correct.
+  After update, installed metadata, manifest and file hashes match official v1.0.1; the engine SHA-256 is
+  `a251b28c21908b72817a50884de61cdd2d2e4fe6cdccd52cfa45da62792e1ff3` and `doctor` reports no problems.
+  Four private-library files retained their fingerprints. No project-level installation was found in the accessible
+  locations scanned. The temporary installed-copy test harness initially omitted the example template rules file;
+  after adding that fixture, the 32 TD-25 release tests passed against the installed engine on each of Python 3.9
+  and 3.13. They cover secret-like identities, no command execution or persistence, ACTIVE and hook behavior, and
+  valid sessions. No production task records were used for those tests.
+- A fresh read-only Codex session loaded the installed skill at version 1.0.1. A fresh Gemini CLI skill listing
+  showed it enabled at the canonical path. Direct version checks through the Claude Code and Antigravity links
+  returned 1.0.1. A live Claude Code invocation was blocked by its weekly usage limit; existing Claude Desktop
+  sessions were not restarted. Antigravity is not installed, so live verification was unavailable. macOS restricted
+  access to `~/Desktop` and the `ZEIN_ORIGINALS` parent; neither was inventoried and no outdated installation is
+  presumed there. These are documented follow-up checks, not passed live checks.
+- The owner explicitly approved closure as **Completed with Limitations**. F-9 remains Deferred; TD-29 and TD-30
+  remain separate open technical debts. The original check statuses, timestamps, fingerprints, spec and plan
+  approvals were not changed by this closure record.
+- Updating the TD-25 technical-debt status changed the workflow code fingerprint, so the required checks were
+  rerun through the official `run` command instead of bypassing the closure gate. On fingerprint `5589c9abc4`,
+  `unit` passed 209/209 (2026-11-23T04:59:32Z) and `privacy` found no issues in 212 files
+  (2026-11-23T05:00:33Z). `check` then reported consistent records and `outcome` allowed Completed or the
+  owner-selected lower status Completed with Limitations. Earlier check entries were preserved.
+- The official `close` command set `state.json` to `closed` with outcome `Completed with Limitations` at
+  2026-11-23T05:01:42Z and removed `ACTIVE`. Post-close `status` confirmed valid v2 spec/plan approvals and S1–S10;
+  `check` reported consistent records, and a standalone privacy scan found no issues in 212 files.
+
 Historical development runs: `c072342` 45024827167, `49ba40a` 45023454467 and `a346300` 45021516859 all passed 7/7. Historical release runs: `0951ed0` 45024829613, `d8efe25` 45023456456 and `095c511` 45036741638 each passed 4/6 with the same pre-existing Windows failures. The original v1.0.0 run 43175463889 failed the same two Windows tests on both Python versions.
 Approved documents: spec v2 `9cf6cec3`, plan v2 `f1c2745d`.
 
@@ -42,11 +80,11 @@ Written by `workflow.py run`; do not edit between the markers.
 |---|---|---|---|---|---|
 | golden-byte-compare | passed | Only the approved late-refusal golden differs from deba846. | `fd10d4edf9` | 2026-11-22T15:13:41Z | codex |
 | mypy | passed | Success: no issues found in 31 source files | `fd10d4edf9` | 2026-11-22T15:13:40Z | codex |
-| privacy | passed | Scanned 212 files: no findings. | `fd10d4edf9` | 2026-11-22T15:13:40Z | codex |
+| privacy | passed | Scanned 212 files: no findings. | `5589c9abc4` | 2026-11-23T05:00:33Z | codex |
 | records-exposure | passed | 38 task record files; 0 flagged; ACTIVE present=True, flagged=False. | `fd10d4edf9` | 2026-11-22T15:13:41Z | codex |
 | ruff | passed | All checks passed! | `fd10d4edf9` | 2026-11-22T15:13:40Z | codex |
 | td25-regression | passed | OK | `fd10d4edf9` | 2026-11-22T15:10:55Z | codex |
-| unit | passed | OK | `fd10d4edf9` | 2026-11-22T15:11:13Z | codex |
+| unit | passed | OK | `5589c9abc4` | 2026-11-23T04:59:32Z | codex |
 | unit-py39 | passed | OK | `fd10d4edf9` | 2026-11-22T15:12:38Z | codex |
 <!-- aidw:checks:end -->
 
@@ -68,7 +106,7 @@ for Blocked and Not Verified it says why. A check that did not run is never Pass
 | AC-8 | Passed | checks `ruff`, `mypy` (31 files), `privacy` (212 files); token-pattern grep over the repository: 0 literal values (synthetic values are concatenated at run time) |
 | AC-9 | Passed | RecoveryTest injects state replacement failure after the temporary state is written. The task folder is removed, the original error is raised and prior records are byte-identical. The separate foreign-file case preserves files at a failed destination and a changed earlier record, with matching release tests. |
 | AC-10 | Passed | RecoveryTest.test_failed_check_block_write_keeps_state_and_the_next_run_repairs_it (OSError propagates with output_tail; state.json has the entry; next run rewrites the block) |
-| AC-11 | Passed | report.md Limitations (FR-9 persistence, FR-10 detection); TECHNICAL_DEBT TD-25 status "fixed on the development branch; installed copies still affected", TD-27, TD-28, TD-29 rows; release proposal in report.md |
+| AC-11 | Passed | report.md Limitations (FR-9 persistence, FR-10 detection); TECHNICAL_DEBT TD-25 and TD-27–TD-30; release and installation completion evidence in the closure verification section above |
 | AC-12 | Passed | HookTest (11 tests, hook log enabled): active task bound/unbound/other agent/records path, non-text and multi-line sessions, huge session, no records, paused, paused/closed with ACTIVE, prompt hook, valid UUID; all 10 invalid-session tests fail on 5a7576a and fa6a676 (the huge-session test errors there), the valid-UUID test passes everywhere; existing test_preflight_and_hooks unchanged and passing |
 | AC-13 | Passed | Codex checked LateRefusalTest in a temporary export of fa6a676 and on the fixed engine, under Python 3.13 and 3.9. The test ran the command and checked marker, redaction, stdout and stderr, order, and exit code 1 against the unchanged approved golden. |
 | AC-14 | Passed | TECHNICAL_DEBT TD-30 (exported writers trust boundary, centralised check assessed, not built); report.md section on the trust boundary |
@@ -90,15 +128,15 @@ for Blocked and Not Verified it says why. A check that did not run is never Pass
 | EC-16 | Passed | HookTest.test_without_an_active_task…; test_paused_or_closed_task_with_an_active_pointer… |
 | EC-17 | Passed | HookTest.test_prompt_hook_is_silent_for_an_invalid_session |
 | EC-18 | Passed | LateRefusalTest (AC-13) |
-| DW-1 | Passed | FR-1–FR-14 implemented. S1–S9 recorded in state.json. S10 records the owner review and keeps the task open for release decisions. |
+| DW-1 | Passed | FR-1–FR-14 implemented. S1–S10 recorded in state.json; later release, installation and closure decisions are recorded separately. |
 | DW-2 | Passed | EC-1–EC-18 rows above |
 | DW-3 | Passed | Engine checks unit (209/209), unit-py39 (209/209), privacy, ruff, mypy and golden-byte-compare passed at `fd10d4edf9`. TD-25 targeted suite 36/36. |
 | DW-4 | Passed | [CI 45036934864](https://github.com/ahmedzein-dev/ai-dev-workflow/actions/runs/45036934864) on `c0f5800`: lint and all six Linux/macOS/Windows jobs for Python 3.9 and 3.13 passed. |
 | DW-5 | Passed | Independent audit rounds and Codex handover review in audit.md. The handover reviewer confirmed the correction for F-13. F-9 remains Deferred. No known Important finding remains open and no existing check or gate was weakened. |
 | DW-6 | Passed | 38 task record files; 0 flagged; ACTIVE present=True, flagged=False. |
-| DW-7 | Passed | Release `6a7cba0`: 152/152 locally under Python 3.13 and 3.9.6, including 32 TD-25 tests; privacy scan 65 files with no findings; golden files unchanged from v1.0.0. [Final release CI](https://github.com/ahmedzein-dev/ai-dev-workflow/actions/runs/45038409846) passed all six Linux/macOS/Windows × Python 3.9/3.13 jobs. Both Windows jobs ran 152/152, passed the two previously failing tests and the new decoding regression, and passed the privacy scan. The same two failures were verified in [original v1.0.0 CI](https://github.com/ahmedzein-dev/ai-dev-workflow/actions/runs/43175463889) and `095c511` CI. The 118 original v1.0.0 tests passed locally on each Python version. Pre-fix TD-25 reproduction is inherited from Claude Code. No tag, release, merge, installation or closure. |
+| DW-7 | Passed | Release `6a7cba0`: 152/152 locally under Python 3.13 and 3.9.6, including 32 TD-25 tests; privacy scan 65 files with no findings; golden files unchanged from v1.0.0. [Final release CI](https://github.com/ahmedzein-dev/ai-dev-workflow/actions/runs/45038409846) passed all six Linux/macOS/Windows × Python 3.9/3.13 jobs. Both Windows jobs ran 152/152, passed the two previously failing tests and the new decoding regression, and passed the privacy scan. The same two failures were verified in [original v1.0.0 CI](https://github.com/ahmedzein-dev/ai-dev-workflow/actions/runs/43175463889) and `095c511` CI. The 118 original v1.0.0 tests passed locally on each Python version. Pre-fix TD-25 reproduction is inherited from Claude Code. Tag, release, main integration and installation were completed later as recorded above. |
 | DW-8 | Passed | Both audit rounds covered the hook path (invalid, non-text, multi-line sessions; logging; fail-closed inside an active task) and the FR-13 pin (golden regenerated by the auditor from fa6a676, byte-identical) |
-| DW-9 | Passed | TECHNICAL_DEBT TD-25 marked "fixed on the development branch; installed copies still affected"; release proposal in report.md for the owner's separate approval; F1.0.4 records untouched |
+| DW-9 | Passed | TECHNICAL_DEBT TD-25 updated for the verified release and accessible installation; F-9 deferred and TD-29/TD-30 remain separate; F1.0.4 records untouched |
 
 ## Behavioral checks
 
@@ -111,5 +149,8 @@ for Blocked and Not Verified it says why. A check that did not run is never Pass
 - **Detection is pattern-based (FR-10):** unknown credential formats and the documented U+0085 and U+2028 cases can escape the secret scan, including the scan of `state.json` (audit F-9). The independent session format rejects those separators and bounds structure. Agent names keep free text.
 - **Persistence (FR-9, TD-29):** single files are replaced atomically; multi-file updates are not transactional. `resume`, `preflight` and pausing another task still write ACTIVE or another task's state.json before the task's own. The check block can lag state.json until the next `run` after a failed write (tested, EC-13).
 - **Trust boundary (TD-30):** direct Python calls to the exported writers (`activate`, `save_state`, …) bypass the API checks; no protection is claimed for them.
-- **Installed copies:** the installed v1.0.0 engine is still affected until v1.0.1 is approved, released and installed.
+- **Installation inventory and live agent checks:** the accessible user-level installation is verified at v1.0.1.
+  The two macOS-restricted locations were not inspected. Existing Claude Desktop sessions were not restarted, a
+  fresh Claude Code check hit its weekly usage limit, and Antigravity has no installed application for a live check.
+  No status is inferred for inaccessible locations or previously running sessions.
 - **Windows baseline:** the two pre-existing v1.0.0 test failures were corrected on the release branch with the owner's approval. This is compatibility work, not a claim of broader Windows coverage beyond the 6/6 CI matrix.

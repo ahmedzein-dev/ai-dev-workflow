@@ -7,8 +7,8 @@
   "created_by": "claude-code",
   "invocation": "عايزين نستخدم AIDevWorkflow نفسه لتطوير AIDevWorkflow بصورة تدريجية، باستخدام النسخة المستقرة المثبتة منه. — Before starting F1.0.5, open a separate task to investigate and fix TD-25, including both unredacted fields (check ID and agent name). Follow the normal Discovery → Specification → Approval → Planning → Approval workflow for that security fix. Do not implement it without approval.",
   "stage": "FINAL_REPORT",
-  "status": "active",
-  "outcome": null,
+  "status": "closed",
+  "outcome": "Completed with Limitations",
   "template": {
     "path": ".ai-dev-workflow/templates/spec-kit.md",
     "sha256": "574d3677a6a4f773352e6ffadf959e794bd9c985e25dea0556c53f37b5296ffc",
@@ -897,6 +897,36 @@
       "status": "passed",
       "summary": "38 task record files; 0 flagged; ACTIVE present=True, flagged=False.",
       "fingerprint": "fd10d4edf94522f066af80d764f0aeb5d3929edfcc8c8a9fc9085a61c364379d"
+    },
+    {
+      "id": "unit",
+      "name": "Unit, scenario and doc tests",
+      "kind": "result",
+      "agent": "codex",
+      "at": "2026-11-23T04:59:32Z",
+      "counts": null,
+      "reason": null,
+      "command": "python3 -m unittest discover -s tests",
+      "duration_s": 54.9,
+      "exit_code": 0,
+      "status": "passed",
+      "summary": "OK",
+      "fingerprint": "5589c9abc4cd511affb393c75aec1d81287e06d111116716328ead1d7c6f106f"
+    },
+    {
+      "id": "privacy",
+      "name": "Pre-publish secret and privacy scan",
+      "kind": "result",
+      "agent": "codex",
+      "at": "2026-11-23T05:00:33Z",
+      "counts": null,
+      "reason": null,
+      "command": "python3 tools/prepublish_check.py",
+      "duration_s": 0.3,
+      "exit_code": 0,
+      "status": "passed",
+      "summary": "Scanned 212 files: no findings.",
+      "fingerprint": "5589c9abc4cd511affb393c75aec1d81287e06d111116716328ead1d7c6f106f"
     }
   ],
   "checkpoints": [
@@ -1067,6 +1097,13 @@
       "by": "owner",
       "recorded_by": "codex",
       "at": "2026-11-22T16:08:05Z"
+    },
+    {
+      "text": "Owner approved closing TD-25 as Completed with Limitations after v1.0.1 release, main integration, and accessible installation verification; retain documented live-agent and directory-access limits as follow-up.",
+      "evidence": "I explicitly approve closing TD-25 with the outcome Completed with Limitations.",
+      "by": "user",
+      "recorded_by": "codex",
+      "at": "2026-11-23T04:56:22Z"
     }
   ],
   "excluded": [
@@ -1714,6 +1751,31 @@
       "at": "2026-11-22T16:08:05Z",
       "event": "decision",
       "agent": "codex"
+    },
+    {
+      "at": "2026-11-23T04:56:22Z",
+      "event": "decision",
+      "agent": "codex"
+    },
+    {
+      "at": "2026-11-23T05:00:27Z",
+      "event": "check",
+      "agent": "codex",
+      "check": "unit",
+      "status": "passed"
+    },
+    {
+      "at": "2026-11-23T05:00:33Z",
+      "event": "check",
+      "agent": "codex",
+      "check": "privacy",
+      "status": "passed"
+    },
+    {
+      "at": "2026-11-23T05:01:42Z",
+      "event": "closed",
+      "agent": "codex",
+      "outcome": "Completed with Limitations"
     }
   ],
   "baseline": {
@@ -1753,7 +1815,7 @@
       "captured_at": "2026-11-22T12:05:43Z"
     }
   },
-  "updated_at": "2026-11-22T16:08:05Z",
+  "updated_at": "2026-11-23T05:01:42Z",
   "last_checkpoint": {
     "at": "2026-11-22T15:24:36Z",
     "fingerprint": "fd10d4edf94522f066af80d764f0aeb5d3929edfcc8c8a9fc9085a61c364379d",
@@ -1766,5 +1828,6 @@
       "tests/test_behaviour_pins.py": "e4ff48cfe20d85a499a905c66bc408fa0f6c0311",
       "tests/test_secret_identity.py": "c8121546588604dfe8398463af0c254d4c39ed2b"
     }
-  }
+  },
+  "closed_at": "2026-11-23T05:01:42Z"
 }

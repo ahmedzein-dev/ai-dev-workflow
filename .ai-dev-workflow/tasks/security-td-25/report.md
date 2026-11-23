@@ -4,12 +4,12 @@
 
 **Status:** Completed with Limitations
 
-Everything in the approved spec v2 (`9cf6cec3`) and plan v2 (`f1c2745d`) is implemented and verified on the
-development branch, and the v1.0.1 backport is prepared and tested. The status stays below "Completed" for two
-reasons:
-- **Installed copies are still vulnerable.** The fix reaches users only through the v1.0.1 release, whose tag,
-  publication and installation need the owner's separate approval. TD-25 stays open until then.
-- **Detection is pattern-based** (§6).
+The approved spec v2 (`9cf6cec3`) and plan v2 (`f1c2745d`) were implemented and verified. The v1.0.1 security
+release was published, the missing fix was integrated into `main`, and the accessible user-level installation was
+updated from the official tag and verified. The owner explicitly approved closing TD-25 with this outcome.
+"Completed with Limitations" records the pattern-based detection boundary (§6), inaccessible installation-inventory
+locations, and agent sessions that could not be verified live (§4). No outdated installation is asserted in an
+inaccessible location.
 
 Approval history:
 - S1–S3 were implemented under the approved v1 documents (`2fdbc034`, `b60cd6f0`).
@@ -49,6 +49,8 @@ Approval history:
   - the same security behaviour in the single-file engine, with no later features or restructuring;
   - version 1.0.1, a CHANGELOG section, and CI on `release/**` with the Ubuntu runner pinned to 24.04;
   - 32 adapted tests.
+- **Publication and main integration:** annotated tag `v1.0.1` resolves to `6a7cba0`; the GitHub Release is
+  published. PR #1 merged the TD-25 integration into `main` at `a964cadd` without replacing its newer work.
 - **Owner-approved Windows compatibility fixes** on release commit `6a7cba0`: the analyzer accepts the Windows
   replacement separator, command output uses the system code page when UTF-8 decoding fails, and the CRLF test
   fixture normalizes its input. Only the relevant hunks and tests from `ad5bfd3` and `0bd5a6c` were ported.
@@ -82,8 +84,31 @@ FR-1–FR-14, EC-1–EC-18 and AC-1–AC-14 are met (verification.md). The docum
   and pristine v1.0.0 are retained in verification.md and the task history. Codex confirmed the patched regression
   suites and did not repeat the old secret persistence scenario.
 - **Exposure check (counts only):** 38 task record files; 0 flagged; ACTIVE present=True, flagged=False.
-- **Installed engine:** the local installed engine identifies as v1.0.0. Its engine file has the same Git blob
-  hash as the engine at the original v1.0.0 tag.
+- **Main integration:** [PR #1](https://github.com/ahmedzein-dev/ai-dev-workflow/pull/1) merged at
+  `a964cadd22347872034bdb82f4e8cecfbea7a111`. Its tree matches the approved integration head `49c1395`;
+  the [post-merge CI](https://github.com/ahmedzein-dev/ai-dev-workflow/actions/runs/45068051262) passed 6/6
+  (Ubuntu, macOS, Windows × Python 3.9 and 3.13), including unit and privacy steps. No newer `main` functionality
+  or existing Windows compatibility fix was removed.
+- **Published release:** [v1.0.1](https://github.com/ahmedzein-dev/ai-dev-workflow/releases/tag/v1.0.1) remains
+  on `6a7cba0da146421e51988edf386fbfb3adda5f20`; `release/1.0.x` and the tag are unchanged.
+- **Installed engine:** the accessible user-level copy under `~/.agents/skills/ai-dev-workflow` was originally an
+  unmodified v1.0.0 install. A private backup was made outside the public repository. The installer dry-run named
+  only that canonical copy for replacement and kept the existing Claude Code and Antigravity links. After update,
+  `doctor` reported no problems; manifest, metadata, engine bytes (SHA-256
+  `a251b28c21908b72817a50884de61cdd2d2e4fe6cdccd52cfa45da62792e1ff3`) and all installed files match the
+  clean official v1.0.1 tag. The private library and task records were unchanged. The 32 TD-25 release regression
+  tests passed against the installed engine on each of Python 3.9 and 3.13 in isolated temporary repositories;
+  they covered rejected agent, session and check identities, no persisted values or command execution, hook denial
+  and logging, and valid session handling. The initial temporary test harness omitted the example rules file;
+  after adding that fixture, all 32 tests passed without changing the installed engine.
+- **Agent resolution:** a fresh read-only Codex session explicitly loaded the installed skill and reported 1.0.1;
+  a fresh Gemini CLI `skills list --all` showed it enabled at the same canonical path. Claude Code and Antigravity
+  symlinks resolve to the 1.0.1 engine, but a fresh Claude Code invocation was blocked by its weekly usage limit,
+  existing Claude Desktop sessions were not restarted, and Antigravity is not installed for a live test.
+- **Closure gate:** after the TD-25 technical-debt status was updated, the official workflow identified its required
+  `unit` and `privacy` checks as stale. They were rerun through `workflow.py run` on code fingerprint `5589c9abc4`:
+  209/209 unit tests passed and the privacy scan found no issue in 212 files. `workflow.py check` reports consistent
+  records, and `outcome` allows Completed; the owner chose Completed with Limitations.
 
 ## 5. Code Audit
 
@@ -131,24 +156,23 @@ gate, approval rule or refusal was weakened.
   strings are redacted records and cannot be run verbatim; the check results, timestamps, fingerprints and approval
   evidence remain intact. The original path remains visible in earlier public Git commits; history was not rewritten.
   Verification details and hashes are in verification.md.
+- **Installation-inventory limits:** no project-level installation was found in the accessible locations inspected.
+  macOS denied access to `~/Desktop` and the `ZEIN_ORIGINALS` parent, so their contents were
+  not inventoried. No claim is made that either contains an installation, outdated or otherwise. Existing Claude
+  Desktop sessions were not restarted; their in-memory skill state is unverified. A live Claude Code check was
+  blocked by its weekly usage limit. Antigravity is not installed, so only its symlink target was checked. These
+  are follow-up verification limits, not failed security tests or evidence of an affected installed copy.
 
 ## 7. Pending Dependencies
 
-- **Owner approval of the v1.0.1 release actions (§8).** Until they are done, installed copies, including this
-  project's managing engine v1.0.0, remain affected.
-- **Repository visibility:** the owner confirmed the public repository is intentional. The three historical
-  machine-specific command paths in the current task record were sanitized with the owner's explicit approval;
-  earlier public Git history still contains them.
+No approval remains for the verified release and accessible installation scope; the owner explicitly approved
+closure as Completed with Limitations. Inspection of the two macOS-restricted directories and live checks of Claude
+Code after its usage limit resets may be performed when available. They do not block this owner-approved closure.
+The public repository is intentional; the historical path sanitation did not rewrite earlier Git history.
 
 ## 8. Next Actions
 
-**Release proposal for the owner's separate approval. R0 is complete; R1–R5 have not been taken.**
-
-| Step | Action | Gate |
-|---|---|---|
-| R0 | Port the two approved Windows fixes and tests; verify the final release branch on all six CI jobs | Done on `6a7cba0`; CI 45038409846 passed 6/6 |
-| R1 | Tag `v1.0.1` on the final tested `release/1.0.x` commit and push the tag | Owner approval |
-| R2 | Publish GitHub release notes: affected versions (1.0.0 and development versions before this fix), impact, fix, mitigation, limits; no secret values. A security advisory is optional | Owner approval |
-| R3 | Bring the fix to `main` (merge `release/1.0.x`, or port it) | Owner approval |
-| R4 | Run `install.py update` from the v1.0.1 checkout on every install (user and project), then `install.py doctor`. Check that `.aidw-install.json` shows 1.0.1, and re-run the CLI and hook regression scenarios against the installed copy | Owner approval |
-| R5 | Mark TD-25 **Resolved** only after R4 is verified; then close this task | After R4 |
+The official `workflow.py close` set the task to Closed — Completed with Limitations after record-integrity and
+privacy checks. When access becomes available, inspect the two restricted directories and verify Claude Code after
+a fresh session can run; record any finding as follow-up without silently changing this outcome. F-9 remains
+Deferred, and TD-29 and TD-30 remain separate open technical debts. No feature starts as part of this closure.
