@@ -73,6 +73,7 @@ constraints), Phase 5 (ADRs, decision sets). D-032–D-038.
 | E6.6 | **Validation and documentation** | | | |
 | F6.6.1 | Scenarios ORE-A, I, J, K (tolerance stub), L, M; property tests (enumerator vs optional adapter); security tests O-01–O-10 | P0 | M | E6.1–E6.5 |
 | F6.6.2 | User documentation `docs/ore/` (overview, schema, strict policy, limits, known limitations) | P0 | M | all |
+| F6.6.3 | **Validation Gate B** (before the v1.6 release): verify ORE result correctness, solver guarantees and practical value (UX-D). Compare with a relevant non-ORE baseline where feasible; assess complexity, time, actual cost when measurable, data provenance and usability for engineers new to OR. Gate report, limitations and owner decision; no unsupported optimality or superiority claim | P0 | M | F6.6.1, F1.7.4 |
 
 ## Acceptance criteria
 
@@ -84,6 +85,7 @@ constraints), Phase 5 (ADRs, decision sets). D-032–D-038.
 - AC-6: ORE-M: a new domain template works without ORE code changes.
 - AC-7: An agent cannot record a classification; a fake solver result fails verification.
 - AC-8: The skill and all existing tests work with ORE not installed.
+- AC-9: Gate B report verifies correctness and solver guarantees, records UX-D practical value and a relevant non-ORE comparison where feasible, labels unavailable time or actual cost, and makes no optimality claim without proof or sufficient solver evidence or unsupported superiority claim. Missing essential evidence is insufficient or blocked; the owner's decision is recorded before v1.6 ships (F6.6.3).
 
 ## Testing strategy
 
@@ -113,3 +115,4 @@ ORE is optional and isolated; uninstalling it leaves the workflow unchanged.
 ## Completion evidence
 
 Scenario and security test results, spike decision record, phase review approved by the owner.
+Validation Gate B report and the owner's decision.

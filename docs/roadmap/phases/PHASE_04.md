@@ -52,6 +52,7 @@ D-021 record model (questions JSONL + views), D-022 approval types (requirement 
 | F4.1.1 | `questions.jsonl` + commands `ask`, `answer`, `derive`, `assume`, `defer` + generated `questions.md` view | P0 | M | F2.7.1 | ✔ |
 | F4.1.2 | `questions next`: open, needed by the next gate, highest impact, grouped, excluding answered/deferred keys | P0 | M | F4.1.1, F3.1.2 | ✔ |
 | F4.1.3 | Structured contradiction detection; re-ask triggers when a related record changes | P1 | S | F4.1.1 | |
+| F4.1.4 | Qualitative question budget per experience (Quick: ask only high-impact questions needed for the next gate); detect derivable or unjustifiably repeated questions in the ledger, allowing a documented re-ask when evidence changed | P0 | S | F4.1.2, F3.3.4 | ✔ |
 | E4.2 | **Business context** | | | | |
 | F4.2.1 | Objectives (`OBJ`) with stakeholders, success metrics (baseline, target, expected/measured), MVP vs future scope, failure impact | P0 | M | F2.7.1 | ✔ |
 | F4.2.2 | Business and technical context topics in the generic profile; instructions for discovery interviews | P0 | M | F3.2.1 | ✔ |
@@ -64,7 +65,7 @@ D-021 record model (questions JSONL + views), D-022 approval types (requirement 
 | F4.4.1 | Feature-mode discovery uses the ledger and active profiles, scaled by depth; spec `FR` map to `REQ` | P0 | M | F4.1.2, F3.3.2 | ✔ |
 | F4.4.2 | Unknown-answer protocol in instructions and records (options, effects, recommendation, assume/defer) | P0 | S | F4.1.1 | ✔ |
 | E4.5 | **Validation** | | | | |
-| F4.5.1 | Eval fixture Scenario A (mobile offline/sync): right questions asked, derivable ones not asked, no imposed architecture | P1 | M | F4.4.1 | |
+| F4.5.1 | Eval fixture Scenario A (mobile offline/sync): right questions asked, derivable ones not asked, no imposed architecture. Its UX-B result measures outcome and user effort against the F1.7.1 baseline; repeated questions are defects unless changed evidence justifies asking again | P0 | M | F4.4.1, F1.7.1 | ✔ |
 
 ## Acceptance criteria
 
@@ -73,6 +74,7 @@ D-021 record model (questions JSONL + views), D-022 approval types (requirement 
 - AC-3: A user who does not know an answer can accept an assumption or defer, and the task proceeds unless the question blocks the gate.
 - AC-4: An NFR with a proposed target stays "proposed" until the requirement baseline is approved.
 - AC-5: A second agent resumes the discussion from the ledger without repeating answered questions.
+- AC-6: Scenario A's UX-B records outcome and effort against the F1.7.1 baseline; it identifies derivable or unjustifiably repeated questions (F4.1.4, F4.5.1).
 
 ## Testing strategy
 
@@ -102,3 +104,4 @@ The ledger is optional per task at L0; feature workflow unchanged when disabled.
 ## Completion evidence
 
 Tests, Scenario A eval results, phase review approved by the owner.
+UX-B eval result against the baseline.

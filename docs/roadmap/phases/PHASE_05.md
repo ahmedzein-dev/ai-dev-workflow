@@ -66,8 +66,10 @@ D-022 approval types, D-023 delegation policy, D-024 modes (decision mode first)
 | F5.4.2 | Spike / PoC results recorded as decision validation evidence | P1 | S | F5.1.1 | |
 | E5.5 | **Partner behaviour** | | | | |
 | F5.5.1 | Instructions: challenge, expose risks, offer better alternatives, explain future impact, no sycophancy; mentor overlay (brief / standard / deep) | P0 | S | — | ✔ |
+| F5.5.2 | Decision presentation, one screen first: recommendation, why, risks and limits, what approving means, what happens next; details on demand; approval interactions counted | P0 | S | F5.2.2 | ✔ |
 | E5.6 | **Validation** | | | | |
 | F5.6.1 | Eval fixtures: Scenario B (booking concurrency — decision part), G (changed business requirement), H (decision conflict) | P0 | M | E5.1–E5.3 | ✔ |
+| F5.6.2 | **Validation Gate A** (before the v1.5 release): compare only capabilities actually shipped by v1.5—existing short spec/plan and approvals, plus Phase 3–5 profiles, discovery, requirements and decisions—against selected alternatives on equivalent UX-A–UX-C tasks. Fix a consistent evaluation method before interpreting results. Record decision quality, observed rework, user effort, alternative version/configuration, evidence source and unavailable values. Phase 8 expanded specs, planning and traceability are outside this gate. Gate report, limitations and owner decision (proceed / adjust / simplify / redesign) | P0 | M | F5.6.1, F1.7.4 | ✔ |
 
 ## Acceptance criteria
 
@@ -76,6 +78,7 @@ D-022 approval types, D-023 delegation policy, D-024 modes (decision mode first)
 - AC-3: Scenario H: an engineer's choice conflicting with a must requirement is blocked until the requirement or the decision changes.
 - AC-4: Three related decisions are approved with one user message; each is hashed and recorded.
 - AC-5: A plan citing a decision that changed after approval cannot be approved.
+- AC-6: Gate A report compares only shipped v1.5 capabilities on equivalent tasks using a method fixed before interpretation; it records decision quality, observed rework, user effort, alternative version/configuration, evidence source and limitations, explicitly excludes Phase 8 capabilities, and carries the owner's decision before v1.5 ships. Missing essential evidence is insufficient or blocked, not a silent pass (F5.6.2).
 
 ## Testing strategy
 
@@ -105,3 +108,4 @@ ADRs optional below L2; existing decision recording continues to work.
 ## Completion evidence
 
 Tests, eval results for B, G, H; MVP review approved by the owner (v1.5.0).
+Validation Gate A report and the owner's decision.

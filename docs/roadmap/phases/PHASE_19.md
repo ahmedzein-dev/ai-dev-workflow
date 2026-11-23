@@ -42,7 +42,7 @@ Each release; the final checkpoint after the phases chosen for the public launch
 
 | ID | Feature | Pri | Effort |
 |---|---|---|---|
-| F19.1.1 | Release checklist and `tools/release_check.py` (versions, changelog, tests, scan, docs consistency, migration test) — used from v1.1 | P0 | S |
+| F19.1.1 | Release checklist and `tools/release_check.py` (versions, changelog, tests, scan, docs consistency, migration test) — used from v1.1. Each release records applicable UX results, complexity regressions and usability-register blockers; an open usability blocker requires the owner's recorded rationale, risks and follow-up, and acceptance cannot waive mandatory guarantees | P0 | S |
 | F19.2.1 | Test strategy completion: concurrency, recovery, migration, interoperability suites | P1 | L |
 | F19.3.1 | Technology validation matrix with fixtures in CI | P1 | L |
 | F19.3.2 | Agent validation matrix with recorded live runs per release | P1 | M |
@@ -55,6 +55,11 @@ Each release; the final checkpoint after the phases chosen for the public launch
 
 No feature is considered ready for publication without clear test evidence, documented known limits and no
 unaddressed critical issue (brief).
+
+Every release records its applicable usability check; no release ships with an open usability blocker without the
+owner's recorded rationale, risks and follow-up (F19.1.1). Such acceptance cannot waive mandatory security,
+approvals, verification or other non-negotiable guarantees. Scenarios unavailable at that milestone are labelled
+unavailable, never Passed.
 
 ## Testing strategy
 

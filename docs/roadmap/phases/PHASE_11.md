@@ -29,6 +29,7 @@ Accounts, cloud hosting, team features (Phase 18); desktop app wrappers (revisit
 3. Dashboard binds to 127.0.0.1, uses a per-launch token, checks Host/Origin, serves only allow-listed files.
 4. Works without installing anything beyond the skill; no network requests to third parties.
 5. The skill keeps working if the dashboard is never used.
+6. The dashboard improves discoverability and interaction; it never compensates for unnecessary engine complexity, and Gate C (F11.0.1) precedes its build.
 
 ## Dependencies
 
@@ -54,12 +55,14 @@ D-009 dashboard technology; D-010 `aidev` launcher. CLI command map (final desig
 
 | ID | Feature | Pri | Effort | Depends on |
 |---|---|---|---|---|
+| E11.0 | **Validation Gate C** (before the dashboard build and automatic orchestration) | | | |
+| F11.0.1 | **Validation Gate C**: appropriate real-user usability study and relevant competitor comparisons using capabilities and UX scenarios available before the dashboard build. Assess task initiation, completion, unnecessary interaction overhead, trust, discoverability and willingness to reuse; record participant and task limitations. Desk research alone cannot replace real-user evidence. Gate report and owner decision; UX-E is assessed later in Phase 14 before automatic orchestration, not required here. Findings may resequence, never silently remove | P0 | L | F9.2.1, F1.7.4 |
 | E11.1 | **Human CLI** (v3.0) | | | |
 | F11.1.1 | CLI design record: command map, output style, exit codes, localisation approach | P0 | S | E1.0 |
 | F11.1.2 | `aidev` launcher installed by `install.py`; commands `init`, `doctor`, `tasks`, `status`, `resume`, `pause`, `check`, interactive `approve` | P0 | M | F11.1.1, F2.3.1 |
 | F11.1.3 | `handoff <task>`: one generated brief (stage, next step, open items, files to read, last evidence) | P1 | S | E1.0 |
 | E11.2 | **Dashboard foundation** (v3.x) | | | |
-| F11.2.1 | Technology and security design record | P0 | S | F11.1.1 |
+| F11.2.1 | Technology and security design record | P0 | S | F11.1.1, F11.0.1 |
 | F11.2.2 | Local server on `http.server`, token, JSON endpoints over the engine API (read first, then approval actions) | P0 | M | F11.2.1 |
 | F11.2.3 | Opt-in project registry (`~/.ai-dev-workflow/projects.json`) and derived index (`index.db`) | P1 | M | F11.2.2 |
 | E11.3 | **Views** | | | |
@@ -70,6 +73,7 @@ D-009 dashboard technology; D-010 `aidev` launcher. CLI command map (final desig
 | E11.5 | **Quality** | | | |
 | F11.5.1 | Tests: API contract, rendering smoke tests, security tests (token, Origin, path traversal) | P0 | M | E11.2–E11.3 |
 | F11.5.2 | Regression test proving the skill-only path works with no dashboard files used | P0 | S | — |
+| F11.5.3 | Parity and usability study: every task can be completed through the agent and CLI alone with no extra steps; the optional dashboard is measured on applicable UX-A–UX-C tasks for discoverability and is never required | P1 | M | F11.5.2, F11.2.2, F11.0.1 |
 | E11.6 | **Engineering views** (brief 2 §16) | | | |
 | F11.6.1 | Business objectives, discovery questions and answers (answer from the UI), requirements explorer, risks and assumptions | P1 | L | Phase 4 |
 | F11.6.2 | Engineering decision center: alternatives, trade-off matrix (user-approved criteria only), AI recommendation and reasons, choose a different option, request more information or a spike, approve decision sets, ADR history | P0 | L | Phase 5 |
@@ -77,12 +81,16 @@ D-009 dashboard technology; D-010 `aidev` launcher. CLI command map (final desig
 | F11.6.4 | Traceability explorer, open engineering questions, project health, production readiness, customer delivery status, business outcome metrics | P2 | L | Phases 8, 16, 17 |
 | F11.6.5 | ORE views: problem explorer, results with guarantee levels and classifications, trade-off and Pareto charts (complete vs partial), scenarios, decision review through the core | P2 | L | Phases 6, 10 |
 
+At the detailed specifications, re-evaluate whether F11.5.3's user study remains distinct from F11.5.2's
+skill-only regression test. Keep both IDs until that evidence-based review; do not merge them automatically.
+
 ## Acceptance criteria
 
 - AC-1: A user can review and manage tasks, approvals and test results from the dashboard (brief).
 - AC-2: The system works exactly as before when the dashboard is not used (brief).
 - AC-3: Every approval made in the dashboard appears in `state.json` with channel A1 and is accepted by `check`.
 - AC-4: Arabic layout is correct right-to-left on desktop and at 375 px; light and dark themes pass contrast checks.
+- AC-5: Gate C report includes real-user evidence, relevant competitor comparison, participant/task limitations and the owner's decision before E11.2 starts; desk research alone is insufficient, and missing essential evidence is insufficient or blocked. The parity study shows no task needs the dashboard (F11.0.1, F11.5.3).
 
 ## Testing strategy
 
@@ -111,4 +119,5 @@ The dashboard is an optional command; disabling it leaves the skill and CLI unaf
 
 ## Completion evidence
 
-Test results, screenshots in both languages and themes, phase review approved by the owner.
+Gate C report and owner decision before dashboard work; parity study against the agent/CLI path, test results,
+screenshots in both languages and themes, phase review approved by the owner.

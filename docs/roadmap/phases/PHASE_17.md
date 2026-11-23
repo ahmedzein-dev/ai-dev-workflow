@@ -35,6 +35,8 @@ Off-device telemetry without explicit opt-in; invented token counts or costs; ra
 ## Dependencies
 
 Phase 2 (event log), Phase 11 (dashboard), Phase 14 (agent usage data, where available), Phase 16 (outcome records).
+F17.6.1 uses the Phase 1 usability baseline and F17.1.1 event-derived task metrics; basic measures can ship in
+v3.x, while richer views follow when their source data exists. Unavailable values remain labelled.
 
 ## Implementation tasks
 
@@ -45,10 +47,16 @@ Phase 2 (event log), Phase 11 (dashboard), Phase 14 (agent usage data, where ava
 | F17.3.1 | Engineering quality metrics (coverage from parsers, churn from git) | P2 | M |
 | F17.4.1 | Analytics views by task, project, agent, technology, period; report export | P2 | L |
 | F17.5.1 | Business impact view from outcome records (baseline, target, actual; expected vs measured; ROI assumptions labelled) | P2 | M |
+| F17.6.1 | Product-experience metrics (PRODUCT_EXPERIENCE §6) from events and explicitly labelled study data, with measured / estimated / assumed / unavailable flags and baseline vs current; no fabricated values | P1 | M |
+
+At the detailed specifications, re-evaluate whether F17.6.1's baseline and experience measures remain distinct
+from F17.1.1's event-derived task metrics. Keep both IDs until that evidence-based review.
 
 ## Acceptance criteria
 
 Results trace to real execution data; reports can be exported; unavailable data is never claimed (brief).
+
+Product-experience metrics show baseline vs current with an availability flag on every value (F17.6.1).
 
 ## Testing strategy
 

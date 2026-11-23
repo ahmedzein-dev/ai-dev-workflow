@@ -9,9 +9,9 @@ entries first. Feature statuses live in [roadmap-data.js](roadmap-data.js); this
 |---|---|
 | Phase | 1 — Foundations & universal technology support (in progress) |
 | Done in Phase 1 | F1.0.1 self-hosting setup · F1.0.2 dev tooling · F1.0.3 engine package · F1.0.4 engine API (closed Completed with Limitations; CI 7/7 at `fa6a676`) |
-| In progress | TD-25 security fix (unredacted check id and agent name in records): discovery and specification only |
-| Waiting on | The owner: review and approval of the TD-25 scope and specification |
-| Next action | TD-25 plan after spec approval, then implementation after plan approval; F1.0.5 (state schema, migration, locking) after TD-25 |
+| Security status | TD-25 closed — Completed with Limitations; v1.0.1 published and verified, user-level installation verified, fix integrated into `main`. F-9 remains Deferred; TD-29 and TD-30 remain open |
+| Roadmap status | Final revised Master Roadmap approved by the owner on 2026-11-23; D-041–D-045 accepted with their recorded clarifications. Evaluation outcomes remain unproven |
+| Next action | Prepare F1.0.5 (state schema, migration, locking) through the normal task workflow when separately initiated; implementation has not started. E1.7 follows it in Phase 1 |
 | Blockers | None |
 
 ## Phase progress
@@ -22,27 +22,94 @@ history in MASTER_ROADMAP §9.
 | Phase | Features done / total | Status |
 |---|---|---|
 | 0 | 15 / 15 | Done |
-| 1 | 4 / 25 | In progress |
+| 1 | 4 / 29 | In progress |
 | 2 | 0 / 20 | Planned |
-| 3 | 0 / 12 | Planned (MVP) |
-| 4 | 0 / 12 | Planned (MVP) |
-| 5 | 0 / 12 | Planned (MVP complete) |
-| 6 | 1 / 19 | Planned (ORE v1); F6.0.2 done early for D-037 |
+| 3 | 0 / 13 | Planned (MVP) |
+| 4 | 0 / 13 | Planned (MVP) |
+| 5 | 0 / 14 | Planned (MVP complete) |
+| 6 | 1 / 20 | Planned (ORE v1); F6.0.2 done early for D-037 |
 | 7 | 0 / 15 | Planned |
 | 8 | 0 / 8 | Planned |
 | 9 | 0 / 8 | Planned |
 | 10 | 0 / 11 | Planned (ORE advanced) |
-| 11 | 0 / 16 | Planned |
+| 11 | 0 / 18 | Planned |
 | 12 | 0 / 10 | Planned |
 | 13 | 0 / 6 | Planned |
-| 14 | 0 / 9 | Planned |
+| 14 | 0 / 10 | Planned |
 | 15 | 0 / 5 | Planned |
 | 16 | 0 / 7 | Planned |
-| 17 | 0 / 5 | Planned |
+| 17 | 0 / 6 | Planned |
 | 18 | 0 / 3 | Future (study) |
 | 19 | 0 / 8 | Planned (checklist from v1.1) |
 
 ## Log
+
+### 2026-11-23 — Final Master Roadmap approved
+
+- Owner explicitly approved the revised roadmap baseline: **20 phases**, **239 features**, **84 MVP features** and
+  **20 completed features**, together with D-041–D-045 and their recorded limits. The D-044 evaluation framework is
+  approved; product-market fit, competitive superiority and usability improvement remain unproven.
+- Owner accepted partial Arabic localization for this version and authorized a roadmap-only commit and push to
+  `phase-1/foundations`. Remaining English roadmap descriptions are identified in the Arabic interface and tracked
+  for scoping under the existing documentation refresh F19.5.1, without a new feature or count change.
+- No implementation, merge into `main` or change to the stable v1.0.1 release is authorized by this approval.
+
+### 2026-11-23 — D-044 framework approved; visual roadmap corrections authorized
+
+- Owner approved D-044's proportional minimum evidence per gate, baseline and UX scenario timing, while preserving
+  the earlier gates-only approval history. This approves an evaluation framework, not measured improvement,
+  product-market fit or competitive superiority. Missing essential evidence is insufficient or blocked; exceptions
+  record rationale, consequences and follow-up without claiming validation was completed.
+- Owner authorized corrections to undefined decision dates, D-044 presentation, Arabic fixed labels and release
+  descriptions, and RTL progress values. Full translation of authored feature descriptions remains outside this
+  focused correction and is labelled as original English in the Arabic view.
+- The full Master Roadmap still awaits final approval; commit, push and F1.0.5 implementation are not authorized.
+
+### 2026-11-23 — Product experience decisions approved with conditions
+
+- Owner approved D-042, D-043 and D-045 with the wording and limits in DECISIONS.md. Acceptance of a material
+  usability regression records rationale, risks and follow-up, and cannot waive mandatory engineering guarantees.
+  Standard resolves to one recorded L1 or L2 level under the existing policy; depth changes below mandatory profile
+  minimums or around required gates/checks are refused with an explanation. Complexity review scales with impact
+  and has no invented numeric quota.
+- Owner approved retaining 13 net-new feature IDs and the five consolidations from the previous draft: **239**
+  features across **20** phases. F11.5.3 versus F11.5.2 and F17.6.1 versus F17.1.1 are flagged for review when their
+  detailed specifications are prepared; neither pair is consolidated now. F3.3.3 (an existing feature) is made P0
+  and MVP-required so the Quick/Standard/Deep presentation cannot precede mandatory profile-minimum enforcement.
+- This is approval of these decisions and the strategic direction, not final approval of the Master Roadmap, a
+  commit/push authorization or permission to start F1.0.5.
+
+### 2026-11-23 — TD-25 closed; brief-4 roadmap draft revised for owner review
+
+- TD-25 closed through the official workflow as **Completed with Limitations** (`eb49f62` on
+  `phase-1/foundations`). The v1.0.1 tag/release is published at `6a7cba0`, the security fix is integrated into
+  remote `main` (`a964cad`), and the accessible user-level v1.0.1 installation was verified. F-9 stays Deferred;
+  TD-29 and TD-30 stay open. Unreleased development on `main` and `phase-1/foundations` is distinct from the
+  stable installed release.
+- Owner approved five corrections to the uncommitted brief-4 draft, **not** final roadmap approval or D-042,
+  D-043 and D-045. Consolidated five proposed IDs into existing work: F3.4.3→F3.4.1,
+  F4.5.2→F4.5.1, F9.2.4→F9.2.1, F16.8.1→F16.4.1 and F19.8.1→F19.1.1. The measurable
+  acceptance criteria and evidence remain. Net addition: **13** feature IDs, from 226 to **239** total;
+  no new phase. UX-E starts in Phase 14, and the Gate A scope is limited to shipped v1.5 capabilities.
+- No software feature was started by this roadmap revision. F1.0.5 remains planned.
+
+### 2026-11-22 — Brief 4 integrated: Powerful Inside. Simple Outside.; competitive validation
+
+- Owner: «I approve adding Competitive Validation & Product-Market Fit to the AIDevWorkflow Master Roadmap … a
+  permanent, non-negotiable product principle: Powerful Inside. Simple Outside.» This is a roadmap and design update
+  only; no software feature was implemented.
+- Initial uncommitted draft integrated the brief into the existing roadmap, with no new phase or parallel plan:
+  - new design document PRODUCT_EXPERIENCE.md (capability design, like ENGINEERING_INTELLIGENCE.md);
+  - INV-23; decisions D-041–D-045 (D-041 and the D-044 gates Accepted, the rest Proposed);
+  - risks R-27 and R-28; RTM section B4;
+  - 18 proposed IDs initially; five were consolidated in the 2026-11-23 revision above. The current draft has
+    13 net new IDs: E1.7 (F1.7.1–F1.7.4), F3.3.4, F4.1.4, F5.5.2, F5.6.2 (Gate A), F6.6.3 (Gate B),
+    F11.0.1 (Gate C), F11.5.3, F14.7.1 and F17.6.1;
+  - usability register UXR-1–UXR-4, seeded from observed friction in tasks `security-td-25` and
+    `engine-api-f1-0-4`.
+- Initial effort estimate: about +5–7 weeks over the whole roadmap (Phase 1 +1–1.5 weeks), to be revisited at
+  feature planning and each validation gate. Consolidating IDs does not remove their evaluation work or justify
+  reducing this estimate mechanically. TD-25 was paused only for these document edits; its scope was unchanged.
 
 ### 2026-11-22 — F1.0.4 closed (Completed with Limitations); TD-25 task opened
 

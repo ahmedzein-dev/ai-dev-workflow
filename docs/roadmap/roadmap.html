@@ -72,6 +72,7 @@ section>p.lead{margin:-6px 0 14px;color:var(--muted);max-width:70ch}
 .bar{height:5px;border-radius:3px;background:var(--surface-2);overflow:hidden}
 .bar span{display:block;height:100%;background:var(--done)}
 .count{font-size:.78rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.count bdi{direction:ltr;unicode-bidi:isolate}
 /* pills */
 .pill{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:1px 9px;font-size:.76rem;font-weight:600;white-space:nowrap;border:1px solid transparent}
 .pill::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
@@ -162,6 +163,7 @@ footer p{margin:4px 0}
   <section aria-labelledby="detail-h">
     <h2 id="detail-h" data-i18n="detail">Epics and features</h2>
     <p class="lead" data-i18n="detailLead">Open a phase to see its features, priorities (P0 must, P1 should, P2 could), rough effort (S ≤ 1 day, M 2–4 days, L 1–2 weeks, XL more) and dependencies.</p>
+    <p class="lead" id="source-lang-note" hidden>أوصاف الخصائص والقرارات والمشكلات ونتائج الاختبارات التي لم تُترجم بعد معروضة بالإنجليزية الأصلية؛ عناوين الواجهة وبيانات الإصدارات مترجمة.</p>
     <div class="filters" id="filters" role="group" aria-label="Filter"></div>
     <div class="phases" id="phases"></div>
   </section>
@@ -169,19 +171,19 @@ footer p{margin:4px 0}
   <div class="grid2">
     <section aria-labelledby="dec-h">
       <h2 id="dec-h" data-i18n="decisions">Decisions</h2>
-      <p class="lead" data-i18n="decLead">Proposed until the owner approves them in their own words.</p>
+      <p class="lead" data-i18n="decLead">Accepted decisions and proposals awaiting the owner's review are labelled separately.</p>
       <div class="tablewrap"><table><thead><tr><th>ID</th><th data-i18n="decision">Decision</th><th data-i18n="when">When</th><th data-i18n="status">Status</th></tr></thead><tbody id="decisions"></tbody></table></div>
     </section>
     <section aria-labelledby="iss-h">
       <h2 id="iss-h" data-i18n="issues">Open issues</h2>
-      <p class="lead" data-i18n="issLead">Highest-severity debt, risks and security items from Phase 0.</p>
+      <p class="lead" data-i18n="issLead">Selected open debt and risks; completed TD-25 is recorded in Progress.</p>
       <div class="tablewrap"><table><thead><tr><th>ID</th><th data-i18n="issue">Issue</th><th data-i18n="severity">Severity</th></tr></thead><tbody id="issues"></tbody></table></div>
     </section>
   </div>
 
   <section aria-labelledby="rtm-h">
     <h2 id="rtm-h" data-i18n="rtm">Requirements coverage</h2>
-    <p class="lead" data-i18n="rtmLead">Every requirement of the three briefs is mapped to a phase and feature (REQUIREMENTS_TRACEABILITY.md). Counts by status.</p>
+    <p class="lead" data-i18n="rtmLead">Requirements from all four briefs are mapped to roadmap work (REQUIREMENTS_TRACEABILITY.md). Counts by status.</p>
     <div class="tablewrap"><table><thead><tr><th data-i18n="source">Source</th><th data-i18n="status">Status</th><th data-i18n="count">Count</th></tr></thead><tbody id="rtm"></tbody></table></div>
   </section>
 
@@ -211,12 +213,13 @@ footer p{margin:4px 0}
     en: { title: "AIDevWorkflow Roadmap", subtitle: "From an Agent Skill to a technology-agnostic platform for AI-assisted software engineering. Progress counts finished features with recorded evidence, never estimates.",
       where: "Where we are", next: "Next action", phases: "Phases", detail: "Epics and features",
       detailLead: "Open a phase to see its features, priorities (P0 must, P1 should, P2 could), rough effort (S ≤ 1 day, M 2–4 days, L 1–2 weeks, XL more) and dependencies.",
-      decisions: "Decisions", decLead: "Proposed until the owner approves them in their own words.", decision: "Decision", when: "When", status: "Status",
-      issues: "Open issues", issLead: "Highest-severity debt, risks and security items from Phase 0.", issue: "Issue", severity: "Severity",
+      decisions: "Decisions", decLead: "Accepted decisions and proposals awaiting the owner's review are labelled separately.", decision: "Decision", when: "When", status: "Status",
+      issues: "Open issues", issLead: "Selected open debt and risks; completed TD-25 is recorded in Progress.", issue: "Issue", severity: "Severity",
       tests: "Test results", date: "Date", check: "Check", result: "Result", releases: "Releases", version: "Version", notes: "Notes",
       foot1: "Data: roadmap-data.js (the single source of statuses). Details: MASTER_ROADMAP.md, PROGRESS.md and phases/PHASE_nn.md.",
       foot2: "Statuses change only from recorded evidence: a closed AIDevWorkflow task, a test run or CI.",
-      rtm: "Requirements coverage", rtmLead: "Every requirement of the three briefs is mapped to a phase and feature (REQUIREMENTS_TRACEABILITY.md). Counts by status.", source: "Source", count: "Count", b1: "Brief 1 — product evolution", b2: "Brief 2 — engineering intelligence", b3: "Brief 3 — optimization engine (ORE)", mvpOnly: "MVP (v1.5)",
+      rtm: "Requirements coverage", rtmLead: "Requirements from all four briefs are mapped to roadmap work (REQUIREMENTS_TRACEABILITY.md). Counts by status.", source: "Source", count: "Count", b1: "Brief 1 — product evolution", b2: "Brief 2 — engineering intelligence", b3: "Brief 3 — optimization engine (ORE)", b4: "Brief 4 — product simplicity and competitive validation", mvpOnly: "MVP (v1.5)", filter: "Filter",
+      rtmSt: { "Exists": "Exists", "Process": "Process", "Planned": "Planned", "Done": "Done", "In progress": "In progress", "Reconsidered": "Reconsidered" },
       phase: "Phase", updated: "Updated", features: "features", target: "Target", effort: "Effort", dependsOn: "Depends on", plan: "Plan",
       feature: "Feature", pri: "Priority", eff: "Effort", deps: "Needs", none: "—", noMatch: "No features match these filters.",
       all: "All", lang: "العربية", dark: "Dark", light: "Light", high: "High", medium: "Medium",
@@ -224,12 +227,13 @@ footer p{margin:4px 0}
     ar: { title: "خريطة تطوير AIDevWorkflow", subtitle: "من مهارة لمساعدين الـ AI لمنصة كاملة لهندسة البرمجيات بالـ AI، شغّالة مع أي تقنية. التقدّم بيتحسب بالخصائص اللي خلصت وليها دليل مسجّل، مش بتقديرات.",
       where: "إحنا فين دلوقتي", next: "الخطوة الجاية", phases: "المراحل", detail: "الأجزاء والخصائص",
       detailLead: "افتح أي مرحلة تشوف خصائصها، وأولويتها (P0 لازم، P1 مهم، P2 لو فيه وقت)، والمجهود التقريبي (S يوم أو أقل، M من 2 لـ 4 أيام، L أسبوع لاتنين، XL أكتر)، وبتعتمد على إيه.",
-      decisions: "القرارات", decLead: "كلها مقترحة لحد ما صاحب المشروع يوافق عليها بكلامه.", decision: "القرار", when: "إمتى", status: "الحالة",
-      issues: "مشاكل مفتوحة", issLead: "أخطر الديون التقنية والمخاطر ونقاط الأمان من المرحلة 0.", issue: "المشكلة", severity: "الخطورة",
+      decisions: "القرارات", decLead: "القرارات المقبولة والمقترحات المنتظرة مراجعة صاحب المشروع موضحة كل واحدة بحالتها.", decision: "القرار", when: "إمتى", status: "الحالة",
+      issues: "مشاكل مفتوحة", issLead: "ديون ومخاطر مفتوحة مختارة؛ إغلاق TD-25 موثّق في سجل التقدم.", issue: "المشكلة", severity: "الخطورة",
       tests: "نتايج الاختبارات", date: "التاريخ", check: "الفحص", result: "النتيجة", releases: "الإصدارات", version: "الإصدار", notes: "ملاحظات",
       foot1: "البيانات: roadmap-data.js (المصدر الوحيد للحالات). التفاصيل: MASTER_ROADMAP.md وPROGRESS.md وphases/PHASE_nn.md.",
       foot2: "الحالة مابتتغيّرش غير بدليل مسجّل: مهمة AIDevWorkflow اتقفلت، أو اختبار اتشغّل، أو CI.",
-      rtm: "تغطية المتطلبات", rtmLead: "كل متطلب في البرومبتات التلاتة ليه مكان في مرحلة وخاصية (REQUIREMENTS_TRACEABILITY.md). العدد حسب الحالة.", source: "المصدر", count: "العدد", b1: "البرومبت الأول — تطوير المنتج", b2: "البرومبت التاني — الذكاء الهندسي", b3: "البرومبت التالت — محرك بحوث العمليات", mvpOnly: "النسخة الأولى (v1.5)",
+      rtm: "تغطية المتطلبات", rtmLead: "متطلبات الرؤى الأربعة مرتبطة بالعمل المخطط له (REQUIREMENTS_TRACEABILITY.md)، والعدد حسب الحالة.", source: "المصدر", count: "العدد", b1: "الرؤية الأولى — تطوير المنتج", b2: "الرؤية الثانية — الذكاء الهندسي", b3: "الرؤية الثالثة — محرك بحوث العمليات", b4: "الرؤية الرابعة — بساطة المنتج والتحقق من المنافسة", mvpOnly: "النسخة الأولى (v1.5)", filter: "تصفية الخصائص",
+      rtmSt: { "Exists": "موجود", "Process": "إجراء معتمد", "Planned": "مخطط", "Done": "مكتمل", "In progress": "جارٍ العمل", "Reconsidered": "أعيد تقييمه" },
       phase: "المرحلة", updated: "آخر تحديث", features: "خصائص", target: "الإصدار", effort: "المجهود", dependsOn: "بتعتمد على", plan: "الخطة",
       feature: "الخاصية", pri: "الأولوية", eff: "المجهود", deps: "محتاجة", none: "—", noMatch: "مافيش خصائص بالفلاتر دي.",
       all: "الكل", lang: "English", dark: "داكن", light: "فاتح", high: "عالية", medium: "متوسطة",
@@ -245,12 +249,16 @@ footer p{margin:4px 0}
   function pill(st) { return '<span class="pill st-' + esc(st) + '">' + esc(T[lang].st[st] || st) + "</span>"; }
   function feats(p) { var out = []; p.epics.forEach(function (e) { out = out.concat(e.features); }); return out; }
   function counts(p) { var f = feats(p); return { done: f.filter(function (x) { return x.st === "done"; }).length, total: f.length }; }
+  function featureCount(c) { var n = '<bdi dir="ltr">' + c.done + ' / ' + c.total + '</bdi>'; return lang === "ar" ? T[lang].features + ' ' + n : n + ' ' + T[lang].features; }
+  function sourceText(value) { return '<span' + (lang === "ar" ? ' lang="en" dir="ltr"' : '') + '>' + esc(value) + '</span>'; }
 
   function renderStatic() {
     var t = T[lang];
     /* direction goes on the content wrapper, not the root: an RTL root shifts the whole page inside some app viewers */
     root.setAttribute("lang", lang); root.setAttribute("data-lang", lang);
     document.querySelector(".wrap").setAttribute("dir", lang === "ar" ? "rtl" : "ltr");
+    document.getElementById("source-lang-note").hidden = lang !== "ar";
+    document.getElementById("filters").setAttribute("aria-label", t.filter);
     document.querySelectorAll("[data-i18n]").forEach(function (el) { var k = el.getAttribute("data-i18n"); if (t[k]) { el.textContent = t[k]; } });
     document.getElementById("lang-btn").textContent = t.lang;
     var dark = root.getAttribute("data-theme") === "dark" || (!root.getAttribute("data-theme") && window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches);
@@ -267,7 +275,7 @@ footer p{margin:4px 0}
       var c = counts(p), pct = c.total ? Math.round(100 * c.done / c.total) : 0;
       return '<li><a href="#phase-' + p.id + '" data-open="' + p.id + '"><span class="pn"><span class="pnum">' + t.phase + " " + p.id + "</span>" + pill(p.status) +
         '</span><span class="pname">' + esc(p.name[lang]) + '</span><span class="bar" aria-hidden="true"><span style="width:' + pct + '%"></span></span>' +
-        '<span class="count">' + c.done + " / " + c.total + " " + t.features + "</span></a></li>";
+        '<span class="count">' + featureCount(c) + "</span></a></li>";
     }).join("");
   }
 
@@ -290,14 +298,14 @@ footer p{margin:4px 0}
         var rows = e.features.filter(match);
         if (!rows.length) { return ""; }
         any = true;
-        return '<div class="epic"><h3><span class="id">' + esc(e.id) + "</span> " + esc(e.name) + '</h3><div class="tablewrap"><table><thead><tr><th>ID</th><th>' + t.feature + "</th><th>" + t.pri + "</th><th>" + t.eff + "</th><th>" + t.deps + "</th><th>" + t.status + "</th></tr></thead><tbody>" +
+        return '<div class="epic"><h3><span class="id">' + esc(e.id) + "</span> " + sourceText(e.name) + '</h3><div class="tablewrap"><table><thead><tr><th>ID</th><th>' + t.feature + "</th><th>" + t.pri + "</th><th>" + t.eff + "</th><th>" + t.deps + "</th><th>" + t.status + "</th></tr></thead><tbody>" +
           rows.map(function (f) {
-            return '<tr><td class="id">' + esc(f.id) + '</td><td class="tt">' + esc(f.t) + (f.mvp ? '<span class="tag mvp">MVP</span>' : "") + (f.note ? '<span class="note">' + esc(f.note) + "</span>" : "") + '</td><td><span class="tag' + (f.pri === "P0" ? " p0" : "") + '">' + esc(f.pri) + '</span></td><td><span class="tag">' + esc(f.eff) + '</span></td><td class="dep">' + esc((f.dep || []).join(", ") || t.none) + "</td><td>" + pill(f.st) + "</td></tr>";
+            return '<tr><td class="id">' + esc(f.id) + '</td><td class="tt">' + sourceText(f.t) + (f.mvp ? '<span class="tag mvp">MVP</span>' : "") + (f.note ? '<span class="note">' + sourceText(f.note) + "</span>" : "") + '</td><td><span class="tag' + (f.pri === "P0" ? " p0" : "") + '">' + esc(f.pri) + '</span></td><td><span class="tag">' + esc(f.eff) + '</span></td><td class="dep">' + esc((f.dep || []).join(", ") || t.none) + "</td><td>" + pill(f.st) + "</td></tr>";
           }).join("") + "</tbody></table></div></div>";
       }).join("");
       var deps = p.deps.length ? p.deps.map(function (d) { return t.phase + " " + d; }).join(", ") : t.none;
       var isOpen = openPhases[p.id] || (filter.st !== "all" || filter.pri !== "all" || filter.mvp) && any;
-      return '<details class="phase" id="phase-' + p.id + '"' + (isOpen ? " open" : "") + ' data-id="' + p.id + '"><summary><span class="pbig">' + p.id + '</span><span class="ptitle"><strong>' + esc(p.name[lang]) + "</strong><span>" + esc(p.goal[lang]) + '</span></span><span class="pmeta">' + pill(p.status) + '<span class="count">' + c.done + " / " + c.total + " " + t.features + "</span></span></summary>" +
+      return '<details class="phase" id="phase-' + p.id + '"' + (isOpen ? " open" : "") + ' data-id="' + p.id + '"><summary><span class="pbig">' + p.id + '</span><span class="ptitle"><strong>' + esc(p.name[lang]) + "</strong><span>" + esc(p.goal[lang]) + '</span></span><span class="pmeta">' + pill(p.status) + '<span class="count">' + featureCount(c) + "</span></span></summary>" +
         '<div class="pbody"><div class="facts"><span>' + t.target + ': <b class="mono">' + esc(p.target) + "</b></span><span>" + t.effort + ": <b>" + esc(p.effort) + "</b></span><span>" + t.dependsOn + ": <b>" + esc(deps) + "</b></span><span>" + t.plan + ': <code>' + esc(p.file) + "</code></span></div>" +
         (any ? epics : '<p class="empty">' + t.noMatch + "</p>") + "</div></details>";
     }).join("");
@@ -305,13 +313,13 @@ footer p{margin:4px 0}
 
   function renderTables() {
     var t = T[lang];
-    document.getElementById("decisions").innerHTML = D.decisions.map(function (d) { return '<tr><td class="id">' + esc(d.id) + "</td><td>" + esc(d.t) + '</td><td class="mono">' + esc(d.when) + "</td><td>" + pill(d.st) + "</td></tr>"; }).join("");
-    document.getElementById("issues").innerHTML = D.issues.map(function (i) { return '<tr><td class="id">' + esc(i.id) + "</td><td>" + esc(i.t) + '</td><td><span class="sev sev-' + esc(i.sev) + '">' + esc(t[i.sev] || i.sev) + "</span></td></tr>"; }).join("");
-    document.getElementById("tests").innerHTML = D.tests.map(function (x) { return '<tr><td class="mono">' + esc(x.date) + "</td><td>" + esc(x.what) + '</td><td class="' + (x.ok ? "ok" : "no") + '">' + esc(x.result) + "</td></tr>"; }).join("");
+    document.getElementById("decisions").innerHTML = D.decisions.map(function (d) { var name = lang === "ar" && d.tAr ? esc(d.tAr) : sourceText(d.t); var note = d.note ? '<span class="note">' + esc(d.note[lang]) + '</span>' : ''; return '<tr><td class="id">' + esc(d.id) + "</td><td>" + name + note + '</td><td class="mono">' + esc(d.when || t.none) + "</td><td>" + pill(d.st) + "</td></tr>"; }).join("");
+    document.getElementById("issues").innerHTML = D.issues.map(function (i) { return '<tr><td class="id">' + esc(i.id) + "</td><td>" + sourceText(i.t) + '</td><td><span class="sev sev-' + esc(i.sev) + '">' + esc(t[i.sev] || i.sev) + "</span></td></tr>"; }).join("");
+    document.getElementById("tests").innerHTML = D.tests.map(function (x) { return '<tr><td class="mono">' + esc(x.date) + "</td><td>" + sourceText(x.what) + '</td><td class="' + (x.ok ? "ok" : "no") + '">' + sourceText(x.result) + "</td></tr>"; }).join("");
     var rows = [];
-    ["B1", "B2", "B3"].forEach(function (k) { var c = (D.rtm || {})[k] || {}; Object.keys(c).forEach(function (s) { rows.push('<tr><td>' + esc(t[k.toLowerCase()]) + "</td><td>" + esc(s) + '</td><td class="mono">' + c[s] + "</td></tr>"); }); });
+    ["B1", "B2", "B3", "B4"].forEach(function (k) { var c = (D.rtm || {})[k] || {}; Object.keys(c).forEach(function (s) { rows.push('<tr><td>' + esc(t[k.toLowerCase()]) + "</td><td>" + esc(t.rtmSt[s] || s) + '</td><td class="mono">' + c[s] + "</td></tr>"); }); });
     document.getElementById("rtm").innerHTML = rows.join("");
-    document.getElementById("releases").innerHTML = D.releases.map(function (r) { return '<tr><td class="id">' + esc(r.v) + '</td><td class="mono">' + esc(r.date) + "</td><td>" + esc(r.notes) + "</td></tr>"; }).join("");
+    document.getElementById("releases").innerHTML = D.releases.map(function (r) { return '<tr><td class="id">' + esc(lang === "ar" && r.vAr ? r.vAr : r.v) + '</td><td class="mono">' + esc(r.date) + "</td><td>" + esc(lang === "ar" && r.notesAr ? r.notesAr : r.notes) + "</td></tr>"; }).join("");
   }
 
   function renderAll() { renderStatic(); renderTrack(); renderFilters(); renderPhases(); renderTables(); }

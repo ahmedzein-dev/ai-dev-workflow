@@ -1,6 +1,6 @@
 # Phase 0 — Current System Audit & Architecture Assessment
 
-**Status:** Done; D-037 (first optional solver) presented for approval — first review approved on 2026-11-22 («موافق على كله و قالب المواصفات الخاص بيا»); the strategic
+**Status:** Done; D-037 (first optional solver) approved — first review approved on 2026-11-22 («موافق على كله و قالب المواصفات الخاص بيا»); the strategic
 integration of brief 2 approved the same day («Approved»).
 **Version:** none (no production code changes).
 

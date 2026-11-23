@@ -42,7 +42,7 @@ Phases 4–8 (discovery, decisions, design, traceability), Phase 9 (audit dimens
 | F16.1.1 | `fde` mode composed from business-discovery, system-design (scaled), PoC, integration, UAT, pilot, delivery, handover, impact stages | P1 | L | F7.1.1, F7.1.3 |
 | F16.2.1 | Solution-design extras in the fde profile and records: build vs buy, legacy/API integration, data mapping and quality, ETL/ELT, sync, multi-tenancy, customer configuration vs product capability | P1 | M | F3.2.3 |
 | F16.3.1 | PoC records: hypotheses, success criteria, scope, result; PoC / prototype / MVP / production-ready distinction | P1 | M | F2.7.1 |
-| F16.4.1 | Delivery records: environment, integration validation, UAT, onboarding, pilot, demo, handover, runbooks, incident response, training, ownership | P1 | L | F16.1.1 |
+| F16.4.1 | Delivery records: environment, integration validation, UAT, onboarding, pilot, demo, handover, runbooks, incident response, training, ownership. Include a stakeholder walkthrough showing the proposal is readable and the handover usable; record effort and outcomes as expected vs measured | P1 | L | F16.1.1, F16.5.1 |
 | F16.5.1 | Business impact records (`MET`): baseline, target, actual, expected vs measured, ROI assumptions labelled | P1 | M | F2.7.1 |
 | F16.6.1 | Eval fixture Scenario E: service-operations AI copilot (discovery, data integration, RAG, tools, human approval, security, tenant isolation, evals, monitoring, deployment, demo, handover, impact) | P1 | M | F9.2.1 |
 | F16.7.1 | ORE for forward deployed work: build vs buy with measurable terms, rollout and implementation scheduling, logistics template (ORE-E) | P2 | M | F10.4.3 |
@@ -52,6 +52,7 @@ Phases 4–8 (discovery, decisions, design, traceability), Phase 9 (audit dimens
 - AC-1: Scenario E runs end to end in `fde` mode with every stage's evidence recorded.
 - AC-2: An outcome without measured data is reported as expected, never as achieved.
 - AC-3: A PoC without success criteria cannot be approved.
+- AC-4: A stakeholder walkthrough of the proposal and handover is recorded, with customer effort and outcomes as expected vs measured (F16.4.1).
 
 ## Testing strategy
 

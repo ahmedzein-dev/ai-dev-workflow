@@ -31,8 +31,9 @@ profiles reuse it for topic applicability.
 3. Each profile defines discovery topics, questions, decision triggers, considerations, trade-offs, spec sections,
    planning needs, recommended diagrams, verification needs, risks and failure cases.
 4. Profiles are references: the agent records which topics applied and why others did not.
-5. Depth is proposed with reasons, shown at the first gate, can be changed by the user, and never removes core gates.
+5. Depth is proposed with reasons, shown at the first gate, can be changed within permitted policy, and never removes core gates. An impermissible change is refused with an explanation.
 6. Unknown domains work through the generic profile plus custom rules.
+7. Users see Quick, Standard or Deep over L0–L3 (D-043). Standard resolves to one recorded L1 or L2 level under the existing policy, with the reason accessible. Labels cannot bypass profile minimums, security, approvals or required checks.
 
 ## Dependencies
 
@@ -56,11 +57,12 @@ D-021 record model, D-025 depth levels, D-026 profile format. Details: [ENGINEER
 | F3.2.3 | cloud-devops, ai-engineering, distributed-systems, data-engineering, security, fde-discovery profiles | P1 | L | F3.2.1 | |
 | F3.2.4 | Decision guides, trade-off guides, architecture patterns, failure-pattern references (Markdown, sourced) | P1 | L | F3.1.1 | |
 | E3.3 | **Adaptive depth** | | | | |
-| F3.3.1 | Depth levels L0–L3: proposal with signals and reasons, user override, shown at the first gate, recorded | P0 | M | F2.1.1 | ✔ |
+| F3.3.1 | Depth levels L0–L3: proposal with signals and reasons, permitted user change, shown at the first gate, resolved level recorded | P0 | M | F2.1.1 | ✔ |
 | F3.3.2 | Depth policy: required artifacts per depth and mode, enforced by the gate table | P0 | M | F3.3.1 | ✔ |
-| F3.3.3 | Profile minimum-depth rules (paths, topics) and under-depth warnings | P1 | S | F3.3.2 | |
+| F3.3.3 | Profile minimum-depth rules (paths, topics): refuse a level below a mandatory minimum with an explanation; warn for non-mandatory under-depth signals | P0 | S | F3.3.2 | ✔ |
+| F3.3.4 | Quick / Standard / Deep over L0 / L1–L2 / L3 (D-043): recommend with reasons, resolve Standard to one recorded L1 or L2 level, expose that reason on demand, and allow one-command changes only within policy. Refuse an impermissible change; labels never bypass mandatory gates or checks | P0 | S | F3.3.2, F3.3.3 | ✔ |
 | E3.4 | **Validation and docs** | | | | |
-| F3.4.1 | Eval fixtures: Scenario F (small bug fix stays L0/L1, no HLD or ADR) and Scenario I (unknown domain via generic profile) | P0 | M | F3.3.2 | ✔ |
+| F3.4.1 | Eval fixtures: Scenario F (small bug fix stays L0/L1, no HLD or ADR) and Scenario I (unknown domain via generic profile). Scenario F also measures UX-A outcome and user effort against the F1.7.1 baseline, recording any confirmed complexity regression | P0 | M | F3.3.4, F1.7.1 | ✔ |
 | F3.4.2 | Docs: profiles guide, depth guide, writing a custom profile | P0 | M | all | ✔ |
 
 ## Acceptance criteria
@@ -69,7 +71,9 @@ D-021 record model, D-025 depth levels, D-026 profile format. Details: [ENGINEER
 - AC-2: A custom profile in `.ai-dev-workflow/profiles/` is picked up without editing engine code.
 - AC-3: Scenario F: a typo fix is classified L0, requires no HLD/LLD/ADR, and keeps both approval gates.
 - AC-4: Scenario I: an unsupported domain gets generic topics and custom rules end to end.
-- AC-5: A depth lower than the signals suggest is shown as a warning at the gate.
+- AC-5: A depth below a mandatory profile minimum is refused with a reason; a permitted depth below non-mandatory risk signals is warned at the gate. Quick cannot bypass security, approvals or required checks.
+- AC-6: Scenario F's UX-A measures outcome and effort at Quick against the F1.7.1 baseline; a confirmed complexity regression is recorded in the usability register, while every gate and check still holds (F3.3.4, F3.4.1).
+- AC-7: Standard resolves to exactly one recorded L1 or L2 level under the existing policy; the user can see its reason on demand without learning the distinction for ordinary tasks (F3.3.4).
 
 ## Testing strategy
 
@@ -100,3 +104,4 @@ Disable profiles and depth policy per project; the feature workflow continues as
 ## Completion evidence
 
 Test results, eval results for Scenarios F and I, phase review approved by the owner.
+UX-A eval result against the baseline.

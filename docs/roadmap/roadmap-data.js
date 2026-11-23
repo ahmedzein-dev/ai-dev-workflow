@@ -4,13 +4,13 @@
  * Statuses: planned · in-progress · review · waiting · blocked · done. mvp: part of v1.5 (D-030).
  */
 window.ROADMAP = {
- "updated": "2026-11-22",
+ "updated": "2026-11-23",
  "baselineCommit": "6849eca",
  "current": {
   "phase": 1,
   "next": {
-   "en": "F1.0.4 (engine API) closed as Completed with Limitations: CI 7/7 at fa6a676, independent audit GO. Now: TD-25 security fix (unredacted check id and agent name in records) — discovery and specification awaiting the owner's review; F1.0.5 after it.",
-   "ar": "F1.0.4 (الـ engine API) اتقفلت بحالة Completed with Limitations: الـ CI نجح 7 من 7 على fa6a676 والمراجعة المستقلة GO. دلوقتي: إصلاح أمني TD-25 (اسم الـ check واسم الـ agent بيتكتبوا في السجلات من غير إخفاء)، الاستكشاف والمواصفات مستنيين مراجعة صاحب المشروع، وبعده F1.0.5."
+   "en": "TD-25 closed (Completed with Limitations); v1.0.1 is the published, verified stable installation. Its fix is in main; main and phase-1/foundations also contain unreleased work. F-9 stays Deferred; TD-29/TD-30 remain open. The revised Master Roadmap and D-041–D-045 are approved, while evaluation outcomes remain unproven. F1.0.5 has not started; E1.7 follows it in Phase 1.",
+   "ar": "TD-25 اتقفلت (Completed with Limitations). الإصدار المستقر المنشور والمثبت بعد التحقق هو v1.0.1، والإصلاح موجود في main؛ وفي main وphase-1/foundations شغل تطوير لم يصدر بعد. F-9 مؤجلة، وTD-29 وTD-30 مفتوحتان. اتوافق على الخطة الكاملة وقرارات D-041 إلى D-045، لكن نتايج التقييم لسه ما ثبتتش. F1.0.5 لسه ما بدأتش، وE1.7 بعدها في المرحلة 1."
   }
  },
  "phases": [
@@ -167,7 +167,7 @@ window.ROADMAP = {
    "id": 1,
    "target": "v1.1",
    "status": "in-progress",
-   "effort": "6–9 wk",
+   "effort": "7–10 wk",
    "deps": [
     0
    ],
@@ -494,6 +494,56 @@ window.ROADMAP = {
        "pri": "P0",
        "eff": "M",
        "st": "planned",
+       "mvp": true
+      }
+     ]
+    },
+    {
+     "id": "E1.7",
+     "name": "Usability foundations (Powerful Inside. Simple Outside.; D-041–D-045, [PRODUCT_EXPERIENCE](../PRODUCT_EXPERIENCE.md))",
+     "features": [
+      {
+       "id": "F1.7.1",
+       "t": "Reproducible UX-A and UX-B baseline using the pinned stable managing engine, reliable existing task evidence and one representative fresh run each. Record version, task context and measurement method; measure interactions, commands, approvals, questions, time to first useful result and record overhead with honest availability labels. No targets or improvement claims yet",
+       "pri": "P0",
+       "eff": "M",
+       "st": "planned",
+       "dep": [
+        "F1.0.5"
+       ],
+       "mvp": true
+      },
+      {
+       "id": "F1.7.2",
+       "t": "One clear next action and progressive disclosure: status, resume, refusals and hook denials give a concise recommendation first, then details on demand. Material risks, uncertainty, required approvals and security information stay visible. Suggest a stage move only where one is valid, never past approval; golden changes need approval",
+       "pri": "P1",
+       "eff": "M",
+       "st": "planned",
+       "dep": [
+        "F1.7.1"
+       ],
+       "mvp": true
+      },
+      {
+       "id": "F1.7.3",
+       "t": "Proportional complexity review and usability register: one statement when interaction is unchanged, brief justification for a small change, and deeper evaluation when significant; phase reviews check applicable UX evidence and register entries",
+       "pri": "P0",
+       "eff": "S",
+       "st": "planned",
+       "dep": [
+        "F1.0.5"
+       ],
+       "mvp": true
+      },
+      {
+       "id": "F1.7.4",
+       "t": "Competitive desk study from official sources: GitHub Spec Kit, BMad Method, OpenSpec, Kiro, Claude Code, GitHub Copilot coding agent, and others found. Per alternative: version, date, source, coverage and verification method. No unverified uniqueness claims; refreshed at each gate",
+       "pri": "P1",
+       "eff": "M",
+       "st": "planned",
+       "dep": [
+        "F1.0.5"
+       ],
        "mvp": true
       }
      ]
@@ -891,7 +941,7 @@ window.ROADMAP = {
      "features": [
       {
        "id": "F3.3.1",
-       "t": "Depth levels L0–L3: proposal with signals and reasons, user override, shown at the first gate, recorded",
+       "t": "Depth levels L0–L3: proposal with signals and reasons, permitted user change, shown at the first gate, resolved level recorded",
        "pri": "P0",
        "eff": "M",
        "st": "planned",
@@ -913,13 +963,26 @@ window.ROADMAP = {
       },
       {
        "id": "F3.3.3",
-       "t": "Profile minimum-depth rules (paths, topics) and under-depth warnings",
-       "pri": "P1",
+       "t": "Profile minimum-depth rules (paths, topics): refuse a level below a mandatory minimum with an explanation; warn for non-mandatory under-depth signals",
+       "pri": "P0",
        "eff": "S",
        "st": "planned",
        "dep": [
         "F3.3.2"
-       ]
+       ],
+       "mvp": true
+      },
+      {
+       "id": "F3.3.4",
+       "t": "Quick / Standard / Deep over one L0–L3 policy (D-043): Standard resolves to a recorded L1 or L2 with an accessible reason. One-command changes stay within policy; impermissible requests are refused with an explanation. Labels never bypass profile minimums, security, approvals or checks",
+       "pri": "P0",
+       "eff": "S",
+       "st": "planned",
+       "dep": [
+        "F3.3.2",
+        "F3.3.3"
+       ],
+       "mvp": true
       }
      ]
     },
@@ -929,12 +992,13 @@ window.ROADMAP = {
      "features": [
       {
        "id": "F3.4.1",
-       "t": "Eval fixtures: Scenario F (small bug fix stays L0/L1, no HLD or ADR) and Scenario I (unknown domain via generic profile)",
+       "t": "Eval fixtures: Scenario F (small bug fix stays L0/L1, no HLD or ADR) and Scenario I (unknown domain via generic profile). Scenario F also measures UX-A outcome and user effort against the F1.7.1 baseline, recording confirmed complexity regressions",
        "pri": "P0",
        "eff": "M",
        "st": "planned",
        "dep": [
-        "F3.3.2"
+        "F3.3.4",
+        "F1.7.1"
        ],
        "mvp": true
       },
@@ -1005,6 +1069,18 @@ window.ROADMAP = {
        "dep": [
         "F4.1.1"
        ]
+      },
+      {
+       "id": "F4.1.4",
+       "t": "Qualitative question budget per experience (Quick: high-impact questions needed for the next gate); detect derivable or unjustifiably repeated questions, allowing a documented re-ask when evidence changed",
+       "pri": "P0",
+       "eff": "S",
+       "st": "planned",
+       "dep": [
+        "F4.1.2",
+        "F3.3.4"
+       ],
+       "mvp": true
       }
      ]
     },
@@ -1121,13 +1197,15 @@ window.ROADMAP = {
      "features": [
       {
        "id": "F4.5.1",
-       "t": "Eval fixture Scenario A (mobile offline/sync): right questions asked, derivable ones not asked, no imposed architecture",
-       "pri": "P1",
+       "t": "Eval fixture Scenario A (mobile offline/sync): right questions asked, derivable ones not asked, no imposed architecture. Its UX-B result measures outcome and user effort against the F1.7.1 baseline; unjustified repeated questions count as defects",
+       "pri": "P0",
        "eff": "M",
        "st": "planned",
        "dep": [
-        "F4.4.1"
-       ]
+        "F4.4.1",
+        "F1.7.1"
+       ],
+       "mvp": true
       }
      ]
     }
@@ -1296,6 +1374,17 @@ window.ROADMAP = {
        "eff": "S",
        "st": "planned",
        "mvp": true
+      },
+      {
+       "id": "F5.5.2",
+       "t": "Decision presentation, one screen first: recommendation, why, risks and limits, what approving means, what happens next; details on demand; approval interactions counted",
+       "pri": "P0",
+       "eff": "S",
+       "st": "planned",
+       "dep": [
+        "F5.2.2"
+       ],
+       "mvp": true
       }
      ]
     },
@@ -1312,6 +1401,18 @@ window.ROADMAP = {
        "dep": [
         "E5.1",
         "E5.3"
+       ],
+       "mvp": true
+      },
+      {
+       "id": "F5.6.2",
+       "t": "Validation Gate A before v1.5: compare only shipped capabilities—existing short spec/plan and approvals, plus Phase 3–5 profiles, discovery, requirements and decisions—against alternatives on equivalent UX-A–UX-C tasks. Fix a consistent method before interpretation; record decision quality, observed rework, user effort, alternative version/configuration, source and limitations. Exclude Phase 8 expanded specs, planning and traceability. Missing essential evidence is insufficient or blocked; gate report and owner decision",
+       "pri": "P0",
+       "eff": "M",
+       "st": "planned",
+       "dep": [
+        "F5.6.1",
+        "F1.7.4"
        ],
        "mvp": true
       }
@@ -1568,6 +1669,17 @@ window.ROADMAP = {
        "pri": "P0",
        "eff": "M",
        "st": "planned"
+      },
+      {
+       "id": "F6.6.3",
+       "t": "Validation Gate B before v1.6: verify ORE result correctness, solver guarantees and practical value (UX-D). Compare with a relevant non-ORE baseline where feasible; assess complexity, time, actual cost when measurable, data provenance and usability for engineers new to OR. No optimality claim without proof or sufficient solver evidence; missing essential evidence is insufficient or blocked. Gate report, limitations and owner decision",
+       "pri": "P0",
+       "eff": "M",
+       "st": "planned",
+       "dep": [
+        "F6.6.1",
+        "F1.7.4"
+       ]
       }
      ]
     }
@@ -1948,13 +2060,14 @@ window.ROADMAP = {
      "features": [
       {
        "id": "F9.2.1",
-       "t": "Eval harness: scenario fixtures A–I, deterministic record checks, results registry with agent/model/version",
+       "t": "Eval harness: scenario fixtures A–I, deterministic record checks, results registry with agent/model/version. Add outcome-quality and user-effort measures for available UX-A–UX-D, with a complexity-regression report. F14.7.1 registers UX-E later after comparable multi-agent runs exist",
        "pri": "P0",
        "eff": "L",
        "st": "planned",
        "dep": [
         "F3.4.1",
-        "F5.6.1"
+        "F5.6.1",
+        "F1.7.1"
        ]
       },
       {
@@ -2186,6 +2299,23 @@ window.ROADMAP = {
    },
    "epics": [
     {
+     "id": "E11.0",
+     "name": "Validation Gate C (before the dashboard build and automatic orchestration)",
+     "features": [
+      {
+       "id": "F11.0.1",
+       "t": "Validation Gate C: appropriate real-user usability study and relevant competitor comparisons using capabilities and UX scenarios available before the dashboard. Assess task initiation, completion, unnecessary interaction, trust, discoverability and willingness to reuse; record participant/task limits. Desk research alone is insufficient. Gate report and owner decision before dashboard or automatic-orchestration expansion; UX-E is a separate Phase 14 precondition",
+       "pri": "P0",
+       "eff": "L",
+       "st": "planned",
+       "dep": [
+        "F9.2.1",
+        "F1.7.4"
+       ]
+      }
+     ]
+    },
+    {
      "id": "E11.1",
      "name": "Human CLI (v3.0)",
      "features": [
@@ -2233,7 +2363,8 @@ window.ROADMAP = {
        "eff": "S",
        "st": "planned",
        "dep": [
-        "F11.1.1"
+        "F11.1.1",
+        "F11.0.1"
        ]
       },
       {
@@ -2319,6 +2450,18 @@ window.ROADMAP = {
        "pri": "P0",
        "eff": "S",
        "st": "planned"
+      },
+      {
+       "id": "F11.5.3",
+       "t": "Parity and usability study: every task can be completed through the agent and CLI alone with no extra steps; the optional dashboard is measured on applicable UX-A–UX-C tasks for discoverability and is never required",
+       "pri": "P1",
+       "eff": "M",
+       "st": "planned",
+       "dep": [
+        "F11.5.2",
+        "F11.2.2",
+        "F11.0.1"
+       ]
       }
      ]
     },
@@ -2604,10 +2747,15 @@ window.ROADMAP = {
       },
       {
        "id": "F14.3.3",
-       "t": "Automatic orchestrator (opt-in): state machine driving agents, budgets, retries, timeouts, iteration limits, cancellation, recovery",
+       "t": "Automatic orchestrator (opt-in): state machine driving agents, budgets, retries, timeouts, iteration limits, cancellation, recovery. Enable only after Gate C, the vendor spike, an evidence-based UX-E comparison with the single-agent baseline and the owner's recorded decision",
        "pri": "P2",
        "eff": "XL",
-       "st": "planned"
+       "st": "planned",
+       "dep": [
+        "F11.0.1",
+        "F14.3.2",
+        "F14.7.1"
+       ]
       },
       {
        "id": "F14.4.1",
@@ -2636,6 +2784,16 @@ window.ROADMAP = {
        "pri": "P2",
        "eff": "S",
        "st": "planned"
+      },
+      {
+       "id": "F14.7.1",
+       "t": "UX-E after manual multi-agent runs exist: compare equivalent tasks against a single-agent baseline on quality, time, cost and interactions; register the result in the eval harness. Do not recommend automatic use without measured benefit; record any explicit owner decision without claiming an advantage",
+       "pri": "P0",
+       "eff": "M",
+       "st": "planned",
+       "dep": [
+        "F14.3.1"
+       ]
       }
      ]
     }
@@ -2761,12 +2919,13 @@ window.ROADMAP = {
       },
       {
        "id": "F16.4.1",
-       "t": "Delivery records: environment, integration validation, UAT, onboarding, pilot, demo, handover, runbooks, incident response, training, ownership",
+       "t": "Delivery records: environment, integration validation, UAT, onboarding, pilot, demo, handover, runbooks, incident response, training, ownership. Include a stakeholder walkthrough of proposal and handover usability; record effort and outcomes as expected vs measured",
        "pri": "P1",
        "eff": "L",
        "st": "planned",
        "dep": [
-        "F16.1.1"
+        "F16.1.1",
+        "F16.5.1"
        ]
       },
       {
@@ -2860,6 +3019,17 @@ window.ROADMAP = {
        "pri": "P2",
        "eff": "M",
        "st": "planned"
+      },
+      {
+       "id": "F17.6.1",
+       "t": "Product-experience metrics (PRODUCT_EXPERIENCE §6) from events and labelled study data, with measured / estimated / assumed / unavailable flags, baseline vs current; no fabricated values",
+       "pri": "P1",
+       "eff": "M",
+       "st": "planned",
+       "dep": [
+        "F17.1.1",
+        "F1.7.1"
+       ]
       }
      ]
     }
@@ -2934,7 +3104,7 @@ window.ROADMAP = {
      "features": [
       {
        "id": "F19.1.1",
-       "t": "Release checklist and tools/release_check.py (versions, changelog, tests, scan, docs consistency, migration test) — used from v1.1",
+       "t": "Release checklist and tools/release_check.py (versions, changelog, tests, scan, docs consistency, migration test) — used from v1.1. Each release records applicable UX results and blockers; acceptance needs the owner's rationale, risks and follow-up and cannot waive mandatory guarantees",
        "pri": "P0",
        "eff": "S",
        "st": "planned"
@@ -3160,6 +3330,37 @@ window.ROADMAP = {
    "st": "accepted"
   },
   {
+   "id": "D-041",
+   "t": "Product principle",
+   "st": "accepted"
+  },
+  {
+   "id": "D-042",
+   "t": "Usability ownership",
+   "st": "accepted"
+  },
+  {
+   "id": "D-043",
+   "t": "Quick / Standard / Deep",
+   "st": "accepted"
+  },
+  {
+   "id": "D-044",
+   "t": "Validation gates and proportional evidence framework",
+   "tAr": "بوابات التحقق وإطار الأدلة المتناسبة",
+   "when": "2026-11-23",
+   "note": {
+    "en": "Evaluation plan approved; improvement, product-market fit and competitive superiority remain unproven.",
+    "ar": "خطة التقييم معتمدة؛ تحسن المنتج وملاءمته للسوق وتفوقه على المنافسين لم تثبت بعد."
+   },
+   "st": "accepted"
+  },
+  {
+   "id": "D-045",
+   "t": "Complexity budget",
+   "st": "accepted"
+  },
+  {
    "id": "D-008",
    "t": "Approval trust levels",
    "st": "proposed"
@@ -3213,14 +3414,36 @@ window.ROADMAP = {
    "Done": 7,
    "Planned": 25,
    "Reconsidered": 2
+  },
+  "B4": {
+   "Done": 3,
+   "Planned": 7
   }
  },
  "issues": [
   {
-   "id": "TD-25",
-   "kind": "security",
+   "id": "TD-29",
+   "kind": "debt",
+   "sev": "medium",
+   "t": "Multi-file workflow updates remain non-transactional; open separately from completed TD-25"
+  },
+  {
+   "id": "TD-30",
+   "kind": "debt",
+   "sev": "medium",
+   "t": "Direct internal persistence calls remain outside TD-25 API validation; open separately"
+  },
+  {
+   "id": "R-27",
+   "kind": "risk",
    "sev": "high",
-   "t": "Unredacted check id and agent name reach verification.md before the secret check refuses (priority; own task)"
+   "t": "Product-market fit not proven against Spec Kit, BMad, OpenSpec, Kiro, Claude Code, Copilot (gates A/B/C)"
+  },
+  {
+   "id": "R-28",
+   "kind": "risk",
+   "sev": "high",
+   "t": "Usability regression: interaction cost grows faster than value"
   },
   {
    "id": "TD-03",
@@ -3285,6 +3508,12 @@ window.ROADMAP = {
  ],
  "tests": [
   {
+   "date": "2026-11-23",
+   "what": "TD-25 closure evidence: published v1.0.1, main integration, verified user-level install; F-9 Deferred",
+   "result": "Completed with Limitations; release CI 6/6, main post-merge CI 6/6, installed security tests 32/32 on Python 3.9 and 3.13",
+   "ok": true
+  },
+  {
    "date": "2026-11-22",
    "what": "Baseline: 141 unit, scenario and doc tests",
    "result": "OK · 44.2 s",
@@ -3343,12 +3572,21 @@ window.ROADMAP = {
   {
    "v": "v1.0.0",
    "date": "2026-11-12",
-   "notes": "First release: 11-stage lifecycle, hash-bound approvals, evidence, Claude hooks, installer, bilingual guide"
+   "notes": "First release: 11-stage lifecycle, hash-bound approvals, evidence, Claude hooks, installer, bilingual guide",
+   "notesAr": "أول إصدار: دورة عمل من 11 مرحلة، موافقات مرتبطة ببصمة المستند، أدلة تحقق، تكامل Claude، أداة تثبيت ودليل بالعربية والإنجليزية"
+  },
+  {
+   "v": "v1.0.1",
+   "date": "2026-11-22",
+   "notes": "Published stable TD-25 security update and Windows compatibility fixes at 6a7cba0; verified user-level installation",
+   "notesAr": "إصدار مستقر منشور يتضمن إصلاح الأمان TD-25 وتوافق Windows عند 6a7cba0؛ تم التحقق من التثبيت على مستوى المستخدم"
   },
   {
    "v": "Unreleased",
+   "vAr": "لم يصدر بعد",
    "date": "—",
-   "notes": "Guided setup; dev tooling (ruff, mypy, golden CLI tests) from F1.0.2"
+   "notes": "Development on main and phase-1/foundations beyond the stable v1.0.1 release; F1.0.5 has not started",
+   "notesAr": "تطوير على main وphase-1/foundations بعد الإصدار المستقر v1.0.1؛ العمل على F1.0.5 لم يبدأ"
   }
  ]
 };

@@ -16,7 +16,7 @@ Status: Proposed · Accepted · Rejected · Superseded.
 | D-002 | Engine structure | Stdlib package `aidw/` inside the skill folder; `workflow.py` stays as the entry point | More files; same install and CLI | **Accepted** |
 | D-003 | Adapter model | Declarative JSON adapters first; executable plugins only in Phase 7 behind explicit trust | A small condition language instead of arbitrary code | **Accepted** |
 | D-004 | Output parsing | Exit code + JUnit XML + SARIF + declared regex; keep the Dart parser | Tools without these formats need a regex or a wrapper | **Accepted** |
-| D-005 | Self-hosting | Manage this repository's development with a **pinned install of the latest release** (now `v1.0.0`), never `--link-source`; upgrade the managing install only after a release passes its checklist | New engine features are used for our own work one release late | **Accepted** |
+| D-005 | Self-hosting | Manage this repository's development with a **pinned install of the latest release** (now verified `v1.0.1`), never `--link-source`; upgrade the managing install only after a release passes its checklist | New engine features are used for our own work one release late | **Accepted** |
 | D-006 | Records mode for this repository | `all`: commit task records, so the development history is visible, reviewable and resumable on any machine (the repository is public; records contain no private data, and the privacy scan runs on them) | Specs, plans and approval quotes become public | **Accepted** |
 | D-007 | Spec template for our own tasks | Ask the owner: their private `user:spec-kit` template, or a new project template committed to this repository so contributors can use it | Private template keeps one personal standard; a committed one lets others follow the same process | **Accepted** — `user:spec-kit` |
 | D-012 | Minimum Python version | Keep **3.9** for v1.x (stock macOS `python3` is 3.9), use a minimal TOML reader for detection; revisit at v2 | 3.9 and 3.10 are past end of life; no `tomllib` until 3.11 | **Accepted** |
@@ -63,6 +63,39 @@ presented; it will be presented separately.
 | D-038 | Model approval | Approved model as a new approval type (hash-bound), extending D-022 | One more approval for consequential optimization decisions | **Accepted** |
 | D-039 | ORE documents | Six design documents in `docs/roadmap/ore/` now (instead of 16 files); user docs in `docs/ore/` when features ship | Fewer, denser files | **Accepted** |
 | D-040 | Versions with ORE | v1.6 ORE v1; v2.0 modes and design, v2.1 specs/plans/traceability, v2.2 audit/evals/registry, v2.3 ORE advanced; v3.x, v4.x, v5.x as in MASTER_ROADMAP §5; MVP stays v1.5 without ORE | ORE arrives right after the MVP, not inside it | **Accepted** |
+
+## Product simplicity, usability & competitive validation (brief 4, 2026-11-22)
+
+**Owner's words, 2026-11-22:** «I approve adding Competitive Validation & Product-Market Fit to the AIDevWorkflow
+Master Roadmap. I also want to establish a permanent, non-negotiable product principle: Powerful Inside. Simple
+Outside.» The brief also asks for usability as a first-class capability and for Quick/Standard/Deep mapped onto
+L0–L3, and it states that it is "a strategic roadmap and product-design update, not authorization to implement new
+software features". Initially this accepted the principle and the three validation gates; the ownership, depth
+presentation and complexity-budget mechanisms were proposed for later review. Design:
+[PRODUCT_EXPERIENCE.md](PRODUCT_EXPERIENCE.md).
+
+**Owner decision, 2026-11-23:** D-042, D-043 and D-045 are approved with the conditions recorded below. The owner
+also approved the five feature consolidations and the 13 net-new features (239 across 20 phases). This approval
+does not finalize the Master Roadmap or authorize a commit, push or software implementation.
+
+**Owner decision, 2026-11-23 (D-044):** The owner subsequently approved the scoped metric and scenario framework
+below. The earlier approval covered only Gates A–C; this decision adds their proportional minimum evidence, the
+F1.7.1 baseline and UX-A–UX-E timing. Approval of the evaluation plan is not evidence that product improvement,
+product-market fit or competitive superiority has been demonstrated. The full Master Roadmap still needs separate
+final approval, and no commit or push is authorized by this decision.
+
+**Owner decision, 2026-11-23 (final roadmap):** The owner explicitly approved this revised Master Roadmap with
+20 phases, 239 features, 84 MVP features and 20 completed features, accepted the documented partial Arabic
+localization, and authorized a roadmap-only commit and push to `phase-1/foundations`. This does not approve
+implementation, a merge into `main`, or any claim of measured product improvement.
+
+| ID | Decision | Recommendation | Main trade-off | Status |
+|---|---|---|---|---|
+| D-041 | Product principle | **Powerful Inside. Simple Outside.**, permanent and non-negotiable: the system absorbs complexity; simplify interactions, not guarantees; new invariant INV-23 | Some engine work is spent on interaction instead of capability | **Accepted** |
+| D-042 | Usability ownership | Usability is a first-class capability from Phase 1. The product owner is accountable for phase and release decisions; each feature owner records whether user effort changes and a qualitative complexity budget after F1.7.3; the reviewer checks it. Phase reviews run applicable UX scenarios and examine the usability register (`UXR-n`). A material complexity regression blocks release until corrected or explicitly accepted by the owner. Acceptance records rationale, risks and appropriate follow-up; it never waives mandatory security, approvals, verification or other non-negotiable guarantees (E1.7, F19.1.1) | Distributed accountability adds brief review work; no-interaction features need only one statement. Owner judgement remains necessary for materiality and accepted risks | **Accepted** (owner, 2026-11-23) |
+| D-043 | Quick / Standard / Deep | Quick, Standard and Deep are user-facing names for the existing recorded L0–L3 depth policy, not a second state machine: Quick = L0, Standard = L1–L2, Deep = L3. For Standard, the engine resolves and records L1 or L2 using the existing policy; the reason and exact level remain accessible without burdening ordinary users. The user may change depth only within permitted policy boundaries, and permitted changes are recorded. Selecting a label cannot bypass profile minimums, security requirements, approval gates or required checks; an impermissible change is refused with an explanation (F3.3.4) | Two vocabularies need clear display, but one enforced level and one policy remain. Refusals must explain the controlling minimum or gate | **Accepted** (owner, 2026-11-23) |
+| D-044 | Validation gates and proportional evidence | Gate A before v1.5 (F5.6.2), Gate B before v1.6 (F6.6.3), Gate C before dashboard and automatic-orchestration expansion (F11.0.1), with UX-E later in Phase 14 before F14.3.3. Establish reproducible UX-A/UX-B baselines first (F1.7.1); reuse existing evaluation infrastructure and require only decision-relevant evidence at each gate (PRODUCT_EXPERIENCE §§6–8). Label measured, estimated, assumed and unavailable values. Missing essential evidence is insufficient or blocked, never a silent pass; owner-approved exceptions record rationale, consequences and follow-up without claiming completed validation. Each gate records the owner's decision and limitations | Gates add about 3–5 weeks over the roadmap; paid tools, additional costs or participant recruitment beyond approved scope need owner decisions. Proportional evidence avoids imposing all metrics on every gate; it does not establish improvement or product-market fit | **Accepted** (owner, 2026-11-23; evaluation framework, not results) |
+| D-045 | Complexity budget | Each feature spec started after F1.7.3 states whether it adds user-visible interaction. None needs one concise statement; a small change needs brief justification and relevant alternatives; significant interaction or architectural change receives deeper evaluation when warranted. This qualitative review has no arbitrary numerical quota or lengthy checklist for trivial work, and never reduces engineering quality or verification. ORE uses its fit gate; automatic multi-agent use requires comparison with a single-agent baseline (F14.7.1), with any owner-accepted case lacking measured benefit reported honestly. Evidence may justify simplifying or resequencing work only through a recorded owner decision, never silent removal | Review effort scales with impact; judgement remains necessary without turning the budget into another source of unnecessary work | **Accepted** (owner, 2026-11-23) |
 
 ## Needed later (decide at the start of the named phase)
 

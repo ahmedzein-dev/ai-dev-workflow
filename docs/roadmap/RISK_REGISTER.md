@@ -9,7 +9,7 @@ Status: Open · Mitigating · Closed.
 
 | ID | Risk | L | I | Mitigation | Owner phase | Status |
 |---|---|---|---|---|---|---|
-| R-01 | Scope explosion: ten phases turn the lean skill into a heavy platform that individual developers stop using | H | H | Every phase ships as an optional layer; the skill-only path stays first-class and is tested in CI on every release (INV-12) | All | Open |
+| R-01 | Scope explosion: many phases turn the lean skill into a heavy platform that individual developers stop using | H | H | Every phase ships as an optional layer; the skill-only path stays first-class and is tested in CI on every release (INV-12). Complexity budget and usability gates (D-042, D-045). | All | Open |
 | R-02 | Backward compatibility breaks existing projects' records | M | H | Schema versions + `migrate` with dry run and backup; old records readable for one major version; migration tests on real v1.0.0 fixtures | P1 | Open |
 | R-03 | Self-hosting loop: the engine under development manages its own development and weakens a gate unnoticed | M | H | Manage development with a pinned stable install (tagged release), never `--link-source` to the working copy; upgrade the managing install only after a release passes (D-005) | Process | Open |
 | R-04 | Agent vendors change skill formats, hooks or headless modes | H | M | Agent adapters with capability flags and evidence labels; compatibility matrix re-run per release; no reliance on undocumented behaviour | P2, P14, P19 | Open |
@@ -30,7 +30,7 @@ Status: Open · Mitigating · Closed.
 | R-14 | Hung or runaway check processes | M | M | Process-group kill, streamed output, timeouts per check (TD-11) | P2 | Open |
 | R-15 | Large monorepos make fingerprints and detection slow | M | M | Measure on a large fixture; cache per command; component-scoped fingerprints considered only if needed | P2 | Open |
 | R-16 | Windows-specific behaviour (hooks, symlinks, process groups, paths) | M | M | Windows CI already exists; add Windows-specific tests for new features | All | Open |
-| R-17 | The engineering-intelligence layer turns the workflow bureaucratic (too many questions, records and approvals) | M | H | Adaptive depth, decision sets, delegation policy, impact-filtered questions, Scenario F eval (small fix stays light) | P3–P5 | Open |
+| R-17 | The engineering-intelligence layer turns the workflow bureaucratic (too many questions, records and approvals) | M | H | Adaptive depth, decision sets, delegation policy, impact-filtered questions, Scenario F eval (small fix stays light). Question budget (F4.1.4), Quick experience (F3.3.4), UX-A/UX-B evals, usability register (D-042). | P3–P5 | Open |
 | R-18 | Profile and guide content becomes stale or shallow | M | M | Sourced guides, applicability records, eval scenarios per profile, community contributions with review | P3 | Open |
 | R-19 | Over-claiming intelligence: users read engine checks as proof of design quality | M | H | Engine verifies records, links, approvals and evidence only, and says so (ENGINEERING_INTELLIGENCE §13); audit separates documentation, design, implementation and measured results | P5–P9 | Open |
 | R-20 | Eval cost and flakiness of agent runs | M | M | Deterministic checks on recorded runs; model grading optional with consent | P9 | Open |
@@ -40,6 +40,8 @@ Status: Open · Mitigating · Closed.
 | R-24 | ORE dependencies make the product heavy or hard to install | M | M | Optional isolated package, built-in standard-library enumerator, opt-in solvers in the trust store | P6 | Open |
 | R-25 | Hard instances exhaust resources or never finish | M | M | Pre-checks, process limits, safe stop, `FEASIBLE_NOT_PROVEN` instead of claims, reformulation suggestions | P6 | Open |
 | R-26 | Application data (prices, demand, capacity, evals) too thin to support conclusions | H | M | `INSUFFICIENT_DATA` and conditional labels; calibration against measurements; sample sizes shown | P10, P14 | Open |
+| R-27 | Product-market fit: AIDevWorkflow solves problems that alternatives (Spec Kit, BMad, OpenSpec, Kiro, Claude Code, Copilot coding agent) already solve as well or better, so engineers keep using them directly | M | H | Competitive desk study (F1.7.4); validation gates A, B and C before v1.5, v1.6 and the dashboard or automatic orchestration (D-044); findings drive recorded resequencing | P1, P5, P6, P11 | Open |
+| R-28 | Usability regression: each feature adds commands, questions, records or approvals faster than it adds value; interaction cost grows unnoticed | M | H | Proportional complexity review (D-045), baselines (F1.7.1), applicable UX measures in the eval harness (F9.2.1), usability register; release checklist blocks material regressions unless the owner records rationale, risks and follow-up without waiving mandatory guarantees (F19.1.1) | All | Open |
 
 ## 3. Security risks and threat model (initial)
 

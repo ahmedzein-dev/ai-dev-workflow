@@ -29,6 +29,7 @@ Nonlinear global optimization and stochastic optimization as proven results (res
 4. New problem classes ship only with a verifier that can meet the stated guarantee level.
 5. AI model selection uses task-specific eval results with sample size; optimality is relative to candidates and sample.
 6. Calibration flags decisions for re-evaluation when measured values deviate beyond the stated threshold.
+7. ORE advanced features stay context-sensitive: offered only when the fit gate holds, and explained in plain language before the mathematical detail (PRODUCT_EXPERIENCE §3).
 
 ## Dependencies
 

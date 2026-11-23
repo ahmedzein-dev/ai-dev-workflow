@@ -45,7 +45,7 @@ Phases 3–8 (records to audit); Phase 2 (evidence v2).
 | F9.1.2 | Audit and outcome distinguish documentation completeness, design correctness, implementation correctness and measured results | P0 | M | F9.1.1 |
 | F9.1.3 | Architecture drift check: implemented code paths vs approved components and diagrams | P1 | M | F7.2.1 |
 | E9.2 | **Evals** | | | |
-| F9.2.1 | Eval harness: scenario fixtures A–I, deterministic record checks, results registry with agent/model/version | P0 | L | F3.4.1, F5.6.1 |
+| F9.2.1 | Eval harness: scenario fixtures A–I, deterministic record checks, results registry with agent/model/version. Add outcome-quality and user-effort measures for UX-A–UX-D when available, with a complexity-regression report against the last baseline. Keep the harness extensible; F14.7.1 registers UX-E after comparable multi-agent runs exist | P0 | L | F3.4.1, F5.6.1, F1.7.1 |
 | F9.2.2 | Human rubric workflow (relevance, missing considerations, trade-off quality, sycophancy) | P1 | S | F9.2.1 |
 | F9.2.3 | Optional model-graded rubric with cost consent | P2 | M | F9.2.1 |
 | E9.3 | **Agent and model performance registry** (ORE integration) | | | |
@@ -57,6 +57,7 @@ Phases 3–8 (records to audit); Phase 2 (evidence v2).
 - AC-1: All nine scenarios (A–I) run through the harness with deterministic checks; results are recorded per agent and model.
 - AC-2: An audit of a fixture with a diagram that contradicts an approved ADR reports it.
 - AC-3: A task with complete documents but failing measured targets cannot report "Completed".
+- AC-4: For scenarios available at a release, the harness reports outcome quality, user effort and complexity regressions against the last baseline. Phase 9 does not claim UX-E; F14.7.1 adds it when multi-agent runs are available (F9.2.1).
 
 ## Testing strategy
 

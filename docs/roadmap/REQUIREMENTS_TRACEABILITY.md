@@ -1,8 +1,8 @@
-# Requirements Traceability Matrix — both briefs
+# Requirements Traceability Matrix — all briefs
 
-Every requirement from the three owner briefs, mapped to where it is covered, so nothing was lost when they were
+Every requirement from the four owner briefs, mapped to where it is covered, so nothing was lost when they were
 merged into one roadmap. **B1** = full product evolution. **B2** = engineering intelligence, system design,
-business-driven architecture. **B3** = Operations Research & Optimization Engine (ORE). All 2026-11-22. Section numbers
+business-driven architecture. **B3** = Operations Research & Optimization Engine (ORE). **B4** = product simplicity, usability and competitive validation ("Powerful Inside. Simple Outside."). All 2026-11-22. Section numbers
 follow each brief.
 
 Status: **Exists** (in v1.0.0, kept) · **Done** (completed with evidence) · **In progress** · **Planned** (phase and
@@ -150,3 +150,18 @@ Coverage check: 0 requirements without a home. Reconsidered items: 6 (all with r
 | B3-25 | Non-negotiable rules (16) | INV-19–INV-22; ore/STRICT_OPTIMALITY_POLICY; ore/SECURITY_AND_THREAT_MODEL | Done (design) |
 | B3-26 | Proposed 16 documents in `docs/ore/` | Consolidated into 6 design docs in `docs/roadmap/ore/`; user docs in `docs/ore/` with F6.6.2 | Reconsidered (D-039) |
 | B3-27 | The 22 requested outputs | This integration (ore/*, phases, RTM, risks, decisions, master roadmap, HTML) | Done (waiting for review) |
+
+## B4 — Product simplicity, usability & competitive validation
+
+| ID | Requirement | Covered by | Status |
+|---|---|---|---|
+| B4-01 | Permanent principle "Powerful Inside. Simple Outside."; the system absorbs complexity | D-041; INV-23; PRODUCT_EXPERIENCE §0 | Done (roadmap) |
+| B4-02 | Usability as a first-class capability from Phase 1; material regression acceptance records rationale, risks and follow-up without waiving mandatory guarantees | D-042; E1.7 (F1.7.1–F1.7.3); F19.1.1; PRODUCT_EXPERIENCE §1, §10 | Planned |
+| B4-03 | Progressive disclosure and Quick / Standard / Deep mapped onto one L0–L3 policy; Standard resolves to one recorded level; permitted changes are recorded and impermissible ones refused | D-043; F1.7.2, F3.3.3, F3.3.4; ENGINEERING_INTELLIGENCE §7 | Planned |
+| B4-04 | Interaction principles: derive before asking, high-value questions, smart defaults with human decisions, one clear next action, progressive technical detail | PRODUCT_EXPERIENCE §3; F4.1.2, F4.1.4, F1.7.2, F5.5.2 | Planned |
+| B4-05 | Prevent feature overload through proportional qualitative review, without arbitrary quotas or reduced engineering quality; ORE, multi-agent, diagrams and documents only when justified | D-045; INV-22; F14.7.1; PRODUCT_EXPERIENCE §5 | Planned |
+| B4-06 | Competitive validation and product-market fit: current, evidence-based comparison with Spec Kit, BMad, OpenSpec, Kiro, Claude Code, Copilot and others; gates A (v1.5), B (v1.6), C (before v3.x/v4.x expansion) | D-044; F1.7.4, F5.6.2, F6.6.3, F11.0.1; R-27 | Planned |
+| B4-07 | Product-experience and quality metrics, baselines first, honest labels, fair comparisons | D-044; F1.7.1, F17.6.1; PRODUCT_EXPERIENCE §6 | Planned |
+| B4-08 | Usability measures UX-A–UX-E with outcome quality and user effort; UX-A/UX-B extend existing fixtures and UX-E waits for Phase 14 | PRODUCT_EXPERIENCE §7; F3.4.1, F4.5.1, F9.2.1, F14.7.1 | Planned |
+| B4-09 | Master roadmap integration items 1–16 (phase-by-phase additions, register, no silent removal, no new phases or parallel documents) | PRODUCT_EXPERIENCE §9; phase files P1, P3–P6, P9–P11, P14, P16, P17, P19; MASTER_ROADMAP §5 | Done (roadmap) |
+| B4-10 | Architectural guardrails: simplify interactions, not guarantees | INV-01–INV-23; PRODUCT_EXPERIENCE §11 | Done (roadmap) |

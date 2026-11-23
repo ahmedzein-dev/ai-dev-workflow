@@ -138,8 +138,8 @@ explanations, comparisons and diagrams; it never lets the agent take consequenti
 ## 7. Adaptive engineering depth (D-025)
 
 At the start of every task the agent proposes a depth level with reasons; the user sees it with the first gate and
-can raise or lower it; the engine records it and enforces the artifacts that level requires. **Depth never removes
-the core gates.**
+can raise or lower it within applicable policy. The engine records the resolved level and enforces its artifacts.
+An impermissible change is refused with an explanation. **Depth never removes the core gates.**
 
 | Level | Typical work | Requires (feature mode) |
 |---|---|---|
@@ -150,7 +150,12 @@ the core gates.**
 
 Signals: size, complexity, business and technical risk, architecture impact, data sensitivity, components affected,
 reversibility, production impact, regulation. Profiles can force a minimum level for paths or topics (for example any
-change under `payments/` is at least L2). A depth lower than the signals suggest is shown as a warning at the gate.
+change under `payments/` is at least L2). A requested level below a mandatory profile minimum is refused; a level
+below non-mandatory risk signals but within policy is shown as a warning at the gate.
+
+Users see the levels as three experiences (D-043, [PRODUCT_EXPERIENCE §4](PRODUCT_EXPERIENCE.md)): **Quick** = L0,
+**Standard** = L1 or L2 as resolved by the existing policy, **Deep** = L3. The single resolved L0–L3 level is
+recorded and enforced; its reason remains accessible. No second depth state machine is introduced.
 
 ## 8. Adaptive questioning (brief 2 §3)
 
@@ -164,6 +169,9 @@ The engine supplies structure; the agent supplies judgement.
   topic, excluding answered and deferred keys.
 - **Unknown answers**: the agent explains why it matters, gives realistic options with effects and a recommendation;
   the user picks one, accepts an assumption (with a review trigger) or defers it.
+- **Question budget** (F4.1.4): the chosen experience limits unnecessary non-blocking questions without an
+  arbitrary count; derivable or unjustifiably repeated questions are defects. A changed source may justify a
+  documented re-ask (PRODUCT_EXPERIENCE §3).
 - **Blocking only when it matters**: a question blocks its gate only if marked needed-by that gate with high impact;
   everything else proceeds with recorded assumptions.
 - **Contradictions**: the engine flags structured ones (two answers for one key, a requirement contradicting a

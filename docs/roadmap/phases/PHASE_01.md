@@ -134,6 +134,17 @@ Tasks for F1.0.3 (example of the task level used for every feature at its start)
 | F1.6.2 | Proof test: a new adapter added as data changes detection without any core file change | P0 | S | F1.2.5 |
 | F1.6.3 | Docs: adapters guide, configuration and templates updates, migration notes, compatibility and validation reports, both languages of the guide where user-facing | P0 | M | all |
 
+### E1.7 — Usability foundations (Powerful Inside. Simple Outside.; D-041–D-045, [PRODUCT_EXPERIENCE](../PRODUCT_EXPERIENCE.md))
+
+TD-25 is closed (Completed with Limitations). E1.7 follows F1.0.5 within Phase 1; it does not change that feature's scope.
+
+| ID | Feature | Pri | Effort | Depends on |
+|---|---|---|---|---|
+| F1.7.1 | Reproducible UX-A (small fix) and UX-B (standard feature) baseline using the pinned stable managing engine, reliable existing task evidence and one representative fresh run each. Record engine version, task context and measurement method; measure interactions, commands, approvals, questions, time to first useful result and record overhead, each labelled measured / estimated / assumed / unavailable. No targets or improvement claims yet | P0 | M | F1.0.5 |
+| F1.7.2 | One clear next action and progressive disclosure: `status`, `resume`, refusals and hook denials give a concise recommendation first, stating what is done, what needs attention, why and what happens next; detailed reasoning and evidence remain available on demand. Material risks, uncertainty, required approvals and security-relevant information stay visible. Stage moves are suggested where only one is valid (UXR-1), never past an approval. Golden outputs change only by approval | P1 | M | F1.7.1 |
+| F1.7.3 | Proportional complexity review and usability register: the spec template asks for one statement when interaction is unchanged, brief justification for a small change, and deeper evaluation when significant; phase reviews check applicable UX evidence and register entries (PRODUCT_EXPERIENCE §5, §10) | P0 | S | F1.0.5 |
+| F1.7.4 | Competitive desk study from official sources: GitHub Spec Kit, BMad Method, OpenSpec, Kiro, Claude Code, GitHub Copilot coding agent, and others found. Per alternative: version, date, source, coverage and verification method. No unverified uniqueness claims; refreshed at each gate | P1 | M | F1.0.5 |
+
 ## Acceptance criteria
 
 - AC-1: Detection on each fixture lists the right components with evidence and confidence; nothing is applied
@@ -147,6 +158,9 @@ Tasks for F1.0.3 (example of the task level used for every feature at its start)
 - AC-7: A schema 1 project keeps working unchanged; `migrate` to schema 2 has a dry run, a backup and a rollback.
 - AC-8: Approval gates behave exactly as in v1.0.0 (all existing scenario tests pass unchanged).
 - AC-9: Tests pass on Ubuntu, macOS and Windows with Python 3.9 and 3.13; privacy scan clean.
+- AC-10: Reproducible UX-A and UX-B baselines record the engine version, task context and measurement method; each value is labelled measured, estimated, assumed or unavailable before any usability target or improvement claim (F1.7.1).
+- AC-11: In every stage, `status` gives a concise recommendation and states what is done, what needs attention, why and what follows; details are available on demand without hiding material risks, uncertainty, required approvals or security information. No approval is skipped (F1.7.2).
+- AC-12: Every feature spec started after F1.7.3 states its interaction impact: one concise statement if none, brief justification for a small change, and deeper evaluation for a significant interaction or architectural change when warranted. The phase review records the usability check and open register entries; no arbitrary quota or quality reduction is imposed.
 
 ## Testing strategy
 
@@ -160,7 +174,7 @@ in [RISK_REGISTER.md](../RISK_REGISTER.md).
 
 ## Estimated effort
 
-About 6–9 weeks of focused work in total (E1.0 ≈ 2–3 weeks, E1.1–E1.3 ≈ 2–3 weeks, E1.4–E1.6 ≈ 2–3 weeks).
+About 7–10 weeks of focused work in total (E1.0 ≈ 2–3 weeks, E1.1–E1.3 ≈ 2–3 weeks, E1.4–E1.6 ≈ 2–3 weeks, E1.7 ≈ 1–1.5 weeks).
 Re-estimated at each feature's spec.
 
 ## Migration requirements
@@ -183,3 +197,5 @@ config from the backup.
 
 Per feature: the AIDevWorkflow task report (closed status and outcome), test results, CI run link. For the phase: a
 phase review in PROGRESS.md approved by the owner, and the v1.1.0 release checklist.
+Usability: the F1.7.1 baseline report, F1.7.2 output and golden review, F1.7.3 spec-template and register review,
+the F1.7.4 sourced desk study and a snapshot of the usability register.
