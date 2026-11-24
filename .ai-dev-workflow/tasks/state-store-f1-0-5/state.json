@@ -240,12 +240,11 @@
     "S8": {
       "status": "in-progress",
       "files": [
-        "skills/ai-dev-workflow/scripts/aidw/store/lock.py",
-        "tests/test_state_store.py"
+        "tests/helpers.py"
       ],
-      "note": "Pre-commit final source fingerprint a1296d7e2ba5cd406413713920aabcf972c13a25b6e610e397728afc6c199f94. Local macOS Python 3.9 and 3.13 full unittest suites each passed 242/242; installed v1.0.1 engine unit and privacy checks passed on this fingerprint. Ruff 0.17.6 and Mypy 1.20.2 each returned zero diagnostics, matching the pre-feature baseline; staged diff and privacy checks passed. Independent read-only code audit GO. Ubuntu/macOS/Windows CI remains pending on the pushed commit, so S8 remains in-progress.",
+      "note": "First CI run f0d469e: Ubuntu 3.9/3.13, macOS 3.13, Windows 3.9/3.13 and lint passed; macOS 3.9 failed on a transient Git maintenance lock disappearing during test-repository cleanup. Narrow FileNotFoundError-only cleanup fix in tests/helpers.py reviewed read-only. Local Python 3.9 and 3.13 suites passed 242/242; official unit 242/242 and privacy passed on code fingerprint 6efbf531b4. Re-run exact-commit CI after corrective commit.",
       "agent": "codex",
-      "at": "2026-11-24T06:07:09Z"
+      "at": "2026-11-24T06:23:30Z"
     }
   },
   "checks": [
@@ -308,6 +307,36 @@
       "status": "passed",
       "summary": "Scanned 225 files: no findings.",
       "fingerprint": "a1296d7e2ba5cd406413713920aabcf972c13a25b6e610e397728afc6c199f94"
+    },
+    {
+      "id": "unit",
+      "name": "Unit, scenario and doc tests",
+      "kind": "result",
+      "agent": "codex",
+      "at": "2026-11-24T06:20:15Z",
+      "counts": null,
+      "reason": null,
+      "command": "python3 -m unittest discover -s tests",
+      "duration_s": 184.0,
+      "exit_code": 0,
+      "status": "passed",
+      "summary": "OK",
+      "fingerprint": "6efbf531b426082bdfac1707efc7ff8522471d09252db3dfef9e6b9b9119bc8f"
+    },
+    {
+      "id": "privacy",
+      "name": "Pre-publish secret and privacy scan",
+      "kind": "result",
+      "agent": "codex",
+      "at": "2026-11-24T06:23:23Z",
+      "counts": null,
+      "reason": null,
+      "command": "python3 tools/prepublish_check.py",
+      "duration_s": 0.4,
+      "exit_code": 0,
+      "status": "passed",
+      "summary": "Scanned 225 files: no findings.",
+      "fingerprint": "6efbf531b426082bdfac1707efc7ff8522471d09252db3dfef9e6b9b9119bc8f"
     }
   ],
   "checkpoints": [
@@ -423,6 +452,15 @@
       "fingerprint": "a1296d7e2ba5cd406413713920aabcf972c13a25b6e610e397728afc6c199f94",
       "valid": true,
       "changed_files": 14,
+      "step": "S8"
+    },
+    {
+      "at": "2026-11-24T06:23:30Z",
+      "kind": "step",
+      "agent": "codex",
+      "fingerprint": "6efbf531b426082bdfac1707efc7ff8522471d09252db3dfef9e6b9b9119bc8f",
+      "valid": true,
+      "changed_files": 15,
       "step": "S8"
     }
   ],
@@ -622,6 +660,27 @@
       "agent": "codex",
       "step": "S8",
       "status": "in-progress"
+    },
+    {
+      "at": "2026-11-24T06:23:19Z",
+      "event": "check",
+      "agent": "codex",
+      "check": "unit",
+      "status": "passed"
+    },
+    {
+      "at": "2026-11-24T06:23:23Z",
+      "event": "check",
+      "agent": "codex",
+      "check": "privacy",
+      "status": "passed"
+    },
+    {
+      "at": "2026-11-24T06:23:30Z",
+      "event": "step",
+      "agent": "codex",
+      "step": "S8",
+      "status": "in-progress"
     }
   ],
   "baseline": {
@@ -636,10 +695,10 @@
       "captured_at": "2026-11-23T10:40:22Z"
     }
   },
-  "updated_at": "2026-11-24T06:07:09Z",
+  "updated_at": "2026-11-24T06:23:30Z",
   "last_checkpoint": {
-    "at": "2026-11-24T06:07:09Z",
-    "fingerprint": "a1296d7e2ba5cd406413713920aabcf972c13a25b6e610e397728afc6c199f94",
+    "at": "2026-11-24T06:23:30Z",
+    "fingerprint": "6efbf531b426082bdfac1707efc7ff8522471d09252db3dfef9e6b9b9119bc8f",
     "changes": {
       "docs/usage.md": "4163e40f3c875d41879ee1a5513cfe0715c6f6b3",
       "skills/ai-dev-workflow/scripts/aidw/agents/claude_hooks.py": "de7b5a4263145560a73716435849307c0cf91200",
@@ -654,6 +713,7 @@
       "skills/ai-dev-workflow/scripts/workflow.py": "d95491f1a98dda03080ef1db2fc5a35f1c66b441",
       "tests/fixtures/state-v1.0.0.json": "e4cdfce704934e6a9929e81b6537bf5725bba0a0",
       "tests/golden/workflow-help.txt": "847bcfd7b467d70a449c0e6217113ca1ec98cf54",
+      "tests/helpers.py": "a2831fcf8cfb9ed9eb7ab2e7189b1b54f45a5b96",
       "tests/test_state_store.py": "83cb72e141269eb4ad71b38ff007986182dffe7f"
     }
   }

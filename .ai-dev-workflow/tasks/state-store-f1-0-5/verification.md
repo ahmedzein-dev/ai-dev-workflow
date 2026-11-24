@@ -7,8 +7,8 @@ Written by `workflow.py run`; do not edit between the markers.
 <!-- aidw:checks:start -->
 | Check | Status | Summary | Code fingerprint | When | Agent |
 |---|---|---|---|---|---|
-| privacy | passed | Scanned 225 files: no findings. | `a1296d7e2b` | 2026-11-24T06:07:01Z | codex |
-| unit | passed | OK | `a1296d7e2b` | 2026-11-24T06:03:47Z | codex |
+| privacy | passed | Scanned 225 files: no findings. | `6efbf531b4` | 2026-11-24T06:23:23Z | codex |
+| unit | passed | OK | `6efbf531b4` | 2026-11-24T06:20:15Z | codex |
 <!-- aidw:checks:end -->
 
 ## Acceptance matrix

@@ -183,9 +183,15 @@ def git(repo: Path, *args: str) -> str:
     return subprocess.run(["git", *args], cwd=str(repo), check=True, capture_output=True, text=True).stdout
 
 
-def _force_remove(func, path, _exc):
-    os.chmod(path, stat.S_IWRITE | stat.S_IREAD)
-    func(path)
+def _force_remove(func, path, exc):
+    problem = exc[1] if isinstance(exc, tuple) else exc  # onerror (3.9) vs onexc (3.12+)
+    if isinstance(problem, FileNotFoundError):
+        return  # git maintenance removed the transient file during rmtree
+    try:
+        os.chmod(path, stat.S_IWRITE | stat.S_IREAD)
+        func(path)
+    except FileNotFoundError:
+        pass  # it disappeared after the callback started
 
 
 class WorkflowTestCase(unittest.TestCase):
