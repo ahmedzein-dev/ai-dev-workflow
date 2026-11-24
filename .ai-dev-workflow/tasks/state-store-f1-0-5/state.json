@@ -6,7 +6,7 @@
   "created_at": "2026-11-23T07:03:13Z",
   "created_by": "codex",
   "invocation": "# AIDevWorkflow — Begin F1.0.5 Discovery\n\nThe revised Master Roadmap has been approved and committed successfully.\n\nApproved roadmap commit:\n\n`a66a6070f40ecc6c6da6ee9e8303d94f43bbfe78`\n\nBranch:\n\n`phase-1/foundations`\n\nWe can now proceed with the next planned development feature:\n\n**F1.0.5 — State Store Reliability**\n\n## Objective\n\nStart the official AIDevWorkflow task workflow for F1.0.5.\n\nThe scope defined in the approved Phase 1 roadmap includes:\n\n- State schema validation on load.\n- Explicit ",
-  "stage": "TESTING",
+  "stage": "FINAL_REPORT",
   "status": "active",
   "outcome": null,
   "template": {
@@ -240,11 +240,11 @@
     "S8": {
       "status": "done",
       "files": [
-        "tests/helpers.py"
+        "tests/test_state_store.py"
       ],
-      "note": "Final code fingerprint 6efbf531b426082bdfac1707efc7ff8522471d09252db3dfef9e6b9b9119bc8f; pushed commit b9c39ed74b39b55fe114898afad377e6051929fb. GitHub CI run 45340225724 succeeded: Ubuntu 24.04, macOS, Windows x Python 3.9/3.13, all 6 matrix jobs plus Ruff/Mypy lint. Each matrix job ran 242 tests and privacy scan 225 files with no findings. Windows 3.9 skipped 2 unsupported/conditional cases, Windows 3.13 skipped 3; see verification.md. Local Python 3.9/3.13 full suites passed 242/242, official unit/privacy passed on final fingerprint, pinned Ruff 0.17.6/Mypy 1.20.2 zero. Independent code audit found no new issues; final evidence audit follows TESTING.",
+      "note": "Final source fingerprint b04a1b47d182d353c27ca0f465f67a54c0837ba341416cc42a87f8b667d413a1; pushed source commit dd88e73140828eebffb373aa2492d0eac0acdf64. GitHub CI run 45390904437 passed all six Ubuntu 24.04/macOS/Windows x Python 3.9/3.13 jobs plus Ruff/Mypy lint. Each matrix job discovered 243 tests and passed privacy scan of 225 files. Windows 3.9 skipped 2 platform-conditional tests, Windows 3.13 skipped 3. Local Python 3.9/3.13 suites each passed 243/243; official unit/privacy checks passed on final fingerprint; pinned Ruff 0.17.6 and Mypy 1.20.2 zero diagnostics. Independent audit found and corrected PID-reuse coverage and development TD-25 test-count evidence; final evidence review follows.",
       "agent": "codex",
-      "at": "2026-11-24T06:32:31Z"
+      "at": "2026-11-24T12:21:55Z"
     }
   },
   "checks": [
@@ -509,6 +509,26 @@
       "fingerprint": "6efbf531b426082bdfac1707efc7ff8522471d09252db3dfef9e6b9b9119bc8f",
       "valid": true,
       "changed_files": 15
+    },
+    {
+      "at": "2026-11-24T12:21:45Z",
+      "kind": "preflight",
+      "agent": "codex",
+      "fingerprint": "b04a1b47d182d353c27ca0f465f67a54c0837ba341416cc42a87f8b667d413a1",
+      "valid": true,
+      "changed_files": 15,
+      "unattributed": [
+        "tests/test_state_store.py"
+      ]
+    },
+    {
+      "at": "2026-11-24T12:21:55Z",
+      "kind": "step",
+      "agent": "codex",
+      "fingerprint": "b04a1b47d182d353c27ca0f465f67a54c0837ba341416cc42a87f8b667d413a1",
+      "valid": true,
+      "changed_files": 15,
+      "step": "S8"
     }
   ],
   "decisions": [],
@@ -787,6 +807,51 @@
       "from": "FIXING",
       "to": "TESTING",
       "reason": "Audit findings corrected: explicit reused-PID lock regression added and TD-25 development count corrected; full local Python 3.9/3.13 suites each passed 243/243, lint and privacy clean. New exact-commit CI pending."
+    },
+    {
+      "at": "2026-11-24T12:21:41Z",
+      "event": "stage",
+      "agent": "codex",
+      "from": "TESTING",
+      "to": "FIXING",
+      "reason": "Reconcile the S8 current-step note and verification records with the final 243-test CI evidence; source code is unchanged."
+    },
+    {
+      "at": "2026-11-24T12:21:45Z",
+      "event": "preflight",
+      "agent": "codex",
+      "valid": true
+    },
+    {
+      "at": "2026-11-24T12:21:55Z",
+      "event": "step",
+      "agent": "codex",
+      "step": "S8",
+      "status": "done"
+    },
+    {
+      "at": "2026-11-24T12:22:00Z",
+      "event": "stage",
+      "agent": "codex",
+      "from": "FIXING",
+      "to": "TESTING",
+      "reason": "S8 reattributed to final PID-reuse test snapshot; exact-source 243-test CI matrix and lint all passed, and acceptance evidence updated."
+    },
+    {
+      "at": "2026-11-24T12:22:15Z",
+      "event": "stage",
+      "agent": "codex",
+      "from": "TESTING",
+      "to": "AUDIT",
+      "reason": "Exact final source commit dd88e731 passed 6/6 OS/Python CI jobs plus lint; 243 tests discovered per job, platform skips documented, local checks and privacy current, all AC/EC except independent-audit DW-5 supported."
+    },
+    {
+      "at": "2026-11-24T12:26:31Z",
+      "event": "stage",
+      "agent": "codex",
+      "from": "AUDIT",
+      "to": "FINAL_REPORT",
+      "reason": "Independent read-only subagent final audit GO on source commit dd88e731 and exact CI evidence; all 31 acceptance items are Passed and findings F-1 through F-3 fixed and rechecked."
     }
   ],
   "baseline": {
@@ -801,10 +866,10 @@
       "captured_at": "2026-11-23T10:40:22Z"
     }
   },
-  "updated_at": "2026-11-24T12:08:11Z",
+  "updated_at": "2026-11-24T12:26:31Z",
   "last_checkpoint": {
-    "at": "2026-11-24T06:35:12Z",
-    "fingerprint": "6efbf531b426082bdfac1707efc7ff8522471d09252db3dfef9e6b9b9119bc8f",
+    "at": "2026-11-24T12:21:55Z",
+    "fingerprint": "b04a1b47d182d353c27ca0f465f67a54c0837ba341416cc42a87f8b667d413a1",
     "changes": {
       "docs/usage.md": "4163e40f3c875d41879ee1a5513cfe0715c6f6b3",
       "skills/ai-dev-workflow/scripts/aidw/agents/claude_hooks.py": "de7b5a4263145560a73716435849307c0cf91200",
@@ -820,7 +885,7 @@
       "tests/fixtures/state-v1.0.0.json": "e4cdfce704934e6a9929e81b6537bf5725bba0a0",
       "tests/golden/workflow-help.txt": "847bcfd7b467d70a449c0e6217113ca1ec98cf54",
       "tests/helpers.py": "a2831fcf8cfb9ed9eb7ab2e7189b1b54f45a5b96",
-      "tests/test_state_store.py": "83cb72e141269eb4ad71b38ff007986182dffe7f"
+      "tests/test_state_store.py": "288606c13e9d7361e9d6873ad0d5d5c7c0bb9070"
     }
   }
 }
