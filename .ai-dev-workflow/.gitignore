@@ -1,3 +1,5 @@
 # Local pointer to the task this checkout is working on
 ACTIVE
 *.local.json
+.locks/
+tasks/*/.migrate-backup/

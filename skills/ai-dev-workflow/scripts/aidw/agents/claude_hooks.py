@@ -13,15 +13,17 @@ from aidw.constants import CODE_STAGES, NEXT, RECORDS, REFERENCE, STAGES
 from aidw.core.gates import approval_status
 from aidw.errors import WorkflowError
 from aidw.infra.gitutil import is_records_path
-from aidw.infra.text import clean_session, now_iso, save_json
+from aidw.infra.text import clean_session, now_iso
 from aidw.records.parsers import blocking_deps
 from aidw.store.config import task_dir
-from aidw.store.state import active_path, load_state, read_active
+from aidw.store.lock import locked_records
+from aidw.store.state import load_state, read_active, save_active
 
 
 def _find_records(start: Path) -> Optional[Path]:
     for folder in [start, *start.parents]:
-        if (folder / RECORDS / "ACTIVE").is_file():
+        pointer = folder / RECORDS / "ACTIVE"
+        if pointer.exists() or pointer.is_symlink():
             return folder
     return None
 
@@ -56,7 +58,7 @@ def _rejected_session_reason(repo: Path, active: Dict[str, Any]) -> Optional[str
     """Deny inside an active task, whatever the binding, so an invalid session can never bypass the gates; without an
     active task there is nothing to gate. The reason never contains the session id."""
     if not (task_dir(repo, active["task"]) / "state.json").exists():
-        return None
+        return "AIDevWorkflow cannot validate the active task; repair ACTIVE or its task state before editing."
     state = load_state(repo, active["task"])
     if state["status"] != "active":
         return None
@@ -121,43 +123,41 @@ def hook_claude_pre_edit(raw: str) -> int:
         if repo is None:
             _hook_log("claude-pre-edit", session=session, file=str(target), decision="allow", why="no active task", **flags)
             return 0
-        active = read_active(repo)
-        if not active:
-            return 0
-    except Exception:  # noqa: BLE001 - without an active task the hook must never interfere
+    except Exception:  # noqa: BLE001 - without a known repository the hook must never interfere
         return 0
-    if rejected:
-        try:
-            reason = _rejected_session_reason(repo, active)
-        except Exception as exc:  # noqa: BLE001 - inside an active task, fail closed
-            reason = f"AIDevWorkflow could not validate task '{active.get('task')}' ({type(exc).__name__}). Fix the records or pause the task."
-        _hook_log("claude-pre-edit", session=None, file=str(target), task=active.get("task"),
-                  decision="deny" if reason else "allow", why=reason or "no active task", **flags)
-        return _deny(reason) if reason else 0
     try:
-        bound = active.get("session")
-        if bound and session and bound != session:
-            _hook_log("claude-pre-edit", session=session, file=str(target), decision="allow", why="other session")
-            return 0
-        if not bound:
-            if active.get("agent") not in (None, "claude-code", "unknown-agent"):
-                _hook_log("claude-pre-edit", session=session, file=str(target), decision="allow", why="other agent")
+        with locked_records(repo, active=True):
+            active = read_active(repo)
+            if not active:
                 return 0
-            active["session"] = session
-            if active.get("preflight_at") and not active.get("preflight_session"):
-                active["preflight_session"] = session
-            save_json(active_path(repo), active)
-        if not (task_dir(repo, active["task"]) / "state.json").exists():
-            return 0
-    except Exception:  # noqa: BLE001 - without an active task the hook must never interfere
-        return 0
-    try:
-        reason = gate_decision(repo, active, target, session)
-    except Exception as exc:  # noqa: BLE001 - inside an active task, fail closed
-        reason = f"AIDevWorkflow could not validate task '{active.get('task')}' ({exc}). Fix the records or pause the task."
-    _hook_log("claude-pre-edit", session=session, file=str(target), task=active.get("task"),
-              decision="deny" if reason else "allow", why=reason or "gates satisfied")
-    return _deny(reason) if reason else 0
+            with locked_records(repo, (active["task"],)):
+                if rejected:
+                    reason = _rejected_session_reason(repo, active)
+                    _hook_log("claude-pre-edit", session=None, file=str(target), task=active["task"],
+                              decision="deny" if reason else "allow", why=reason or "no active task", **flags)
+                    return _deny(reason) if reason else 0
+                bound = active.get("session")
+                if bound and session and bound != session:
+                    _hook_log("claude-pre-edit", session=session, file=str(target), decision="allow", why="other session")
+                    return 0
+                if not bound:
+                    if active.get("agent") not in (None, "claude-code", "unknown-agent"):
+                        _hook_log("claude-pre-edit", session=session, file=str(target), decision="allow", why="other agent")
+                        return 0
+                    active["session"] = session
+                    if active.get("preflight_at") and not active.get("preflight_session"):
+                        active["preflight_session"] = session
+                    save_active(repo, active)
+                reason = gate_decision(repo, active, target, session)
+                _hook_log("claude-pre-edit", session=session, file=str(target), task=active["task"],
+                          decision="deny" if reason else "allow", why=reason or "gates satisfied")
+                return _deny(reason) if reason else 0
+    except Exception as exc:  # noqa: BLE001 - a present but invalid ACTIVE/task fails closed
+        reason = (f"AIDevWorkflow could not validate the active workflow ({type(exc).__name__}). "
+                  "Inspect ACTIVE and the task records before editing.")
+        _hook_log("claude-pre-edit", session=None if rejected else session, file=str(target),
+                  decision="deny", why=reason, **flags)
+        return _deny(reason)
 
 
 def hook_claude_prompt(raw: str) -> int:

@@ -1,13 +1,14 @@
 === workflow.py --help ===
-usage: workflow.py [-h] [--version] {init,new,status,discover,spec-check,review,plan-check,approve,stage,resume,pause,preflight,step,run,scope,decision,check,outcome,close,hook} ...
+usage: workflow.py [-h] [--version] {init,new,status,migrate,discover,spec-check,review,plan-check,approve,stage,resume,pause,preflight,step,run,scope,decision,check,outcome,close,hook} ...
 
 AIDevWorkflow engine for the ai-dev-workflow skill.
 
 positional arguments:
-  {init,new,status,discover,spec-check,review,plan-check,approve,stage,resume,pause,preflight,step,run,scope,decision,check,outcome,close,hook}
+  {init,new,status,migrate,discover,spec-check,review,plan-check,approve,stage,resume,pause,preflight,step,run,scope,decision,check,outcome,close,hook}
     init                Set up AIDevWorkflow in a project (after asking the user).
     new                 Create a task (only after an explicit invocation).
     status              List tasks, or show one task with its next step.
+    migrate             Preview, apply or roll back a registered task-state migration.
     discover            Record inspected files and the discovery summary.
     spec-check          Validate the spec against the template and its rules.
     review              Record the spec review (judgment rules, flags, coverage).
@@ -87,6 +88,20 @@ options:
   --repo REPO    Path inside the project's git repository (default: current directory).
   --agent AGENT  Your agent name: claude-code, codex, gemini-cli, antigravity or other.
   --json         Machine-readable output where supported.
+
+=== workflow.py migrate --help ===
+usage: workflow.py migrate [-h] [--repo REPO] [--agent AGENT] [--json] [--apply | --rollback BACKUP_ID] task
+
+positional arguments:
+  task
+
+options:
+  -h, --help            show this help message and exit
+  --repo REPO           Path inside the project's git repository (default: current directory).
+  --agent AGENT         Your agent name: claude-code, codex, gemini-cli, antigravity or other.
+  --json                Machine-readable output where supported.
+  --apply               Apply a registered migration after reviewing the preview.
+  --rollback BACKUP_ID  Restore a verified backup if no later state edit occurred.
 
 === workflow.py discover --help ===
 usage: workflow.py discover [-h] [--repo REPO] [--agent AGENT] [--json] [--inspected [INSPECTED ...]] [--summary SUMMARY] task

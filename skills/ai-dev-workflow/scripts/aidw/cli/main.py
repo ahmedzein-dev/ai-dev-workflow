@@ -6,7 +6,7 @@ import sys
 from typing import Optional, Sequence
 from aidw import __version__
 from aidw.agents.claude_hooks import cmd_hook
-from aidw.cli.commands import cmd_approve, cmd_check, cmd_close, cmd_decision, cmd_discover, cmd_init, cmd_new, cmd_outcome, cmd_pause, cmd_plan_check, cmd_preflight, cmd_resume, cmd_review, cmd_run, cmd_scope, cmd_spec_check, cmd_stage, cmd_status, cmd_step
+from aidw.cli.commands import cmd_approve, cmd_check, cmd_close, cmd_decision, cmd_discover, cmd_init, cmd_migrate, cmd_new, cmd_outcome, cmd_pause, cmd_plan_check, cmd_preflight, cmd_resume, cmd_review, cmd_run, cmd_scope, cmd_spec_check, cmd_stage, cmd_status, cmd_step
 from aidw.constants import COMMIT_MODES, STAGES, TASK_TYPES
 from aidw.errors import WorkflowError
 
@@ -50,6 +50,13 @@ def build_parser() -> argparse.ArgumentParser:
     p = sub.add_parser("status", parents=[common], help="List tasks, or show one task with its next step.")
     p.add_argument("task", nargs="?")
     p.set_defaults(func=cmd_status)
+
+    p = sub.add_parser("migrate", parents=[common], help="Preview, apply or roll back a registered task-state migration.")
+    p.add_argument("task")
+    mode = p.add_mutually_exclusive_group()
+    mode.add_argument("--apply", action="store_true", help="Apply a registered migration after reviewing the preview.")
+    mode.add_argument("--rollback", metavar="BACKUP_ID", help="Restore a verified backup if no later state edit occurred.")
+    p.set_defaults(func=cmd_migrate)
 
     p = sub.add_parser("discover", parents=[common], help="Record inspected files and the discovery summary.")
     p.add_argument("task")

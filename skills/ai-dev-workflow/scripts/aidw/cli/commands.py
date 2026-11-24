@@ -96,6 +96,26 @@ def repo_arg(args: argparse.Namespace) -> str:
     return args.repo
 
 
+def cmd_migrate(args: argparse.Namespace) -> int:
+    result = api.migrate_task(repo=repo_arg(args), task=args.task, agent=agent_name(args),
+                              apply=args.apply, rollback=args.rollback)
+    if args.json:
+        print(json.dumps(result, indent=2))
+    elif result["action"] == "preview":
+        print(f"Migration preview for '{result['task']}': {result['message']}")
+        print(f"  State: {result['affected_file']}  schema: {result['source_schema']}"
+              + (f" → {result['target_schema']}" if result["target_schema"] is not None else ""))
+        print(f"  Validation: source {result['validation']['source']}; "
+              f"proposed {result['validation']['proposed']}")
+        print(f"  Backups, when needed: {result['backup_location']}")
+    elif result["action"] == "apply":
+        print(f"Migrated '{result['task']}' from schema {result['source_schema']} to {result['target_schema']}. "
+              f"Backup: {result['backup']} (ID: {result['backup_id']}).")
+    else:
+        print(f"Restored '{result['task']}' from {result['backup']} (schema {result['schema']}).")
+    return 0
+
+
 def cmd_init(args: argparse.Namespace) -> int:
     if args.discover:
         report = api.discover_setup(repo=repo_arg(args))

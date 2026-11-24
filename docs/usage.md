@@ -107,3 +107,38 @@ python3 ~/.agents/skills/ai-dev-workflow/scripts/workflow.py check             #
 python3 ~/.agents/skills/ai-dev-workflow/scripts/workflow.py outcome <task>    # highest status the evidence allows
 python3 ~/.agents/skills/ai-dev-workflow/scripts/workflow.py --help
 ```
+
+## Task-state migration and recovery
+
+Existing schema-1 tasks continue unchanged. This version has no production conversion to schema 2, so a preview
+reports that no migration is available and does not write to the project. When a future release registers a
+conversion, use the matching release's engine and inspect its preview before applying it:
+
+```bash
+python3 skills/ai-dev-workflow/scripts/workflow.py migrate <task>
+python3 skills/ai-dev-workflow/scripts/workflow.py migrate <task> --apply
+python3 skills/ai-dev-workflow/scripts/workflow.py migrate <task> --rollback <backup-id>
+```
+
+The preview identifies the affected `state.json`, source and target schemas, and local backup location. Apply
+requires an explicit command; it saves the original bytes and a digest manifest under that task's ignored
+`.migrate-backup/` folder before replacing `state.json`. Keep the printed backup ID. A retry checks the current
+schema instead of applying the conversion again. Rollback restores the exact saved bytes only while the task state
+still matches the migration result. If the task changed afterward, preserve the backup and reconcile the records
+manually rather than discarding newer evidence. Back up the repository and stop older agent sessions before a
+future migration. Do not migrate a live task with a different engine version writing to the same checkout.
+
+The engine uses local task and ACTIVE locks for current-engine record changes. If a lock times out, check whether
+another agent is still writing. It automatically clears a lock only when the same-host owner process is provably
+dead on supported POSIX systems; on Windows liveness is treated as unknown, so stale locks and temporary files
+require manual inspection. A present malformed ACTIVE pointer is reported as an error and
+Claude edit hooks deny the affected repository until it is repaired. Do not delete a lock or temporary state file
+merely because it looks old: it might be the only recoverable copy.
+In repositories created by older versions, the engine adds the lock ignore rule to that clone's local
+`.git/info/exclude` before creating a lock; it does not replace a customized project `.gitignore`.
+
+Each replaced file is flushed and atomically renamed; on supported POSIX systems its parent directory is synced.
+Windows does not provide that directory-sync guarantee here. A directory-sync failure after replacement leaves
+durability uncertain, so inspect the file before retrying. These guarantees apply per file: updates involving
+`state.json`, ACTIVE, snapshots and verification are not one transaction (TD-29). Direct internal persistence calls
+remain outside the API identity-validation boundary (TD-30).

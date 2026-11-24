@@ -42,7 +42,7 @@ from aidw.api import (  # noqa: E402,F401
 )
 from aidw.cli.commands import (  # noqa: E402,F401
     cmd_approve, cmd_check, cmd_close, cmd_decision, cmd_discover, cmd_init,
-    cmd_new, cmd_outcome, cmd_pause, cmd_plan_check, cmd_preflight, cmd_resume,
+    cmd_migrate, cmd_new, cmd_outcome, cmd_pause, cmd_plan_check, cmd_preflight, cmd_resume,
     cmd_review, cmd_run, cmd_scope, cmd_spec_check, cmd_stage, cmd_status,
     cmd_step, ensure_commit_mode, print_discovery, print_spec_check, resolve_template, update_setup,
 )

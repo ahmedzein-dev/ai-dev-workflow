@@ -186,7 +186,9 @@ just records; agents are not bound by them. `state.json` and `approved/` are wri
 
 
 def apply_commit_mode(repo: Path, mode: str) -> Path:
-    write_text(records_dir(repo) / ".gitignore", "# Local pointer to the task this checkout is working on\nACTIVE\n*.local.json\n")
+    write_text(records_dir(repo) / ".gitignore",
+               "# Local workflow files; never commit locks or migration backups\n"
+               "ACTIVE\n*.local.json\n.locks/\ntasks/*/.migrate-backup/\n")
     exclude_rel = run_git(repo, ["rev-parse", "--git-path", "info/exclude"]).strip()
     exclude = Path(exclude_rel)
     if not exclude.is_absolute():

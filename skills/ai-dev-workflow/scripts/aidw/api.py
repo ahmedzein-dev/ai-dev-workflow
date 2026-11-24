@@ -15,8 +15,10 @@ The only environment input is `AI_DEV_WORKFLOW_HOME` (the user's template librar
 """
 from __future__ import annotations
 
+import hashlib
 import json
 from contextlib import contextmanager
+from functools import wraps
 import os
 import re
 import shlex
@@ -37,7 +39,9 @@ from aidw.infra.text import bullet_list, clean_session, load_json, make_readonly
 from aidw.records.markdown import Doc
 from aidw.records.parsers import blocking_deps, parse_audit, parse_dependencies, parse_matrix, parse_report
 from aidw.store.config import config_path, library_dir, load_config, load_rules, record_template, records_dir, task_dir, template_path
-from aidw.store.state import activate, active_path, add_checkpoint, add_history, clear_active, list_tasks, load_state, read_active, save_state, state_path
+from aidw.store.lock import locked_records
+from aidw.store.migrate import migrate_task as _migrate_task
+from aidw.store.state import activate, active_path, add_checkpoint, add_history, clear_active, list_tasks, load_state, read_active, save_active, save_state, state_path
 
 PathLike = Union[str, Path]
 
@@ -306,6 +310,41 @@ def _task(repo: PathLike, task: str) -> Tuple[Path, Dict[str, Any], Dict[str, An
     return root, cfg, state
 
 
+def migrate_task(*, repo: PathLike, task: str, agent: str, apply: bool = False,
+                 rollback: Optional[str] = None) -> Dict[str, Any]:
+    """Preview, explicitly apply, or roll back one registered task-state migration.
+
+    Returns an action, task, affected file/backup where applicable, schema details, and changed.
+    No converter is registered in F1.0.5; schema-1 preview is a read-only no-op.
+    """
+    _check_agent(agent)
+    return _migrate_task(_root(repo), task, apply=apply, rollback=rollback)
+
+
+def _locked_task_change(*, active: bool = False) -> Any:
+    """Guard one API read-modify-write call; ACTIVE is always acquired before task locks."""
+    def decorate(func: Any) -> Any:
+        @wraps(func)
+        def wrapped(**kwargs: Any) -> Any:
+            _check_agent(kwargs["agent"])
+            if "session" in kwargs:
+                _check_session(kwargs["session"])
+            root = _root(kwargs["repo"])
+            tasks = [kwargs["task"]]
+            with locked_records(root, active=active):
+                # An ACTIVE-changing call can also pause the previously active task.
+                if active:
+                    current = read_active(root)
+                    if current and current["task"] != kwargs["task"]:
+                        tasks.append(current["task"])
+                with locked_records(root, tasks):
+                    if active and current and current["task"] != kwargs["task"]:
+                        load_state(root, current["task"])
+                    return func(**kwargs)
+        return wrapped
+    return decorate
+
+
 # ------------------------------------------------------------------------------------------ setup and tasks
 
 def apply_clone_commit_mode(*, repo: PathLike, cfg: Dict[str, Any]) -> Dict[str, Any]:
@@ -431,6 +470,7 @@ def update_setup(*, repo: PathLike, agent: str, commit: Optional[str] = None, st
     return {"changed": changed}
 
 
+@_locked_task_change(active=True)
 def new_task(*, repo: PathLike, task: str, title: str, task_type: str, invocation: Optional[str], agent: str,
              session: Optional[str] = None) -> Dict[str, Any]:
     """Create a task. Returns `task`, `commit_mode_message` (or None), `paused` (task paused by this one, or None),
@@ -491,6 +531,15 @@ def _remove_partial_task(tdir: Path, written: Sequence[Tuple[Path, os.stat_resul
         pass
 
 
+def _same_record_bytes(path: Path, previous: Optional[bytes]) -> bool:
+    if previous is None:
+        return not path.exists() and not path.is_symlink()
+    try:
+        return path.read_bytes() == previous
+    except OSError:
+        return False
+
+
 def _create_task(root: Path, cfg: Dict[str, Any], task: str, title: str, task_type: str, invocation: str,
                  agent: str, session: Optional[str], notice: Optional[str]) -> Dict[str, Any]:
     if not SLUG_RE.match(task) or len(task) > 60:
@@ -505,6 +554,11 @@ def _create_task(root: Path, cfg: Dict[str, Any], task: str, title: str, task_ty
     title = title.strip()
     invocation = redact(invocation.strip())[:500]
     assert_no_secrets(title, "the task title")
+    prior_active = read_active(root)
+    pointer = active_path(root)
+    pointer_before = pointer.read_bytes() if prior_active else None
+    prior_state = state_path(root, prior_active["task"]) if prior_active else None
+    prior_state_before = prior_state.read_bytes() if prior_state else None
     tdir.mkdir(parents=True)  # refuses if the folder appeared meanwhile; nothing is cleaned up then
     written: List[Tuple[Path, os.stat_result]] = []
     try:
@@ -529,10 +583,19 @@ def _create_task(root: Path, cfg: Dict[str, Any], task: str, title: str, task_ty
         add_history(state, "created", agent, invocation=invocation)
         with _reserve_task_destination(state_path(root, task)):
             save_state(root, state)  # before activation, so failure leaves ACTIVE and other tasks untouched
+            written.append((state_path(root, task), state_path(root, task).lstat()))
     except BaseException:
         _remove_partial_task(tdir, written)
         raise
-    paused = activate(root, state, agent, session)
+    try:
+        paused = activate(root, state, agent, session)
+    except BaseException:
+        # Clean owned records only when activation changed neither ACTIVE nor the previous task.
+        # A partial multi-file update is left intact for inspection (TD-29).
+        if (_same_record_bytes(pointer, pointer_before)
+                and (prior_state is None or _same_record_bytes(prior_state, prior_state_before))):
+            _remove_partial_task(tdir, written)
+        raise
     return {"task": task, "commit_mode_message": notice, "paused": paused,
             "preexisting": len(state["baseline"]["start"]["dirty"]), "next": NEXT["DISCOVERY"],
             "read": REFERENCE["DISCOVERY"]}
@@ -553,6 +616,7 @@ def status(*, repo: PathLike, task: Optional[str] = None) -> Dict[str, Any]:
     return {"setup": True, "active": active.get("task") if active else None, "tasks": tasks}
 
 
+@_locked_task_change()
 def record_discovery(*, repo: PathLike, task: str, agent: str, inspected: Sequence[str] = (),
                      summary: Optional[str] = None) -> Dict[str, Any]:
     """Record inspected paths and the discovery summary. Returns `inspected` (count), `summary_set` and `missing`
@@ -590,6 +654,7 @@ def plan_check(*, repo: PathLike, task: str) -> Dict[str, Any]:
     return _plan_check(root, state)
 
 
+@_locked_task_change()
 def review(*, repo: PathLike, task: str, agent: str, maps: Sequence[str] = (), questions: Sequence[str] = (),
            dismiss: Sequence[Tuple[str, str]] = (), notes: Sequence[str] = (),
            passes: Sequence[str] = ()) -> Dict[str, Any]:
@@ -668,6 +733,7 @@ def review(*, repo: PathLike, task: str, agent: str, maps: Sequence[str] = (), q
     return {"spec_check": _spec_check(root, state, cfg)}
 
 
+@_locked_task_change()
 def approve(*, repo: PathLike, task: str, document: str, evidence: Optional[str], agent: str,
             by: Optional[str] = None) -> Dict[str, Any]:
     """Record the user's approval of the spec or the plan and freeze a snapshot. Returns `document`, `version`,
@@ -735,6 +801,7 @@ def approve(*, repo: PathLike, task: str, document: str, evidence: Optional[str]
             "stage": state["stage"], "message": message}
 
 
+@_locked_task_change()
 def stage(*, repo: PathLike, task: str, stage: str, agent: str, reason: Optional[str] = None) -> Dict[str, Any]:
     """Move the task to another stage (the gates decide). Returns `task`, `stage`, `next`, `read`."""
     _check_agent(agent)
@@ -747,6 +814,7 @@ def stage(*, repo: PathLike, task: str, stage: str, agent: str, reason: Optional
             "read": REFERENCE[state["stage"]]}
 
 
+@_locked_task_change(active=True)
 def resume(*, repo: PathLike, task: str, agent: str, session: Optional[str] = None) -> Dict[str, Any]:
     """Make the task active in this checkout. Returns `paused` (the task paused by this one, or None), `summary`
     (the detailed task summary) and `code_stage` (True in IMPLEMENTATION or FIXING)."""
@@ -764,6 +832,7 @@ def resume(*, repo: PathLike, task: str, agent: str, session: Optional[str] = No
             "code_stage": state["stage"] in CODE_STAGES}
 
 
+@_locked_task_change(active=True)
 def pause(*, repo: PathLike, task: str, agent: str, reason: Optional[str] = None) -> Dict[str, Any]:
     """Pause the task. Returns `task`."""
     _check_agent(agent)
@@ -779,6 +848,7 @@ def pause(*, repo: PathLike, task: str, agent: str, reason: Optional[str] = None
 
 # --------------------------------------------------------------------------------- implementation and evidence
 
+@_locked_task_change(active=True)
 def preflight(*, repo: PathLike, task: str, agent: str, session: Optional[str] = None) -> Dict[str, Any]:
     """Revalidate the task before code edits and record a checkpoint. Returns `valid`, `problems`, `unattributed`
     (changes no recorded step explains), `task`, `stage` and `analyzer_hint` (the baseline reminder, or None).
@@ -819,7 +889,7 @@ def preflight(*, repo: PathLike, task: str, agent: str, session: Optional[str] =
             active = read_active(root) or {}
         active.update({"agent": agent, "session": session or active.get("session"),
                        "preflight_session": session, "preflight_at": now_iso()})
-        save_json(active_path(root), active)
+        save_active(root, active)
     add_history(state, "preflight", agent, valid=valid)
     save_state(root, state)
     analyzer_hint = None
@@ -832,6 +902,7 @@ def preflight(*, repo: PathLike, task: str, agent: str, session: Optional[str] =
             "stage": state["stage"], "analyzer_hint": analyzer_hint}
 
 
+@_locked_task_change()
 def step(*, repo: PathLike, task: str, step: str, status: str, agent: str, files: Optional[str] = None,
          note: Optional[str] = None) -> Dict[str, Any]:
     """Record progress on a step of the approved plan. Returns `step`, `status`, `files` (attributed), `done` and
@@ -875,7 +946,11 @@ def run_check(*, repo: PathLike, task: str, check: str, agent: str, extra: Seque
     If anything fails after the command ran, the exception carries the output in its `output_tail` attribute."""
     _check_agent(agent)
     _assert_clean_value(check, "the check name")
-    root, cfg, state = _task(repo, task)
+    root = _root(repo)
+    with locked_records(root, (task,)):
+        cfg = load_config(root)
+        state = load_state(root, task)
+        original_digest = hashlib.sha256(state_path(root, task).read_bytes()).hexdigest()
     checks = {c["id"]: c for c in cfg.get("checks", [])}
     chosen = checks.get(check)
     if chosen is None:
@@ -950,14 +1025,21 @@ def run_check(*, repo: PathLike, task: str, check: str, agent: str, extra: Seque
                                  summary=(f"exit {code}: " if code else "") + last_line(output))
         if entry.get("reason"):
             assert_no_secrets(entry["reason"], "the reason")
-        entry["fingerprint"] = code_fingerprint(root)
-        state["checks"].append(entry)
-        del state["checks"][:-200]
-        add_history(state, "check", agent, check=chosen["id"], status=entry["status"])
-        save_state(root, state)
-        # The check block is a view of state.json, written after it: a refused or failed save changes no record. If
-        # this write fails, state.json is ahead until the next `run` rewrites the block (not a transaction, TD-29).
-        regenerate_check_block(root, state)
+        with locked_records(root, (task,)):
+            current_digest = hashlib.sha256(state_path(root, task).read_bytes()).hexdigest()
+            if current_digest != original_digest:
+                raise WorkflowError(
+                    "Task state changed while the check ran; its output was shown but no result was recorded. "
+                    "Inspect the current task and rerun the check if still needed."
+                )
+            entry["fingerprint"] = code_fingerprint(root)
+            state["checks"].append(entry)
+            del state["checks"][:-200]
+            add_history(state, "check", agent, check=chosen["id"], status=entry["status"])
+            save_state(root, state)
+            # The check block is a view of state.json, written after it: a refused or failed save changes no record.
+            # If it fails, state.json is ahead until the next run rewrites the block (TD-29).
+            regenerate_check_block(root, state)
     except BaseException as exc:
         # The CLI printed the output before any later refusal; keep that by handing the tail to the caller.
         if output_tail:
@@ -966,6 +1048,7 @@ def run_check(*, repo: PathLike, task: str, check: str, agent: str, extra: Seque
     return {"entry": entry, "output_tail": output_tail, "recorded_on_purpose": bool(blocked or not_applicable)}
 
 
+@_locked_task_change()
 def scope(*, repo: PathLike, task: str, agent: str, exclude: Sequence[str] = (),
           reason: Optional[str] = None) -> Dict[str, Any]:
     """Changes in the task's scope, optionally excluding unrelated files first. Returns exactly `baseline`
@@ -993,6 +1076,7 @@ def scope(*, repo: PathLike, task: str, agent: str, exclude: Sequence[str] = (),
     }
 
 
+@_locked_task_change()
 def decision(*, repo: PathLike, task: str, text: Optional[str], evidence: Optional[str], agent: str,
              by: Optional[str] = None) -> Dict[str, Any]:
     """Record a user decision with the user's own words. Returns `count` (decisions recorded in total)."""
@@ -1037,6 +1121,7 @@ def outcome(*, repo: PathLike, task: str) -> Dict[str, Any]:
     return compute_outcome(root, state, cfg)
 
 
+@_locked_task_change(active=True)
 def close(*, repo: PathLike, task: str, agent: str) -> Dict[str, Any]:
     """Close the task with the status written in report.md, if the evidence allows it. Returns `task`, `outcome`."""
     _check_agent(agent)

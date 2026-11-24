@@ -1,0 +1,44 @@
+{
+  "schema": 1,
+  "id": "legacy-fixture",
+  "title": "Legacy fixture",
+  "type": "feature",
+  "created_at": "2026-11-23T10:41:35Z",
+  "created_by": "unknown-agent",
+  "invocation": "Use AIDevWorkflow for a fixture",
+  "stage": "DISCOVERY",
+  "status": "active",
+  "outcome": null,
+  "template": {
+    "path": ".ai-dev-workflow/templates/spec-kit.md",
+    "sha256": "574d3677a6a4f773352e6ffadf959e794bd9c985e25dea0556c53f37b5296ffc",
+    "rules": ".ai-dev-workflow/templates/spec-kit.rules.json"
+  },
+  "discovery": {
+    "inspected": [],
+    "summary": ""
+  },
+  "approvals": {},
+  "spec_review": {},
+  "progress": {},
+  "checks": [],
+  "checkpoints": [],
+  "decisions": [],
+  "excluded": [],
+  "history": [
+    {
+      "at": "2026-11-23T10:41:35Z",
+      "event": "created",
+      "agent": "unknown-agent",
+      "invocation": "Use AIDevWorkflow for a fixture"
+    }
+  ],
+  "baseline": {
+    "start": {
+      "head": "a5c4636bfffbfc5b48e35c8cfa8862cb94006969",
+      "dirty": {},
+      "captured_at": "2026-11-23T10:41:35Z"
+    }
+  },
+  "updated_at": "2026-11-23T10:41:35Z"
+}

@@ -1,0 +1,660 @@
+{
+  "schema": 1,
+  "id": "state-store-f1-0-5",
+  "title": "F1.0.5 State Store Reliability",
+  "type": "feature",
+  "created_at": "2026-11-23T07:03:13Z",
+  "created_by": "codex",
+  "invocation": "# AIDevWorkflow — Begin F1.0.5 Discovery\n\nThe revised Master Roadmap has been approved and committed successfully.\n\nApproved roadmap commit:\n\n`a66a6070f40ecc6c6da6ee9e8303d94f43bbfe78`\n\nBranch:\n\n`phase-1/foundations`\n\nWe can now proceed with the next planned development feature:\n\n**F1.0.5 — State Store Reliability**\n\n## Objective\n\nStart the official AIDevWorkflow task workflow for F1.0.5.\n\nThe scope defined in the approved Phase 1 roadmap includes:\n\n- State schema validation on load.\n- Explicit ",
+  "stage": "IMPLEMENTATION",
+  "status": "active",
+  "outcome": null,
+  "template": {
+    "path": ".ai-dev-workflow/templates/spec-kit.md",
+    "sha256": "574d3677a6a4f773352e6ffadf959e794bd9c985e25dea0556c53f37b5296ffc",
+    "rules": ".ai-dev-workflow/templates/spec-kit.rules.json"
+  },
+  "discovery": {
+    "inspected": [
+      "skills/ai-dev-workflow/scripts/workflow.py",
+      "skills/ai-dev-workflow/scripts/aidw/cli/main.py",
+      "skills/ai-dev-workflow/scripts/aidw/cli/commands.py",
+      "skills/ai-dev-workflow/scripts/aidw/api.py",
+      "skills/ai-dev-workflow/scripts/aidw/store/state.py",
+      "skills/ai-dev-workflow/scripts/aidw/store/config.py",
+      "skills/ai-dev-workflow/scripts/aidw/infra/text.py",
+      "skills/ai-dev-workflow/scripts/aidw/core/gates.py",
+      "skills/ai-dev-workflow/scripts/aidw/core/checks.py",
+      "skills/ai-dev-workflow/scripts/aidw/agents/claude_hooks.py",
+      "docs/roadmap/phases/PHASE_01.md",
+      "docs/roadmap/TARGET_ARCHITECTURE.md",
+      "docs/roadmap/CURRENT_ARCHITECTURE.md",
+      "docs/roadmap/DECISIONS.md",
+      "docs/roadmap/TECHNICAL_DEBT.md",
+      "docs/roadmap/RISK_REGISTER.md",
+      "docs/roadmap/PRODUCT_EXPERIENCE.md",
+      ".ai-dev-workflow/config.json",
+      ".ai-dev-workflow/PROJECT.md",
+      ".ai-dev-workflow/templates/spec-kit.md",
+      ".ai-dev-workflow/templates/spec-kit.rules.json",
+      "tests/test_records_safety.py",
+      "tests/test_preflight_and_hooks.py",
+      "tests/test_secret_identity.py",
+      ".github/workflows/tests.yml"
+    ],
+    "summary": "F1.0.5 protects per-task state.json and ACTIVE read/write reliability: validate state schema and shape, explicit versioned migration with dry-run/backup/rollback, task-scoped concurrency, durable atomic replacement and safe temp cleanup. Preserve v1 records, approvals, histories, evidence, TD-25 validation, existing CLI/API and hook gates. Exclude real-record migration now, TD-29 multi-file transactions, TD-30 direct-writer trust boundary, config schema 2 of F1.4.1, release or installed-engine changes. Affected layers: store, shared file writer, API read-modify-write paths, CLI, hooks, tests and migration guidance."
+  },
+  "approvals": {
+    "spec": {
+      "version": 1,
+      "sha256": "0bd712e1bd5e731e7727582a3a806e8ac75717fe4647d710b2c8bf5418e6bcc6",
+      "snapshot": "approved/spec.v1.md",
+      "approved_by": "user",
+      "evidence": "I explicitly approve the F1.0.5 specification with SHA-256 fingerprint:\n\n`0bd712e1bd5e731e7727582a3a806e8ac75717fe4647d710b2c8bf5418e6bcc6`\n\nThis approval includes the decision to implement the migration mechanism **without introducing a production schema-2 converter**. The schema-2 format is not defined or approved yet.\n\nI also approve the revised AC-10 and Done-when criteria distinguishing pre-existing Ruff/Mypy findings from regressions introduced by F1.0.5.",
+      "recorded_by": "codex",
+      "recorded_at": "2026-11-23T10:32:57Z"
+    },
+    "plan": {
+      "version": 1,
+      "sha256": "a8f95a2689e0771f595cfa62132803116df9927d31577e689163abc12cdb6296",
+      "snapshot": "approved/plan.v1.md",
+      "approved_by": "user",
+      "evidence": "I explicitly approve the F1.0.5 implementation plan with SHA-256 fingerprint:\n\n`a8f95a2689e0771f595cfa62132803116df9927d31577e689163abc12cdb6296`\n\nThe approved specification fingerprint is:\n\n`0bd712e1bd5e731e7727582a3a806e8ac75717fe4647d710b2c8bf5418e6bcc6`",
+      "recorded_by": "codex",
+      "recorded_at": "2026-11-23T10:40:22Z",
+      "spec_sha256": "0bd712e1bd5e731e7727582a3a806e8ac75717fe4647d710b2c8bf5418e6bcc6",
+      "spec_version": 1
+    }
+  },
+  "spec_review": {
+    "spec_sha256": "0bd712e1bd5e731e7727582a3a806e8ac75717fe4647d710b2c8bf5418e6bcc6",
+    "rules": {
+      "J1": {
+        "status": "pass",
+        "note": "",
+        "agent": "codex",
+        "at": "2026-11-23T10:16:21Z"
+      },
+      "J2": {
+        "status": "pass",
+        "note": "",
+        "agent": "codex",
+        "at": "2026-11-23T10:16:21Z"
+      },
+      "J3": {
+        "status": "pass",
+        "note": "Only AC-10 and its Done when check changed. The proposed store and migration structures still follow inspected aidw/store/state.py, aidw/infra/text.py, aidw/api.py and TARGET_ARCHITECTURE section 4.4.",
+        "agent": "codex",
+        "at": "2026-11-23T10:16:21Z"
+      },
+      "J4": {
+        "status": "pass",
+        "note": "",
+        "agent": "codex",
+        "at": "2026-11-23T10:16:21Z"
+      }
+    },
+    "map": {
+      "FR-1": [
+        "AC-1",
+        "EC-1",
+        "EC-2",
+        "EC-3"
+      ],
+      "FR-2": [
+        "AC-2",
+        "AC-3",
+        "EC-4",
+        "EC-15",
+        "EC-16"
+      ],
+      "FR-3": [
+        "AC-3",
+        "AC-4",
+        "EC-5",
+        "EC-7"
+      ],
+      "FR-4": [
+        "AC-5",
+        "EC-8",
+        "EC-9"
+      ],
+      "FR-5": [
+        "AC-6",
+        "EC-10"
+      ],
+      "FR-6": [
+        "AC-7",
+        "EC-6",
+        "EC-14"
+      ],
+      "FR-7": [
+        "AC-7",
+        "EC-11"
+      ],
+      "FR-8": [
+        "AC-8",
+        "AC-9",
+        "EC-12",
+        "EC-13"
+      ],
+      "FR-9": [
+        "AC-1",
+        "AC-9",
+        "AC-10"
+      ]
+    },
+    "questions": {
+      "double-tap": "EC-15",
+      "offline": "n/a:Local state operation with no network dependency",
+      "server-error": "n/a:No server involved; local I/O failure is EC-5 or EC-6",
+      "empty-result": "EC-4",
+      "app-killed": "EC-6",
+      "concurrent-change": "EC-8",
+      "stale-data": "EC-7",
+      "lost-response": "EC-16"
+    },
+    "dismissed": {}
+  },
+  "progress": {
+    "S1": {
+      "status": "done",
+      "files": [
+        "tests/fixtures/state-v1.0.0.json"
+      ],
+      "note": "Generated a schema-1 fixture with the unmodified v1.0.0 tag in an isolated temporary repository; pre-change golden, TD-25, and package tests passed 51/51. Ruff 0.17.6 and Mypy 1.20.2 baseline on a66a607 had zero diagnostics each.",
+      "agent": "codex",
+      "at": "2026-11-23T10:42:11Z"
+    },
+    "S2": {
+      "status": "done",
+      "files": [
+        "skills/ai-dev-workflow/scripts/aidw/store/state.py",
+        "tests/test_state_store.py"
+      ],
+      "note": "State schema 1, core container, ID/path and ACTIVE shape validation implemented; v1.0.0 fixture loads byte-identically. Focused tests pass 4/4. Hook fail-closed integration remains S4.",
+      "agent": "codex",
+      "at": "2026-11-23T10:43:12Z"
+    },
+    "S3": {
+      "status": "done",
+      "files": [
+        "skills/ai-dev-workflow/scripts/aidw/store/lock.py",
+        "tests/test_state_store.py",
+        ".ai-dev-workflow/.gitignore"
+      ],
+      "note": "Added ordered ACTIVE/task O_EXCL locks, bounded waits, owner tokens and conservative same-host stale recovery guarded against competing recoverers; cross-process crash/live/ambiguous tests pass. Integration with API/hooks remains S4.",
+      "agent": "codex",
+      "at": "2026-11-23T10:45:53Z"
+    },
+    "S4": {
+      "status": "done",
+      "files": [
+        "skills/ai-dev-workflow/scripts/aidw/api.py",
+        "skills/ai-dev-workflow/scripts/aidw/agents/claude_hooks.py",
+        "tests/test_state_store.py"
+      ],
+      "note": "Serialized task and ACTIVE API mutations in deterministic order; check execution releases task lock and refuses recording on intervening state change while retaining output. Claude hook binding uses the same locks and malformed ACTIVE fails closed. Targeted concurrency tests 12/12 and broader API/security/lifecycle suite 90/90 passed.",
+      "agent": "codex",
+      "at": "2026-11-23T10:50:37Z"
+    },
+    "S5": {
+      "status": "done",
+      "files": [
+        "skills/ai-dev-workflow/scripts/aidw/infra/text.py",
+        "skills/ai-dev-workflow/scripts/aidw/store/state.py",
+        "skills/ai-dev-workflow/scripts/aidw/api.py",
+        "skills/ai-dev-workflow/scripts/aidw/agents/claude_hooks.py",
+        "tests/test_state_store.py"
+      ],
+      "note": "Shared writer now uses unique owned temp files, file fsync, atomic replace and POSIX directory fsync; post-replace sync errors report indeterminate durability. Validated locked state/ACTIVE writes clean only proven dead-writer temps. Fault-injection and security tests passed (16 focused; 68 focused+TD-25/hook).",
+      "agent": "codex",
+      "at": "2026-11-23T10:54:03Z"
+    },
+    "S6": {
+      "status": "done",
+      "files": [
+        "skills/ai-dev-workflow/scripts/aidw/store/migrate.py",
+        "skills/ai-dev-workflow/scripts/aidw/api.py",
+        "skills/ai-dev-workflow/scripts/aidw/cli/main.py",
+        "skills/ai-dev-workflow/scripts/aidw/cli/commands.py",
+        "skills/ai-dev-workflow/scripts/aidw/core/setup.py",
+        "skills/ai-dev-workflow/scripts/workflow.py",
+        ".ai-dev-workflow/.gitignore",
+        "tests/test_state_store.py"
+      ],
+      "note": "Added preview-first task-state migration CLI/API and empty production converter registry. Isolated test converter exercised backup/apply/retry/rollback, conflict and injected failure paths; 6 migration tests passed. Backup contents are ignored by git and real records were not migrated.",
+      "agent": "codex",
+      "at": "2026-11-23T11:00:10Z"
+    },
+    "S7": {
+      "status": "done",
+      "files": [
+        "docs/usage.md",
+        "tests/golden/workflow-help.txt"
+      ],
+      "note": "Documented read-only preview, explicit apply and verified rollback, lock recovery, per-file durability and Windows limit. Updated only the workflow help golden for migrate; targeted golden/state-store tests passed (28/28). No new settings or ordinary-use prompts.",
+      "agent": "codex",
+      "at": "2026-11-23T11:02:30Z"
+    },
+    "S8": {
+      "status": "in-progress",
+      "files": [
+        "skills/ai-dev-workflow/scripts/aidw/store/lock.py",
+        "tests/test_state_store.py"
+      ],
+      "note": "Pre-commit final source fingerprint a1296d7e2ba5cd406413713920aabcf972c13a25b6e610e397728afc6c199f94. Local macOS Python 3.9 and 3.13 full unittest suites each passed 242/242; installed v1.0.1 engine unit and privacy checks passed on this fingerprint. Ruff 0.17.6 and Mypy 1.20.2 each returned zero diagnostics, matching the pre-feature baseline; staged diff and privacy checks passed. Independent read-only code audit GO. Ubuntu/macOS/Windows CI remains pending on the pushed commit, so S8 remains in-progress.",
+      "agent": "codex",
+      "at": "2026-11-24T06:07:09Z"
+    }
+  },
+  "checks": [
+    {
+      "id": "privacy",
+      "name": "Pre-publish secret and privacy scan",
+      "kind": "result",
+      "agent": "codex",
+      "at": "2026-11-24T05:36:18Z",
+      "counts": null,
+      "reason": null,
+      "command": "python3 tools/prepublish_check.py",
+      "duration_s": 0.4,
+      "exit_code": 0,
+      "status": "passed",
+      "summary": "Scanned 225 files: no findings.",
+      "fingerprint": "4dd9e292641bbc9e718133b27fcb34e9ddbd2c6c9e144fe5831d70a70387ee7a"
+    },
+    {
+      "id": "unit",
+      "name": "Unit, scenario and doc tests",
+      "kind": "result",
+      "agent": "codex",
+      "at": "2026-11-24T05:38:56Z",
+      "counts": null,
+      "reason": null,
+      "command": "python3 -m unittest discover -s tests",
+      "duration_s": 176.9,
+      "exit_code": 0,
+      "status": "passed",
+      "summary": "OK",
+      "fingerprint": "4dd9e292641bbc9e718133b27fcb34e9ddbd2c6c9e144fe5831d70a70387ee7a"
+    },
+    {
+      "id": "unit",
+      "name": "Unit, scenario and doc tests",
+      "kind": "result",
+      "agent": "codex",
+      "at": "2026-11-24T06:03:47Z",
+      "counts": null,
+      "reason": null,
+      "command": "python3 -m unittest discover -s tests",
+      "duration_s": 186.6,
+      "exit_code": 0,
+      "status": "passed",
+      "summary": "OK",
+      "fingerprint": "a1296d7e2ba5cd406413713920aabcf972c13a25b6e610e397728afc6c199f94"
+    },
+    {
+      "id": "privacy",
+      "name": "Pre-publish secret and privacy scan",
+      "kind": "result",
+      "agent": "codex",
+      "at": "2026-11-24T06:07:01Z",
+      "counts": null,
+      "reason": null,
+      "command": "python3 tools/prepublish_check.py",
+      "duration_s": 0.4,
+      "exit_code": 0,
+      "status": "passed",
+      "summary": "Scanned 225 files: no findings.",
+      "fingerprint": "a1296d7e2ba5cd406413713920aabcf972c13a25b6e610e397728afc6c199f94"
+    }
+  ],
+  "checkpoints": [
+    {
+      "at": "2026-11-23T10:40:22Z",
+      "kind": "implementation-start",
+      "agent": "codex",
+      "fingerprint": "5a0016cb35bc8488ec12f1812ac98f70681d24e7989aa4249adf7f6685b4dad9",
+      "valid": true,
+      "changed_files": 0
+    },
+    {
+      "at": "2026-11-23T10:40:25Z",
+      "kind": "preflight",
+      "agent": "codex",
+      "fingerprint": "5a0016cb35bc8488ec12f1812ac98f70681d24e7989aa4249adf7f6685b4dad9",
+      "valid": true,
+      "changed_files": 0
+    },
+    {
+      "at": "2026-11-23T10:42:11Z",
+      "kind": "step",
+      "agent": "codex",
+      "fingerprint": "2ea64b17c1bf2046f1dd2ebb39da92a1137f3e87202610e8d4086714edfd4b94",
+      "valid": true,
+      "changed_files": 1,
+      "step": "S1"
+    },
+    {
+      "at": "2026-11-23T10:43:12Z",
+      "kind": "step",
+      "agent": "codex",
+      "fingerprint": "32206278eb4dce3cdb5251d9691d439a68611d527738828ed1b05a324fd9fc34",
+      "valid": true,
+      "changed_files": 3,
+      "step": "S2"
+    },
+    {
+      "at": "2026-11-23T10:45:53Z",
+      "kind": "step",
+      "agent": "codex",
+      "fingerprint": "f62f9e853414e81bc4bf6d247b602182ae1082c939dc53363b9f7913f4e486d7",
+      "valid": true,
+      "changed_files": 4,
+      "step": "S3"
+    },
+    {
+      "at": "2026-11-23T10:50:37Z",
+      "kind": "step",
+      "agent": "codex",
+      "fingerprint": "4a65a7a679dc14c6725c30acfb305707d2564e114eb94d5c7de461e839fcec85",
+      "valid": true,
+      "changed_files": 6,
+      "step": "S4"
+    },
+    {
+      "at": "2026-11-23T10:54:03Z",
+      "kind": "step",
+      "agent": "codex",
+      "fingerprint": "b7ef0e7c599bba66763b6c904040072d24e000a6dc6a501f1b1440555afd3fee",
+      "valid": true,
+      "changed_files": 7,
+      "step": "S5"
+    },
+    {
+      "at": "2026-11-23T11:00:10Z",
+      "kind": "step",
+      "agent": "codex",
+      "fingerprint": "3bf1fa3d9e18edb6fb24c694a50375ab9685407a564b83ab56893d4b243ec3e1",
+      "valid": true,
+      "changed_files": 12,
+      "step": "S6"
+    },
+    {
+      "at": "2026-11-23T11:02:30Z",
+      "kind": "step",
+      "agent": "codex",
+      "fingerprint": "d2a6b316d998db6a310b93192aace8982447717a3198c4aae5fe3a0c980bfa8b",
+      "valid": true,
+      "changed_files": 14,
+      "step": "S7"
+    },
+    {
+      "at": "2026-11-23T11:18:12Z",
+      "kind": "step",
+      "agent": "codex",
+      "fingerprint": "4dd9e292641bbc9e718133b27fcb34e9ddbd2c6c9e144fe5831d70a70387ee7a",
+      "valid": true,
+      "changed_files": 14,
+      "step": "S8"
+    },
+    {
+      "at": "2026-11-24T05:43:14Z",
+      "kind": "step",
+      "agent": "codex",
+      "fingerprint": "4dd9e292641bbc9e718133b27fcb34e9ddbd2c6c9e144fe5831d70a70387ee7a",
+      "valid": true,
+      "changed_files": 14,
+      "step": "S8"
+    },
+    {
+      "at": "2026-11-24T05:58:29Z",
+      "kind": "preflight",
+      "agent": "codex",
+      "fingerprint": "4dd9e292641bbc9e718133b27fcb34e9ddbd2c6c9e144fe5831d70a70387ee7a",
+      "valid": true,
+      "changed_files": 14
+    },
+    {
+      "at": "2026-11-24T06:07:09Z",
+      "kind": "step",
+      "agent": "codex",
+      "fingerprint": "a1296d7e2ba5cd406413713920aabcf972c13a25b6e610e397728afc6c199f94",
+      "valid": true,
+      "changed_files": 14,
+      "step": "S8"
+    }
+  ],
+  "decisions": [],
+  "excluded": [],
+  "history": [
+    {
+      "at": "2026-11-23T07:03:13Z",
+      "event": "created",
+      "agent": "codex",
+      "invocation": "# AIDevWorkflow — Begin F1.0.5 Discovery\n\nThe revised Master Roadmap has been approved and committed successfully.\n\nApproved roadmap commit:\n\n`a66a6070f40ecc6c6da6ee9e8303d94f43bbfe78`\n\nBranch:\n\n`phase-1/foundations`\n\nWe can now proceed with the next planned development feature:\n\n**F1.0.5 — State Store Reliability**\n\n## Objective\n\nStart the official AIDevWorkflow task workflow for F1.0.5.\n\nThe scope defined in the approved Phase 1 roadmap includes:\n\n- State schema validation on load.\n- Explicit "
+    },
+    {
+      "at": "2026-11-23T09:55:28Z",
+      "event": "discovery",
+      "agent": "codex",
+      "inspected": 25
+    },
+    {
+      "at": "2026-11-23T09:55:37Z",
+      "event": "stage",
+      "agent": "codex",
+      "from": "DISCOVERY",
+      "to": "DEPENDENCIES"
+    },
+    {
+      "at": "2026-11-23T09:56:24Z",
+      "event": "stage",
+      "agent": "codex",
+      "from": "DEPENDENCIES",
+      "to": "SPECIFICATION"
+    },
+    {
+      "at": "2026-11-23T09:59:25Z",
+      "event": "spec-review",
+      "agent": "codex",
+      "spec_sha256": "d7516372"
+    },
+    {
+      "at": "2026-11-23T09:59:40Z",
+      "event": "stage",
+      "agent": "codex",
+      "from": "SPECIFICATION",
+      "to": "SPEC_APPROVAL"
+    },
+    {
+      "at": "2026-11-23T10:16:21Z",
+      "event": "spec-review",
+      "agent": "codex",
+      "spec_sha256": "0bd712e1"
+    },
+    {
+      "at": "2026-11-23T10:32:57Z",
+      "event": "approved",
+      "agent": "codex",
+      "document": "spec",
+      "version": 1,
+      "sha256": "0bd712e1"
+    },
+    {
+      "at": "2026-11-23T10:32:57Z",
+      "event": "stage",
+      "agent": "codex",
+      "from": "SPEC_APPROVAL",
+      "to": "PLANNING",
+      "reason": "spec approved"
+    },
+    {
+      "at": "2026-11-23T10:36:00Z",
+      "event": "stage",
+      "agent": "codex",
+      "from": "PLANNING",
+      "to": "PLAN_APPROVAL"
+    },
+    {
+      "at": "2026-11-23T10:40:22Z",
+      "event": "approved",
+      "agent": "codex",
+      "document": "plan",
+      "version": 1,
+      "sha256": "a8f95a26"
+    },
+    {
+      "at": "2026-11-23T10:40:22Z",
+      "event": "stage",
+      "agent": "codex",
+      "from": "PLAN_APPROVAL",
+      "to": "IMPLEMENTATION",
+      "reason": "plan approved"
+    },
+    {
+      "at": "2026-11-23T10:40:25Z",
+      "event": "preflight",
+      "agent": "codex",
+      "valid": true
+    },
+    {
+      "at": "2026-11-23T10:42:11Z",
+      "event": "step",
+      "agent": "codex",
+      "step": "S1",
+      "status": "done"
+    },
+    {
+      "at": "2026-11-23T10:43:12Z",
+      "event": "step",
+      "agent": "codex",
+      "step": "S2",
+      "status": "done"
+    },
+    {
+      "at": "2026-11-23T10:45:53Z",
+      "event": "step",
+      "agent": "codex",
+      "step": "S3",
+      "status": "done"
+    },
+    {
+      "at": "2026-11-23T10:50:37Z",
+      "event": "step",
+      "agent": "codex",
+      "step": "S4",
+      "status": "done"
+    },
+    {
+      "at": "2026-11-23T10:54:03Z",
+      "event": "step",
+      "agent": "codex",
+      "step": "S5",
+      "status": "done"
+    },
+    {
+      "at": "2026-11-23T11:00:10Z",
+      "event": "step",
+      "agent": "codex",
+      "step": "S6",
+      "status": "done"
+    },
+    {
+      "at": "2026-11-23T11:02:30Z",
+      "event": "step",
+      "agent": "codex",
+      "step": "S7",
+      "status": "done"
+    },
+    {
+      "at": "2026-11-23T11:18:12Z",
+      "event": "step",
+      "agent": "codex",
+      "step": "S8",
+      "status": "in-progress"
+    },
+    {
+      "at": "2026-11-24T05:36:19Z",
+      "event": "check",
+      "agent": "codex",
+      "check": "privacy",
+      "status": "passed"
+    },
+    {
+      "at": "2026-11-24T05:41:53Z",
+      "event": "check",
+      "agent": "codex",
+      "check": "unit",
+      "status": "passed"
+    },
+    {
+      "at": "2026-11-24T05:43:14Z",
+      "event": "step",
+      "agent": "codex",
+      "step": "S8",
+      "status": "in-progress"
+    },
+    {
+      "at": "2026-11-24T05:58:29Z",
+      "event": "preflight",
+      "agent": "codex",
+      "valid": true
+    },
+    {
+      "at": "2026-11-24T06:06:54Z",
+      "event": "check",
+      "agent": "codex",
+      "check": "unit",
+      "status": "passed"
+    },
+    {
+      "at": "2026-11-24T06:07:01Z",
+      "event": "check",
+      "agent": "codex",
+      "check": "privacy",
+      "status": "passed"
+    },
+    {
+      "at": "2026-11-24T06:07:09Z",
+      "event": "step",
+      "agent": "codex",
+      "step": "S8",
+      "status": "in-progress"
+    }
+  ],
+  "baseline": {
+    "start": {
+      "head": "a66a6070f40ecc6c6da6ee9e8303d94f43bbfe78",
+      "dirty": {},
+      "captured_at": "2026-11-23T07:03:13Z"
+    },
+    "implementation": {
+      "head": "a66a6070f40ecc6c6da6ee9e8303d94f43bbfe78",
+      "dirty": {},
+      "captured_at": "2026-11-23T10:40:22Z"
+    }
+  },
+  "updated_at": "2026-11-24T06:07:09Z",
+  "last_checkpoint": {
+    "at": "2026-11-24T06:07:09Z",
+    "fingerprint": "a1296d7e2ba5cd406413713920aabcf972c13a25b6e610e397728afc6c199f94",
+    "changes": {
+      "docs/usage.md": "4163e40f3c875d41879ee1a5513cfe0715c6f6b3",
+      "skills/ai-dev-workflow/scripts/aidw/agents/claude_hooks.py": "de7b5a4263145560a73716435849307c0cf91200",
+      "skills/ai-dev-workflow/scripts/aidw/api.py": "7c36a820aacb77a7b21e404296964dc250055ebc",
+      "skills/ai-dev-workflow/scripts/aidw/cli/commands.py": "e9e6cb90fd72cc10c10158149e6166a3fdb777ab",
+      "skills/ai-dev-workflow/scripts/aidw/cli/main.py": "34ddd2d7c6bda82ca23e88302d0f5c1850832fb1",
+      "skills/ai-dev-workflow/scripts/aidw/core/setup.py": "3d0b0e11b93c8b976c1c0da03c42eb711d9895b6",
+      "skills/ai-dev-workflow/scripts/aidw/infra/text.py": "87647827769259a3f4391ac378556767e08aaa11",
+      "skills/ai-dev-workflow/scripts/aidw/store/lock.py": "29d5ef74bf9f76c5c3e77ab7a5c243abe7ba92dc",
+      "skills/ai-dev-workflow/scripts/aidw/store/migrate.py": "3b6641f57503a70abb29e9d6a8c17eb3656312ef",
+      "skills/ai-dev-workflow/scripts/aidw/store/state.py": "8ee31c6dcd725a1cd1f016018c26f921e2fec4b9",
+      "skills/ai-dev-workflow/scripts/workflow.py": "d95491f1a98dda03080ef1db2fc5a35f1c66b441",
+      "tests/fixtures/state-v1.0.0.json": "e4cdfce704934e6a9929e81b6537bf5725bba0a0",
+      "tests/golden/workflow-help.txt": "847bcfd7b467d70a449c0e6217113ca1ec98cf54",
+      "tests/test_state_store.py": "83cb72e141269eb4ad71b38ff007986182dffe7f"
+    }
+  }
+}
