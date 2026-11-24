@@ -388,6 +388,26 @@ class LockTest(WorkflowTestCase):
             self.assertEqual(path.read_bytes(), before)
         self.assertFalse(path.exists())
 
+    def test_reused_pid_metadata_does_not_steal_a_lock(self) -> None:
+        # The old owner is gone, but its PID now identifies an unrelated live process.
+        child = subprocess.Popen([sys.executable, "-c", "import time; time.sleep(15)"],
+                                 stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        try:
+            self.assertIsNone(child.poll())
+            path = lock._lock_path(self.repo, "favorites")
+            path.parent.mkdir(parents=True)
+            path.write_text(json.dumps({"token": "former-owner", "pid": child.pid,
+                                        "host": lock._HOST, "created": 0}), encoding="utf-8")
+            before = path.read_bytes()
+            self.assertFalse(lock._dead_same_host(lock._owner(path)))
+            with self.assertRaisesRegex(WorkflowError, "Timed out"):
+                with lock.locked_records(self.repo, ("favorites",), timeout=0.1):
+                    self.fail("a reused PID caused lock theft")
+            self.assertEqual(path.read_bytes(), before)
+        finally:
+            child.kill()
+            child.wait(timeout=5)
+
     def test_stale_recovery_requires_proof_and_preserves_new_owner(self) -> None:
         path = lock._lock_path(self.repo, "favorites")
         path.parent.mkdir(parents=True)

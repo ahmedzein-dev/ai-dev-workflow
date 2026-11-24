@@ -6,7 +6,7 @@
   "created_at": "2026-11-23T07:03:13Z",
   "created_by": "codex",
   "invocation": "# AIDevWorkflow — Begin F1.0.5 Discovery\n\nThe revised Master Roadmap has been approved and committed successfully.\n\nApproved roadmap commit:\n\n`a66a6070f40ecc6c6da6ee9e8303d94f43bbfe78`\n\nBranch:\n\n`phase-1/foundations`\n\nWe can now proceed with the next planned development feature:\n\n**F1.0.5 — State Store Reliability**\n\n## Objective\n\nStart the official AIDevWorkflow task workflow for F1.0.5.\n\nThe scope defined in the approved Phase 1 roadmap includes:\n\n- State schema validation on load.\n- Explicit ",
-  "stage": "IMPLEMENTATION",
+  "stage": "TESTING",
   "status": "active",
   "outcome": null,
   "template": {
@@ -238,13 +238,13 @@
       "at": "2026-11-23T11:02:30Z"
     },
     "S8": {
-      "status": "in-progress",
+      "status": "done",
       "files": [
         "tests/helpers.py"
       ],
-      "note": "First CI run f0d469e: Ubuntu 3.9/3.13, macOS 3.13, Windows 3.9/3.13 and lint passed; macOS 3.9 failed on a transient Git maintenance lock disappearing during test-repository cleanup. Narrow FileNotFoundError-only cleanup fix in tests/helpers.py reviewed read-only. Local Python 3.9 and 3.13 suites passed 242/242; official unit 242/242 and privacy passed on code fingerprint 6efbf531b4. Re-run exact-commit CI after corrective commit.",
+      "note": "Final code fingerprint 6efbf531b426082bdfac1707efc7ff8522471d09252db3dfef9e6b9b9119bc8f; pushed commit b9c39ed74b39b55fe114898afad377e6051929fb. GitHub CI run 45340225724 succeeded: Ubuntu 24.04, macOS, Windows x Python 3.9/3.13, all 6 matrix jobs plus Ruff/Mypy lint. Each matrix job ran 242 tests and privacy scan 225 files with no findings. Windows 3.9 skipped 2 unsupported/conditional cases, Windows 3.13 skipped 3; see verification.md. Local Python 3.9/3.13 full suites passed 242/242, official unit/privacy passed on final fingerprint, pinned Ruff 0.17.6/Mypy 1.20.2 zero. Independent code audit found no new issues; final evidence audit follows TESTING.",
       "agent": "codex",
-      "at": "2026-11-24T06:23:30Z"
+      "at": "2026-11-24T06:32:31Z"
     }
   },
   "checks": [
@@ -337,6 +337,36 @@
       "status": "passed",
       "summary": "Scanned 225 files: no findings.",
       "fingerprint": "6efbf531b426082bdfac1707efc7ff8522471d09252db3dfef9e6b9b9119bc8f"
+    },
+    {
+      "id": "unit",
+      "name": "Unit, scenario and doc tests",
+      "kind": "result",
+      "agent": "codex",
+      "at": "2026-11-24T06:36:50Z",
+      "counts": null,
+      "reason": null,
+      "command": "python3 -m unittest discover -s tests",
+      "duration_s": 186.3,
+      "exit_code": 0,
+      "status": "passed",
+      "summary": "OK",
+      "fingerprint": "b04a1b47d182d353c27ca0f465f67a54c0837ba341416cc42a87f8b667d413a1"
+    },
+    {
+      "id": "privacy",
+      "name": "Pre-publish secret and privacy scan",
+      "kind": "result",
+      "agent": "codex",
+      "at": "2026-11-24T12:08:03Z",
+      "counts": null,
+      "reason": null,
+      "command": "python3 tools/prepublish_check.py",
+      "duration_s": 0.5,
+      "exit_code": 0,
+      "status": "passed",
+      "summary": "Scanned 225 files: no findings.",
+      "fingerprint": "b04a1b47d182d353c27ca0f465f67a54c0837ba341416cc42a87f8b667d413a1"
     }
   ],
   "checkpoints": [
@@ -462,6 +492,23 @@
       "valid": true,
       "changed_files": 15,
       "step": "S8"
+    },
+    {
+      "at": "2026-11-24T06:32:31Z",
+      "kind": "step",
+      "agent": "codex",
+      "fingerprint": "6efbf531b426082bdfac1707efc7ff8522471d09252db3dfef9e6b9b9119bc8f",
+      "valid": true,
+      "changed_files": 15,
+      "step": "S8"
+    },
+    {
+      "at": "2026-11-24T06:35:12Z",
+      "kind": "preflight",
+      "agent": "codex",
+      "fingerprint": "6efbf531b426082bdfac1707efc7ff8522471d09252db3dfef9e6b9b9119bc8f",
+      "valid": true,
+      "changed_files": 15
     }
   ],
   "decisions": [],
@@ -681,6 +728,65 @@
       "agent": "codex",
       "step": "S8",
       "status": "in-progress"
+    },
+    {
+      "at": "2026-11-24T06:32:31Z",
+      "event": "step",
+      "agent": "codex",
+      "step": "S8",
+      "status": "done"
+    },
+    {
+      "at": "2026-11-24T06:32:38Z",
+      "event": "stage",
+      "agent": "codex",
+      "from": "IMPLEMENTATION",
+      "to": "TESTING",
+      "reason": "Implementation steps complete; exact pushed code passed local checks and 7/7 GitHub CI jobs, now reconciling acceptance evidence."
+    },
+    {
+      "at": "2026-11-24T06:33:47Z",
+      "event": "stage",
+      "agent": "codex",
+      "from": "TESTING",
+      "to": "AUDIT",
+      "reason": "All eight implementation steps done; final pushed commit passed six OS/Python CI jobs plus lint, and acceptance evidence is recorded. Final independent evidence review is pending in AUDIT."
+    },
+    {
+      "at": "2026-11-24T06:35:07Z",
+      "event": "stage",
+      "agent": "codex",
+      "from": "AUDIT",
+      "to": "FIXING",
+      "reason": "Independent audit found a missing explicit reused-PID lock fixture and an incorrect TD-25 development test count in verification evidence; both are in approved F1.0.5 validation scope."
+    },
+    {
+      "at": "2026-11-24T06:35:12Z",
+      "event": "preflight",
+      "agent": "codex",
+      "valid": true
+    },
+    {
+      "at": "2026-11-24T06:39:57Z",
+      "event": "check",
+      "agent": "codex",
+      "check": "unit",
+      "status": "passed"
+    },
+    {
+      "at": "2026-11-24T12:08:03Z",
+      "event": "check",
+      "agent": "codex",
+      "check": "privacy",
+      "status": "passed"
+    },
+    {
+      "at": "2026-11-24T12:08:11Z",
+      "event": "stage",
+      "agent": "codex",
+      "from": "FIXING",
+      "to": "TESTING",
+      "reason": "Audit findings corrected: explicit reused-PID lock regression added and TD-25 development count corrected; full local Python 3.9/3.13 suites each passed 243/243, lint and privacy clean. New exact-commit CI pending."
     }
   ],
   "baseline": {
@@ -695,9 +801,9 @@
       "captured_at": "2026-11-23T10:40:22Z"
     }
   },
-  "updated_at": "2026-11-24T06:23:30Z",
+  "updated_at": "2026-11-24T12:08:11Z",
   "last_checkpoint": {
-    "at": "2026-11-24T06:23:30Z",
+    "at": "2026-11-24T06:35:12Z",
     "fingerprint": "6efbf531b426082bdfac1707efc7ff8522471d09252db3dfef9e6b9b9119bc8f",
     "changes": {
       "docs/usage.md": "4163e40f3c875d41879ee1a5513cfe0715c6f6b3",
