@@ -4,13 +4,13 @@
  * Statuses: planned · in-progress · review · waiting · blocked · done. mvp: part of v1.5 (D-030).
  */
 window.ROADMAP = {
- "updated": "2026-11-23",
+ "updated": "2026-11-25",
  "baselineCommit": "6849eca",
  "current": {
   "phase": 1,
   "next": {
-   "en": "TD-25 closed (Completed with Limitations); v1.0.1 is the published, verified stable installation. Its fix is in main; main and phase-1/foundations also contain unreleased work. F-9 stays Deferred; TD-29/TD-30 remain open. The revised Master Roadmap and D-041–D-045 are approved, while evaluation outcomes remain unproven. F1.0.5 has not started; E1.7 follows it in Phase 1.",
-   "ar": "TD-25 اتقفلت (Completed with Limitations). الإصدار المستقر المنشور والمثبت بعد التحقق هو v1.0.1، والإصلاح موجود في main؛ وفي main وphase-1/foundations شغل تطوير لم يصدر بعد. F-9 مؤجلة، وTD-29 وTD-30 مفتوحتان. اتوافق على الخطة الكاملة وقرارات D-041 إلى D-045، لكن نتايج التقييم لسه ما ثبتتش. F1.0.5 لسه ما بدأتش، وE1.7 بعدها في المرحلة 1."
+   "en": "F1.0.5 closed as Completed on phase-1/foundations with 7/7 CI and independent audit GO. The published, verified stable installation remains v1.0.1; main and phase-1/foundations contain unreleased work. TD-25 is closed with limitations, F-9 stays Deferred, and TD-29/TD-30 remain open. The approved roadmap and D-041–D-045 are unchanged; evaluation outcomes remain unproven. Review the accelerated MVP strategy before another feature; E1.7 stays planned in Phase 1.",
+   "ar": "F1.0.5 اتقفلت بحالة Completed على phase-1/foundations بعد نجاح 7/7 وظائف CI وتدقيق مستقل GO. الإصدار المستقر المنشور والمثبت يظل v1.0.1، وفي main وphase-1/foundations تطوير لم يصدر بعد. TD-25 مقفولة مع قيود، وF-9 مؤجلة، وTD-29 وTD-30 مفتوحتان. الخطة المعتمدة وقرارات D-041 إلى D-045 لم تتغير، ونتايج التقييم لسه ما ثبتتش. هنراجع خطة تسريع الـMVP قبل أي ميزة جديدة، وE1.7 ما زالت مخططة في المرحلة 1."
   }
  },
  "phases": [
@@ -234,11 +234,12 @@ window.ROADMAP = {
        "t": "State store: schema check on load, migrate (dry run, backup, rollback), lock file with stale detection, fsync, temp-file cleanup",
        "pri": "P0",
        "eff": "M",
-       "st": "planned",
+       "st": "done",
        "dep": [
         "F1.0.3"
        ],
-       "mvp": true
+       "mvp": true,
+       "note": "Completed 2026-11-25; source dd88e731, CI at e08a0fa; 7/7 jobs, 243 tests discovered per matrix job, independent audit GO. Windows conditional skips and durability limits are documented."
       },
       {
        "id": "F1.0.6",
@@ -3458,12 +3459,6 @@ window.ROADMAP = {
    "t": "Detection inspects only the repository root (reproduced)"
   },
   {
-   "id": "TD-08",
-   "kind": "debt",
-   "sev": "high",
-   "t": "state.json schema never checked on load"
-  },
-  {
    "id": "R-17",
    "kind": "risk",
    "sev": "high",
@@ -3507,6 +3502,12 @@ window.ROADMAP = {
   }
  ],
  "tests": [
+  {
+   "date": "2026-11-25",
+   "what": "F1.0.5 Completed: source dd88e731; branch e08a0fa; 243 tests discovered per OS/Python job, Ruff, Mypy, privacy, independent audit",
+   "result": "7/7 CI passed; Windows 2/3 conditional skips; 225 files privacy-clean",
+   "ok": true
+  },
   {
    "date": "2026-11-23",
    "what": "TD-25 closure evidence: published v1.0.1, main integration, verified user-level install; F-9 Deferred",
@@ -3585,8 +3586,8 @@ window.ROADMAP = {
    "v": "Unreleased",
    "vAr": "لم يصدر بعد",
    "date": "—",
-   "notes": "Development on main and phase-1/foundations beyond the stable v1.0.1 release; F1.0.5 has not started",
-   "notesAr": "تطوير على main وphase-1/foundations بعد الإصدار المستقر v1.0.1؛ العمل على F1.0.5 لم يبدأ"
+   "notes": "Development on phase-1/foundations includes completed F1.0.5; main and this branch contain unreleased work beyond stable v1.0.1",
+   "notesAr": "تطوير phase-1/foundations يتضمن F1.0.5 المكتملة؛ main والفرع ده فيهما عمل أحدث من v1.0.1 المستقر ولم يصدر بعد"
   }
  ]
 };

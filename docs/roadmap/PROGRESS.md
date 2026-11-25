@@ -8,10 +8,10 @@ entries first. Feature statuses live in [roadmap-data.js](roadmap-data.js); this
 | | |
 |---|---|
 | Phase | 1 — Foundations & universal technology support (in progress) |
-| Done in Phase 1 | F1.0.1 self-hosting setup · F1.0.2 dev tooling · F1.0.3 engine package · F1.0.4 engine API (closed Completed with Limitations; CI 7/7 at `fa6a676`) |
+| Done in Phase 1 | F1.0.1 self-hosting setup · F1.0.2 dev tooling · F1.0.3 engine package · F1.0.4 engine API (Completed with Limitations) · F1.0.5 state store reliability (Completed; CI 7/7 at `e08a0fa`) |
 | Security status | TD-25 closed — Completed with Limitations; v1.0.1 published and verified, user-level installation verified, fix integrated into `main`. F-9 remains Deferred; TD-29 and TD-30 remain open |
 | Roadmap status | Final revised Master Roadmap approved by the owner on 2026-11-23; D-041–D-045 accepted with their recorded clarifications. Evaluation outcomes remain unproven |
-| Next action | Prepare F1.0.5 (state schema, migration, locking) through the normal task workflow when separately initiated; implementation has not started. E1.7 follows it in Phase 1 |
+| Next action | Review the accelerated MVP execution strategy before starting another feature. Preserve the approved E1.7 usability priorities in Phase 1; no parallel implementation has been approved |
 | Blockers | None |
 
 ## Phase progress
@@ -22,7 +22,7 @@ history in MASTER_ROADMAP §9.
 | Phase | Features done / total | Status |
 |---|---|---|
 | 0 | 15 / 15 | Done |
-| 1 | 4 / 29 | In progress |
+| 1 | 5 / 29 | In progress |
 | 2 | 0 / 20 | Planned |
 | 3 | 0 / 13 | Planned (MVP) |
 | 4 | 0 / 13 | Planned (MVP) |
@@ -43,6 +43,21 @@ history in MASTER_ROADMAP §9.
 | 19 | 0 / 8 | Planned (checklist from v1.1) |
 
 ## Log
+
+### 2026-11-25 — F1.0.5 closed as Completed
+
+- The owner explicitly approved closure after reviewing the final report, 31/31 acceptance items, independent audit
+  GO and CI. The installed stable v1.0.1 engine closed `state-store-f1-0-5` as **Completed**; record integrity and
+  approval snapshots remained valid, and `ACTIVE` was removed. Source commit `dd88e731` has fingerprint
+  `b04a1b47d182…`; final branch commit before closure `e08a0fa` passed [7/7 CI jobs](https://github.com/ahmedzein-dev/ai-dev-workflow/actions/runs/45396463475)
+  across Ubuntu 24.04, macOS and Windows with Python 3.9/3.13 plus lint. Each matrix job discovered 243 tests;
+  Windows had 2/3 documented platform-conditional skips. Privacy scan found no issue in 225 files.
+- Progress is now **21 / 239 completed features** (Phase 1 **5 / 29**; MVP **5 / 84**). The approved 20 phases,
+  239 features and 84 MVP features have not changed. E1.7 remains planned in Phase 1; no new feature has started.
+- F1.0.5 remediates TD-08, TD-09 and TD-10 in unreleased development. The official stable installation remains
+  v1.0.1; F-9 stays Deferred, and TD-29/TD-30 remain open. Config schema 2 has no approved production converter.
+- The owner requested read-only analysis of dependency-aware, two/three-track MVP acceleration. No worktree or
+  parallel implementation has been authorized by this progress update.
 
 ### 2026-11-23 — Final Master Roadmap approved
 

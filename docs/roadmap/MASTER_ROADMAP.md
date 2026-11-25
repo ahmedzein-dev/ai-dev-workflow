@@ -18,11 +18,11 @@ Research & Optimization Engine (B3), and product simplicity with competitive val
 
 | | |
 |---|---|
-| Current phase | **Phase 1 — Foundations & universal technology support: in progress** (F1.0.1–F1.0.4 done) |
+| Current phase | **Phase 1 — Foundations & universal technology support: in progress** (F1.0.1–F1.0.5 done; 5 / 29 Phase 1 features) |
 | Approved | The complete revised Master Roadmap and D-041–D-045 (owner, 2026-11-23), including the proportional validation framework. Approval of an evaluation plan is not a claim of demonstrated benefit; ORE integration (D-031–D-040) remains approved |
 | Managing engine | Verified user-level AIDevWorkflow v1.0.1 from the published tag; `main` contains the TD-25 security fix, while `main` and `phase-1/foundations` also contain unreleased development work |
 | Remaining TD-25 limits | F-9 detection limitation remains Deferred; TD-29 (multi-file persistence) and TD-30 (internal writer boundary) remain open separately. See TECHNICAL_DEBT and the closed task report |
-| Next action | TD-25 is closed — Completed with Limitations. Use the approved roadmap to prepare F1.0.5 through the normal task workflow; implementation has not started. E1.7 follows it within Phase 1 |
+| Next action | F1.0.5 is closed — Completed, with 7/7 CI and an independent audit GO. Review the proposed accelerated MVP execution strategy before starting another feature; E1.7 usability priorities remain in Phase 1. Stable v1.0.1 is unchanged |
 
 ## 2. Invariants (hold in every phase)
 

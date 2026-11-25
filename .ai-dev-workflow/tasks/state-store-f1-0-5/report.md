@@ -4,7 +4,7 @@
 
 **Status:** Completed
 
-The official `outcome` command allows Completed: all eight plan steps are done, all 31 AC/EC/Done-when rows are Passed, required checks are current, and the independent audit issued GO. This is a technical completion assessment. The task remains active in `FINAL_REPORT`; the owner has not authorized `close`.
+The official `outcome` command allows Completed: all eight plan steps are done, all 31 AC/EC/Done-when rows are Passed, required checks are current, and the independent audit issued GO. The owner subsequently gave explicit approval to close this task as Completed. The official closure status is recorded in `state.json`.
 
 ## 2. What Was Implemented
 
@@ -36,8 +36,8 @@ Secret detection remains pattern-based; F-9 remains Deferred. TD-29 multi-file t
 
 ## 7. Pending Dependencies
 
-Owner approval is still required before formal task closure. No source-code blocker remains within the approved F1.0.5 scope. No release, main-branch merge, installed-skill update or real-record migration is implied by this report.
+Owner approval for formal closure was received. No source-code blocker remains within the approved F1.0.5 scope. No release, main-branch merge, installed-skill update or real-record migration is implied by this report.
 
 ## 8. Next Actions
 
-Present this report for the owner's closure review and leave the task in `FINAL_REPORT` until explicit approval to close. Preserve the exact source and CI evidence when publishing these records; verify the resulting branch commit separately.
+Track the documented F-9, TD-29 and TD-30 limitations separately. Preserve the exact source and CI evidence when publishing the closure records and verify the resulting branch commit separately. Review the accelerated MVP execution strategy before starting another feature.

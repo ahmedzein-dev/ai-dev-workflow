@@ -1,6 +1,6 @@
 # Phase 1 — Universal Development Support (target release v1.1.0)
 
-**Status:** In progress — started 2026-11-22. F1.0.1 done; F1.0.2 closed as Completed with Limitations (CI not run until the owner pushes). Scope unchanged by the strategic integration, except that detection results now also feed profile activation (Phase 3).
+**Status:** In progress — started 2026-11-22. F1.0.1–F1.0.5 are done; F1.0.5 closed as Completed on 2026-11-25 with 7/7 CI and independent audit GO. Phase progress: 5 / 29 features. Scope remains unchanged; detection results also feed profile activation (Phase 3).
 
 ## Goal
 
@@ -136,7 +136,7 @@ Tasks for F1.0.3 (example of the task level used for every feature at its start)
 
 ### E1.7 — Usability foundations (Powerful Inside. Simple Outside.; D-041–D-045, [PRODUCT_EXPERIENCE](../PRODUCT_EXPERIENCE.md))
 
-TD-25 is closed (Completed with Limitations). E1.7 follows F1.0.5 within Phase 1; it does not change that feature's scope.
+TD-25 is closed (Completed with Limitations), and F1.0.5 is closed (Completed). E1.7 remains planned within Phase 1; its usability priorities and dependencies are unchanged.
 
 | ID | Feature | Pri | Effort | Depends on |
 |---|---|---|---|---|
